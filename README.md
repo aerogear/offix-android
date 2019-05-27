@@ -6,9 +6,9 @@ The aim is to extend Data Sync (Data Synchronization using Voyager Framework) to
 
 While the Apollo SDK provides us with CRUD functionalities and cache support for querying, adding cache support for mutation queries, offline support and cache resolution will be the main focus of this project.
 
-- CRUD functionality : Using the Apollo GraphQL client to provide the users with the basic CRUD (Create, Read, Update and Delete) functionalities for making the required changes.
-- Cache Support : Use of the existing Apollo Cache along with providing some additional functionalities to implement a cache for mutation queries too.
-- Offline Support : Queries and Mutations will be persisted when Offline.
+- CRUD functionality 
+- Cache Support 
+- Offline Support 
 - Offline Listeners and workflows for seamless UI.
 - Conflict Resolution Implementations.
 
