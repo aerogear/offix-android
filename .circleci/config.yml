@@ -22,14 +22,14 @@ jobs:
           key: jars-{{ checksum "build.gradle" }}
       - run:
           name: Run Tests
-          command: ./gradlew lint jacocoRootReport spotlessCheck
+          command: ./gradlew lint
       - run:
           name: Generate Maven Artifacts
-          command: ./gradlew install
+          command: ./gradlew assembleDebug
  
 workflows:
   version: 2
-  build_and_release:
+  build:
     jobs:
       - build:
           filters:
