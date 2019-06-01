@@ -1,6 +1,6 @@
-# Apollo Android Offline Extensions
+# Voyager Android
 
-Apollo Android Offline extends capabilities of Apollo GraphQL providing
+Voyager Anderoid extends capabilities of Apollo GraphQL Android providing
 fully featured Offline Workflow and Conflict Resolution.
 
 ## Features 
