@@ -25,7 +25,7 @@ jobs:
           command: ./gradlew lint
       - run:
           name: Generate Maven Artifacts
-          command: ./gradlew install
+          command: ./gradlew installDebug
  
 workflows:
   version: 2
