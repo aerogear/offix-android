@@ -1,16 +1,21 @@
-# Conflict Resolution and Offline Support for the Aerogear Android SDK
+# Voyager Android
 
-The aim is to extend Data Sync (Data Synchronization using Voyager Framework) to android by porting of the current aerogear-js-sdk (https://github.com/aerogear/aerogear-js-sdk/tree/2.5.0) to Android to provide the services of Offline Support, Conflict Resolution, and the Data Sync services to the users which is one of the key features provided by the AeroGear mobile services.
+Voyager Anderoid extends capabilities of Apollo GraphQL Android providing
+fully featured Offline Workflow and Conflict Resolution.
 
 ## Features 
 
-While the Apollo SDK provides us with CRUD functionalities and cache support for querying, adding cache support for mutation queries, offline support and cache resolution will be the main focus of this project.
-
-- CRUD functionality 
-- Cache Support 
-- Offline Support 
+ 
+- Offline support. Mutations are persisted when Offline.
 - Offline Listeners and workflows for seamless UI.
-- Conflict Resolution Implementations.
+- Flexible, out of the box Conflict Resolution implementations
+- Subscriptions and Binary Upload that works offline.
+- Multi platform support.
+- Works with Web, Cordova, Capacitor and React Native.
+- Framework agnostic (works with React, Angular and Vue)
+- Works with Apollo GraphQL Server and Prisma (Yoga)
 
+## Example application
 
+See `sample` for example application
 
