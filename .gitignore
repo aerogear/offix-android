@@ -1,0 +1,15 @@
+*.iml
+build
+.gradle
+/local.properties
+.idea
+.DS_Store
+/captures
+.externalNativeBuild
+bin/
+gen/
+out/
+library/library.iml
+.project
+.settings/
+.classpath
