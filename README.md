@@ -13,5 +13,6 @@ fully featured Offline Workflow and Conflict Resolution.
 
 ## Example application
 
-See `sample` for example application
+See `sample` for example application. It uses voyager server as its backened (https://github.com/aerogear/voyager-server)
+
 
