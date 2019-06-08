@@ -1,0 +1,8 @@
+mutation createTask ($title:String!, $description :String!) {
+    createTask(title: $title, description: $description) {
+        id
+        title
+        description
+        version
+    }
+}

@@ -1,0 +1,8 @@
+mutation updateCurrentTask($id: ID!, $title:String, $version: Int! ) {
+  updateTask(id: $id, title: $title, version:$version ) {
+    id
+    title
+    description
+    version
+  }
+}
