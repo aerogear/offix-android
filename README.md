@@ -17,7 +17,7 @@ See `sample` for example application. For now it's using ionic showcase as its b
 
 ## How to run the application
 
-- Clone the ionic showcase repository(https://github.com/aerogear/ionic-showcase.git)
+- Clone the ionic showcase repository (https://github.com/aerogear/ionic-showcase.git)
 - Run the following commands **to start the server:**
   - cd ./server
   - docker-compose up
