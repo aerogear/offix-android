@@ -54,14 +54,14 @@ class TaskAdapter(private val notes: List<Task>, private val context: Context) :
 
                     val id = inflatedView.etId.toString()
                     val titleEt = inflatedView.etTitle.text.toString()
-                    val versionEt = inflatedView.etVersion.text.toString()
+                    val versionEt:Int = inflatedView.etVersion.text.toString().toInt()
 
                     Log.e("Adapter", "${inflatedView.etId.text}")
 
                     if (context is MainActivity) this.context.updateTask(
                         currentTask.id.toString(),
                         titleEt,
-                        versionEt.toInt()
+                        versionEt
                     )
                     dialog.dismiss()
                 }

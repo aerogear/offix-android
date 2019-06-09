@@ -1,14 +1,19 @@
 package org.aerogear.graphqlandroid.activities
 
+import android.content.Context
+import android.net.ConnectivityManager
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v7.app.AlertDialog
 import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
 import android.util.Log
 import android.view.LayoutInflater
 import com.apollographql.apollo.ApolloCall
+import com.apollographql.apollo.ApolloMutationCall
+import com.apollographql.apollo.api.OperationName
 import com.apollographql.apollo.api.Response
+import com.apollographql.apollo.cache.normalized.ApolloStore
+import com.apollographql.apollo.cache.normalized.sql.ApolloSqlHelper
 import com.apollographql.apollo.exception.ApolloException
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.alertdialog_task.view.*
@@ -21,15 +26,29 @@ class MainActivity : AppCompatActivity() {
 
     val noteslist = arrayListOf<Task>()
     val TAG = javaClass.simpleName
+    lateinit var apolloStore: ApolloStore
     val taskAdapter by lazy {
         TaskAdapter(noteslist, this)
+    }
+    val connectivityManager by lazy {
+        getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    }
+    val apolloSqlHelpersize by lazy {
+        ApolloSqlHelper.TABLE_RECORDS.length
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        getTasks()
+        var activeNetwork = connectivityManager.activeNetworkInfo
+
+        if (activeNetwork != null && activeNetwork.isConnected) {
+            Log.e(TAG, " User is online ")
+            Log.e(TAG, "  apolloSql size: $apolloSqlHelpersize")
+            getTasks()
+
+        }
 
         recycler_view.layoutManager = LinearLayoutManager(this)
         recycler_view.adapter = taskAdapter
@@ -53,7 +72,7 @@ class MainActivity : AppCompatActivity() {
                     val title = inflatedView.etTitle.text.toString()
                     val desc = inflatedView.etDesc.text.toString()
                     createtask(title, desc)
-                    Log.e(TAG, "jhjj")
+                    Log.e(TAG, "---")
 //                    taskAdapter.notifyItemInserted(noteslist.size - 1)
                     dialog.dismiss()
                 }
@@ -71,6 +90,14 @@ class MainActivity : AppCompatActivity() {
         val client = Utils.getApolloClient(this)?.query(
             AllTasksQuery.builder().build()
         )
+
+        //Utils.getApolloClient(this)?.clearNormalizedCache()
+
+        Log.e(TAG, " getActiveCallsCount : ${Utils.getApolloClient(this)?.activeCallsCount()}")
+
+        apolloStore = Utils.getApolloClient(this)?.apolloStore()!!
+
+        Log.e(TAG, " apolloStore : ${Utils.getApolloClient(this)?.apolloStore()}")
 
         client?.enqueue(object : ApolloCall.Callback<AllTasksQuery.Data>() {
 
@@ -107,30 +134,39 @@ class MainActivity : AppCompatActivity() {
 
         Log.e(TAG, "inside update task")
 
-        val client = Utils.getApolloClient(this)?.mutate(
-            UpdateCurrentTask.builder().id(id).title(title).version(version).build()
-        )
-        client?.enqueue(object : ApolloCall.Callback<UpdateCurrentTask.Data>() {
-            override fun onFailure(e: ApolloException) {
-                Log.e("onFailure" + "updateTask", e.toString())
+        val client: ApolloMutationCall<UpdateCurrentTask.Data>?
+
+        val mutation = UpdateCurrentTask.builder().id(id).title(title).version(version).build()
+
+        client = Utils.getApolloClient(this)?.mutate(mutation)?.refetchQueries(object : OperationName {
+            override fun name(): String {
+                return AllTasksQuery.OPERATION_DEFINITION
             }
 
-            override fun onResponse(response: Response<UpdateCurrentTask.Data>) {
-                val result = response.data()?.updateTask()
-
-                Log.e(TAG, "onResponse-UpdateTask")
-
-                Log.e(TAG, "${result?.id()}")
-                Log.e(TAG, "${result?.title()}")
-                Log.e(TAG, "${result?.description()}")
-                Log.e(TAG, "${result?.version()}")
-
-                runOnUiThread {
-                    noteslist.clear()
-                    getTasks()
-                }
-            }
         })
+        Log.e(TAG, " getActiveCallsCount update Task : ${Utils.getApolloClient(this)?.activeCallsCount()}")
+
+        client?.enqueue(
+            object : ApolloCall.Callback<UpdateCurrentTask.Data>() {
+                override fun onFailure(e: ApolloException) {
+                    Log.e("onFailure" + "updateTask", e.toString())
+                }
+
+                override fun onResponse(response: Response<UpdateCurrentTask.Data>) {
+                    val result = response.data()?.updateTask()
+                    Log.e(TAG, "onResponse-UpdateTask")
+
+                    Log.e(TAG, "${result?.id()}")
+                    Log.e(TAG, "${result?.title()}")
+                    Log.e(TAG, "${result?.description()}")
+                    Log.e(TAG, "${result?.version()}")
+
+                    runOnUiThread {
+                        noteslist.clear()
+                        getTasks()
+                    }
+                }
+            })
     }
 
     private fun createtask(title: String, description: String) {
@@ -139,7 +175,11 @@ class MainActivity : AppCompatActivity() {
 
         val client = Utils.getApolloClient(this)?.mutate(
             CreateTask.builder().title(title).description(description).build()
-        )
+        )?.refetchQueries(object : OperationName {
+            override fun name(): String {
+                return AllTasksQuery.OPERATION_DEFINITION
+            }
+        })
 
         client?.enqueue(object : ApolloCall.Callback<CreateTask.Data>() {
             override fun onFailure(e: ApolloException) {
@@ -156,8 +196,12 @@ class MainActivity : AppCompatActivity() {
                 Log.e(TAG, "${result?.description()}")
                 Log.e(TAG, "${result?.version()}")
 
+                getTasks()
+
                 runOnUiThread {
+                    noteslist.clear()
                     getTasks()
+                    Log.e(TAG, "createTask : ${noteslist.size}")
                 }
             }
         })
