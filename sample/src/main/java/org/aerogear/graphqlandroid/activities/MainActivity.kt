@@ -1,20 +1,19 @@
 package org.aerogear.graphqlandroid.activities
 
-import android.arch.lifecycle.ViewModelProvider
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
 import android.net.ConnectivityManager
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v7.app.AlertDialog
+import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
 import android.util.Log
 import android.view.LayoutInflater
 import com.apollographql.apollo.ApolloCall
+import com.apollographql.apollo.ApolloQueryWatcher
 import com.apollographql.apollo.api.Response
-import com.apollographql.apollo.cache.http.HttpCachePolicy
 import com.apollographql.apollo.cache.normalized.ApolloStore
+import com.apollographql.apollo.cache.normalized.CacheControl
 import com.apollographql.apollo.cache.normalized.sql.ApolloSqlHelper
 import com.apollographql.apollo.exception.ApolloException
 import kotlinx.android.synthetic.main.activity_main.*
@@ -23,6 +22,7 @@ import org.aerogear.graphqlandroid.*
 import org.aerogear.graphqlandroid.adapter.TaskAdapter
 import org.aerogear.graphqlandroid.data.ViewModel
 import org.aerogear.graphqlandroid.model.Task
+import java.util.concurrent.atomic.AtomicReference
 
 class MainActivity : AppCompatActivity() {
 
@@ -35,12 +35,16 @@ class MainActivity : AppCompatActivity() {
 
     lateinit var apolloStore: ApolloStore
 
+    val watchResponse = AtomicReference<Response<AllTasksQuery.Data>>()
+
     val connectivityManager by lazy {
         getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     }
     val apolloSqlHelpersize by lazy {
         ApolloSqlHelper.TABLE_RECORDS.length
     }
+
+    var apolloQueryWatcher: ApolloQueryWatcher<AllTasksQuery.Data>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,7 +61,9 @@ class MainActivity : AppCompatActivity() {
 
         }
 
-
+        pull_to_refresh.setOnRefreshListener {
+            doYourUpdate()
+        }
 
         recycler_view.layoutManager = LinearLayoutManager(this)
         recycler_view.adapter = taskAdapter
@@ -87,50 +93,67 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    private fun doYourUpdate() {
+        apolloQueryWatcher?.refetch()
+        Log.e(TAG, " on Refersh : doYourUpdate ")
+        taskAdapter.notifyDataSetChanged()
+        pull_to_refresh.isRefreshing = false
+    }
+
     fun getTasks() {
 
-        Log.e(TAG, "inside getTasks")
+        noteslist.clear()
 
+        Log.e(TAG, "inside getTasks")
+        Log.e(TAG, " getActiveCallsCount : ${Utils.getApolloClient(this)?.activeCallsCount()}")
+        apolloStore = Utils.getApolloClient(this)?.apolloStore()!!
+        Log.e(TAG, " apolloStore : ${Utils.getApolloClient(this)?.apolloStore()}")
 
         val client = Utils.getApolloClient(this)?.query(
             AllTasksQuery.builder().build()
-        )?.httpCachePolicy(HttpCachePolicy.CACHE_FIRST)
-
-        Log.e(TAG, " getActiveCallsCount : ${Utils.getApolloClient(this)?.activeCallsCount()}")
-
-        apolloStore = Utils.getApolloClient(this)?.apolloStore()!!
-
-        Log.e(TAG, " apolloStore : ${Utils.getApolloClient(this)?.apolloStore()}")
-
-        client?.enqueue(object : ApolloCall.Callback<AllTasksQuery.Data>() {
-
-            override fun onFailure(e: ApolloException) {
-                e.printStackTrace()
-                Log.e(TAG, e.toString())
-            }
-
-            override fun onResponse(response: Response<AllTasksQuery.Data>) {
-
-                val result = response.data()?.allTasks()
-                Log.e(
-                    TAG,
-                    "onResponse-getTasks : ${result?.get(result.size - 1)?.title()} ${result?.get(result.size - 1)?.version()}"
-                )
-
-                result?.forEach {
-                    val title = it.title()
-                    val desc = it.description()
-                    val id = it.id()
-                    val version: Int? = it.version()
-                    val task = Task(title, desc, id.toInt(), version!!)
-                    noteslist.add(task)
+        )?.watcher()
+            ?.refetchCacheControl(CacheControl.CACHE_FIRST)
+            ?.enqueueAndWatch(object : ApolloCall.Callback<AllTasksQuery.Data>() {
+                override fun onFailure(e: ApolloException) {
+                    e.printStackTrace()
+                    Log.e(TAG, "----$e ")
                 }
-                runOnUiThread {
-                    Log.e(TAG, " Size ${noteslist.size}")
-                    taskAdapter.notifyDataSetChanged()
+
+                override fun onResponse(response: Response<AllTasksQuery.Data>) {
+
+                    watchResponse.set(response)
+
+                    Log.e(TAG, "on Response : Watcher ${response.data()}")
+
+
+                    val result = response.data()?.allTasks()
+                    Log.e(
+                        TAG,
+                        "onResponse-getTasks : ${result?.get(result.size - 1)?.title()} ${result?.get(result.size - 1)?.version()}"
+                    )
+
+                    result?.forEach {
+                        val title = it.title()
+                        val desc = it.description()
+                        val id = it.id()
+                        val version: Int? = it.version()
+                        val task = Task(title, desc, id.toInt(), version!!)
+                        noteslist.add(task)
+                    }
+                    runOnUiThread {
+                        Log.e(TAG, " Size ${noteslist.size}")
+                        taskAdapter.notifyDataSetChanged()
+                    }
                 }
-            }
-        })
+            })
+
+        Log.e(TAG, "watched operation ${client?.operation()}")
+
+        //client?.refetch()
+
+//            ?.httpCachePolicy(HttpCachePolicy.NETWORK_ONLY)
+
+
     }
 
     fun updateTask(id: String, title: String, version: Int) {
@@ -139,7 +162,7 @@ class MainActivity : AppCompatActivity() {
 
         val client = Utils.getApolloClient(this)?.mutate(
             UpdateCurrentTask.builder().id(id).title(title).version(version).build()
-        )
+        )?.refetchQueries(apolloQueryWatcher?.operation()?.name())
 
 //        client = Utils.getApolloClient(this)?.mutate(mutation)?.refetchQueries(object : OperationName {
 //            override fun name(): String {
@@ -163,10 +186,11 @@ class MainActivity : AppCompatActivity() {
                 Log.e(TAG, "${result?.description()}")
                 Log.e(TAG, "${result?.version()}")
 
-                runOnUiThread {
-                    noteslist.clear()
-                    getTasks()
-                }
+                noteslist.clear()
+//                runOnUiThread {
+//                    noteslist.clear()
+//                    getTasks()
+//                }
             }
         })
     }
@@ -177,7 +201,7 @@ class MainActivity : AppCompatActivity() {
 
         val client = Utils.getApolloClient(this)?.mutate(
             CreateTask.builder().title(title).description(description).build()
-        )
+        )?.refetchQueries(apolloQueryWatcher?.operation()?.name())
 
         client?.enqueue(object : ApolloCall.Callback<CreateTask.Data>() {
             override fun onFailure(e: ApolloException) {
@@ -194,11 +218,7 @@ class MainActivity : AppCompatActivity() {
                 Log.e(TAG, "${result?.description()}")
                 Log.e(TAG, "${result?.version()}")
 
-                runOnUiThread {
-
-                    noteslist.clear()
-                    getTasks()
-                }
+                noteslist.clear()
             }
         })
     }
@@ -235,5 +255,10 @@ class MainActivity : AppCompatActivity() {
         noteslist.clear()
         getTasks()
         taskAdapter.notifyDataSetChanged()
+    }
+
+    override fun onDestroy() {
+        apolloQueryWatcher?.cancel()
+        super.onDestroy()
     }
 }

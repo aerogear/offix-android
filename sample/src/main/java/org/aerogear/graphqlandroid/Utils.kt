@@ -7,6 +7,7 @@ import android.widget.Toast
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.api.Field
 import com.apollographql.apollo.api.Operation
+import com.apollographql.apollo.cache.http.HttpCachePolicy
 import com.apollographql.apollo.cache.normalized.CacheKey
 import com.apollographql.apollo.cache.normalized.CacheKeyResolver
 import com.apollographql.apollo.cache.normalized.lru.EvictionPolicy
@@ -22,7 +23,7 @@ import java.nio.charset.Charset
 object Utils {
 
     //To run on emulator
-    private const val BASE_URL = "http://192.168.0.106:4000/graphql"
+    private const val BASE_URL = "http://192.168.0.105:4000/graphql"
     private const val SQL_CACHE_NAME = "tasksDb"
 
     private var apClient: ApolloClient? = null
@@ -48,6 +49,7 @@ object Utils {
                 .okHttpClient(getOkhttpClient(context)!!)
                 .normalizedCache(cacheFactory, cacheResolver())
                 .serverUrl(BASE_URL)
+                .defaultHttpCachePolicy(HttpCachePolicy.NETWORK_ONLY)
                 .build()
         }
 
