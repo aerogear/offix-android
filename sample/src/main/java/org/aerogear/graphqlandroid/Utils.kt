@@ -22,7 +22,7 @@ import java.nio.charset.Charset
 object Utils {
 
     //To run on emulator
-    private const val BASE_URL = "http://10.0.2.2:4000/graphql"
+    private const val BASE_URL = "http://192.168.0.106:4000/graphql"
     private const val SQL_CACHE_NAME = "tasksDb"
 
     private var apClient: ApolloClient? = null

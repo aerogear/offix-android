@@ -1,106 +1,37 @@
-package org.aerogear.graphqlandroid.activities
+package org.aerogear.graphqlandroid.data
 
-import android.arch.lifecycle.ViewModelProvider
-import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
-import android.net.ConnectivityManager
-import android.support.v7.app.AppCompatActivity
-import android.os.Bundle
-import android.support.v7.app.AlertDialog
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
 import android.util.Log
-import android.view.LayoutInflater
 import com.apollographql.apollo.ApolloCall
 import com.apollographql.apollo.api.Response
 import com.apollographql.apollo.cache.http.HttpCachePolicy
 import com.apollographql.apollo.cache.normalized.ApolloStore
-import com.apollographql.apollo.cache.normalized.sql.ApolloSqlHelper
 import com.apollographql.apollo.exception.ApolloException
-import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.alertdialog_task.view.*
 import org.aerogear.graphqlandroid.*
-import org.aerogear.graphqlandroid.adapter.TaskAdapter
-import org.aerogear.graphqlandroid.data.ViewModel
 import org.aerogear.graphqlandroid.model.Task
 
-class MainActivity : AppCompatActivity() {
+class UserData {
 
 
-    val noteslist = arrayListOf<Task>()
     val TAG = javaClass.simpleName
-    val taskAdapter by lazy {
-        TaskAdapter(noteslist, this)
-    }
 
     lateinit var apolloStore: ApolloStore
 
-    val connectivityManager by lazy {
-        getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-    }
-    val apolloSqlHelpersize by lazy {
-        ApolloSqlHelper.TABLE_RECORDS.length
-    }
+    fun getTasks(context: Context): ArrayList<Task> {
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-
-        val myModel = ViewModelProviders.of(this).get(ViewModel::class.java)
-
-        val activeNetwork = connectivityManager.activeNetworkInfo
-
-        if (activeNetwork != null && activeNetwork.isConnected) {
-            Log.e(TAG, " User is online ")
-            Log.e(TAG, "  apolloSql size: $apolloSqlHelpersize")
-            getTasks()
-
-        }
-
-
-
-        recycler_view.layoutManager = LinearLayoutManager(this)
-        recycler_view.adapter = taskAdapter
-
-        fabAdd.setOnClickListener {
-
-            val inflatedView = LayoutInflater.from(this).inflate(R.layout.alertfrag_create, null, false)
-
-            val customAlert: AlertDialog = AlertDialog.Builder(this)
-                .setView(inflatedView)
-                .setTitle("Create a new Note")
-                .setNegativeButton("No") { dialog, which ->
-                    dialog.dismiss()
-                }
-                .setPositiveButton("Yes") { dialog, which ->
-                    val title = inflatedView.etTitle.text.toString()
-                    val desc = inflatedView.etDesc.text.toString()
-                    createtask(title, desc)
-                    Log.e(TAG, "jhjj")
-//                    taskAdapter.notifyItemInserted(noteslist.size - 1)
-                    dialog.dismiss()
-                }
-                .create()
-            customAlert.show()
-
-        }
-
-    }
-
-    fun getTasks() {
+        var noteslist = arrayListOf<Task>()
 
         Log.e(TAG, "inside getTasks")
 
-
-        val client = Utils.getApolloClient(this)?.query(
+        val client = Utils.getApolloClient(context)?.query(
             AllTasksQuery.builder().build()
         )?.httpCachePolicy(HttpCachePolicy.CACHE_FIRST)
 
-        Log.e(TAG, " getActiveCallsCount : ${Utils.getApolloClient(this)?.activeCallsCount()}")
+        Log.e(TAG, " getActiveCallsCount : ${Utils.getApolloClient(context)?.activeCallsCount()}")
 
-        apolloStore = Utils.getApolloClient(this)?.apolloStore()!!
+        apolloStore = Utils.getApolloClient(context)?.apolloStore()!!
 
-        Log.e(TAG, " apolloStore : ${Utils.getApolloClient(this)?.apolloStore()}")
+        Log.e(TAG, " apolloStore : ${Utils.getApolloClient(context)?.apolloStore()}")
 
         client?.enqueue(object : ApolloCall.Callback<AllTasksQuery.Data>() {
 
@@ -125,19 +56,17 @@ class MainActivity : AppCompatActivity() {
                     val task = Task(title, desc, id.toInt(), version!!)
                     noteslist.add(task)
                 }
-                runOnUiThread {
-                    Log.e(TAG, " Size ${noteslist.size}")
-                    taskAdapter.notifyDataSetChanged()
-                }
             }
         })
+
+        return noteslist
     }
 
-    fun updateTask(id: String, title: String, version: Int) {
+    fun updateTask(id: String, title: String, version: Int, context: Context) {
 
         Log.e(TAG, "inside update task")
 
-        val client = Utils.getApolloClient(this)?.mutate(
+        val client = Utils.getApolloClient(context)?.mutate(
             UpdateCurrentTask.builder().id(id).title(title).version(version).build()
         )
 
@@ -163,19 +92,16 @@ class MainActivity : AppCompatActivity() {
                 Log.e(TAG, "${result?.description()}")
                 Log.e(TAG, "${result?.version()}")
 
-                runOnUiThread {
-                    noteslist.clear()
-                    getTasks()
-                }
+                getTasks(context)
             }
         })
     }
 
-    fun createtask(title: String, description: String) {
+     fun createtask(title: String, description: String, context: Context) {
 
         Log.e(TAG, "inside create task")
 
-        val client = Utils.getApolloClient(this)?.mutate(
+        val client = Utils.getApolloClient(context)?.mutate(
             CreateTask.builder().title(title).description(description).build()
         )
 
@@ -194,19 +120,16 @@ class MainActivity : AppCompatActivity() {
                 Log.e(TAG, "${result?.description()}")
                 Log.e(TAG, "${result?.version()}")
 
-                runOnUiThread {
-
-                    noteslist.clear()
-                    getTasks()
-                }
+                getTasks(context)
             }
         })
     }
 
-    fun deleteTask(id: String) {
+
+    fun deleteTask(id: String,context: Context) {
         Log.e(TAG, "inside delete task")
 
-        val client = Utils.getApolloClient(this)?.mutate(
+        val client = Utils.getApolloClient(context)?.mutate(
             DeleteTask.builder().id(id).build()
         )
         client?.enqueue(object : ApolloCall.Callback<DeleteTask.Data>() {
@@ -220,20 +143,10 @@ class MainActivity : AppCompatActivity() {
                 Log.e(TAG, "onResponse-DeleteTask")
 
                 Log.e(TAG, "$result")
-
-                runOnUiThread {
-                    getTasks()
-                }
+                getTasks(context)
             }
         })
     }
 
-    fun onSuccess() {
 
-        Log.e(TAG, "onSuccess in MainActivity")
-
-        noteslist.clear()
-        getTasks()
-        taskAdapter.notifyDataSetChanged()
-    }
 }
