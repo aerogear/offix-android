@@ -4,18 +4,24 @@ import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
 import android.net.ConnectivityManager
 import android.os.Bundle
-import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.util.Log
 import android.view.LayoutInflater
+import android.widget.Toast
 import com.apollographql.apollo.ApolloCall
 import com.apollographql.apollo.ApolloQueryWatcher
 import com.apollographql.apollo.api.Response
 import com.apollographql.apollo.cache.normalized.ApolloStore
-import com.apollographql.apollo.cache.normalized.CacheControl
 import com.apollographql.apollo.cache.normalized.sql.ApolloSqlHelper
 import com.apollographql.apollo.exception.ApolloException
+import com.apollographql.apollo.fetcher.ApolloResponseFetchers
+import com.apollographql.apollo.rx2.Rx2Apollo
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.observers.DisposableObserver
+import io.reactivex.schedulers.Schedulers
+import io.reactivex.subscribers.DisposableSubscriber
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.alertdialog_task.view.*
 import org.aerogear.graphqlandroid.*
@@ -23,6 +29,7 @@ import org.aerogear.graphqlandroid.adapter.TaskAdapter
 import org.aerogear.graphqlandroid.data.ViewModel
 import org.aerogear.graphqlandroid.model.Task
 import java.util.concurrent.atomic.AtomicReference
+import org.aerogear.graphqlandroid.SubscribeTasks as SubscribeTasks1
 
 class MainActivity : AppCompatActivity() {
 
@@ -33,7 +40,10 @@ class MainActivity : AppCompatActivity() {
         TaskAdapter(noteslist, this)
     }
 
+
     lateinit var apolloStore: ApolloStore
+
+    private val disposables = CompositeDisposable()
 
     val watchResponse = AtomicReference<Response<AllTasksQuery.Data>>()
 
@@ -72,7 +82,7 @@ class MainActivity : AppCompatActivity() {
 
             val inflatedView = LayoutInflater.from(this).inflate(R.layout.alertfrag_create, null, false)
 
-            val customAlert: AlertDialog = AlertDialog.Builder(this)
+            val customAlert: android.support.v7.app.AlertDialog = android.support.v7.app.AlertDialog.Builder(this)
                 .setView(inflatedView)
                 .setTitle("Create a new Note")
                 .setNegativeButton("No") { dialog, which ->
@@ -109,30 +119,21 @@ class MainActivity : AppCompatActivity() {
         apolloStore = Utils.getApolloClient(this)?.apolloStore()!!
         Log.e(TAG, " apolloStore : ${Utils.getApolloClient(this)?.apolloStore()}")
 
-        val client = Utils.getApolloClient(this)?.query(
+        val client: ApolloCall<AllTasksQuery.Data> = Utils.getApolloClient(this)?.query(
             AllTasksQuery.builder().build()
-        )?.watcher()
-            ?.refetchCacheControl(CacheControl.CACHE_FIRST)
-            ?.enqueueAndWatch(object : ApolloCall.Callback<AllTasksQuery.Data>() {
-                override fun onFailure(e: ApolloException) {
-                    e.printStackTrace()
-                    Log.e(TAG, "----$e ")
+        )?.responseFetcher(ApolloResponseFetchers.CACHE_FIRST) as ApolloCall<AllTasksQuery.Data>
+
+        Rx2Apollo.from(client).subscribeOn(Schedulers.io())
+            ?.observeOn(AndroidSchedulers.mainThread())
+            ?.subscribeWith(object : DisposableObserver<Response<AllTasksQuery.Data>>() {
+                override fun onComplete() {
+
                 }
 
-                override fun onResponse(response: Response<AllTasksQuery.Data>) {
+                override fun onNext(result: Response<AllTasksQuery.Data>) {
+                    Log.e(TAG, " onNext : ${result.data()?.allTasks()?.size}")
 
-                    watchResponse.set(response)
-
-                    Log.e(TAG, "on Response : Watcher ${response.data()}")
-
-
-                    val result = response.data()?.allTasks()
-                    Log.e(
-                        TAG,
-                        "onResponse-getTasks : ${result?.get(result.size - 1)?.title()} ${result?.get(result.size - 1)?.version()}"
-                    )
-
-                    result?.forEach {
+                    result?.data()?.allTasks()?.forEach {
                         val title = it.title()
                         val desc = it.description()
                         val id = it.id()
@@ -144,14 +145,20 @@ class MainActivity : AppCompatActivity() {
                         Log.e(TAG, " Size ${noteslist.size}")
                         taskAdapter.notifyDataSetChanged()
                     }
+
                 }
-            })
 
-        Log.e(TAG, "watched operation ${client?.operation()}")
+                override fun onError(e: Throwable) {
+                    Log.e(TAG, " onError : ${e.message}")
+                }
 
-        //client?.refetch()
+            }
 
-//            ?.httpCachePolicy(HttpCachePolicy.NETWORK_ONLY)
+            )?.let {
+                disposables.add(
+                    it
+                )
+            }
 
 
     }
@@ -160,9 +167,13 @@ class MainActivity : AppCompatActivity() {
 
         Log.e(TAG, "inside update task")
 
+        val mutation = UpdateCurrentTask.builder().id(id).title(title).version(version).build()
+
         val client = Utils.getApolloClient(this)?.mutate(
-            UpdateCurrentTask.builder().id(id).title(title).version(version).build()
+            mutation
         )?.refetchQueries(apolloQueryWatcher?.operation()?.name())
+
+        Utils.getApolloClient(this)?.defaultCacheHeaders()
 
 //        client = Utils.getApolloClient(this)?.mutate(mutation)?.refetchQueries(object : OperationName {
 //            override fun name(): String {
@@ -261,4 +272,7 @@ class MainActivity : AppCompatActivity() {
         apolloQueryWatcher?.cancel()
         super.onDestroy()
     }
+
+
 }
+

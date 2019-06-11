@@ -1,0 +1,24 @@
+
+subscription subscribeTasks{
+#    taskAdded{
+#        id
+#        title
+#        description
+#        version
+#    }
+
+#    taskDeleted{
+#        id
+#        title
+#        description
+#        version
+#    }
+    taskUpdated{
+        id
+        title
+        description
+        version
+    }
+
+}
+

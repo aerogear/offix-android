@@ -4,7 +4,6 @@ import android.content.Context
 import android.util.Log
 import com.apollographql.apollo.ApolloCall
 import com.apollographql.apollo.api.Response
-import com.apollographql.apollo.cache.http.HttpCachePolicy
 import com.apollographql.apollo.cache.normalized.ApolloStore
 import com.apollographql.apollo.exception.ApolloException
 import org.aerogear.graphqlandroid.*
@@ -25,7 +24,7 @@ class UserData {
 
         val client = Utils.getApolloClient(context)?.query(
             AllTasksQuery.builder().build()
-        )?.httpCachePolicy(HttpCachePolicy.CACHE_FIRST)
+        )
 
         Log.e(TAG, " getActiveCallsCount : ${Utils.getApolloClient(context)?.activeCallsCount()}")
 

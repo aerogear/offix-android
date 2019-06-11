@@ -5,9 +5,9 @@ import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.widget.Toast
 import com.apollographql.apollo.ApolloClient
-import com.apollographql.apollo.api.Field
 import com.apollographql.apollo.api.Operation
-import com.apollographql.apollo.cache.http.HttpCachePolicy
+import com.apollographql.apollo.api.ResponseField
+import com.apollographql.apollo.api.cache.http.HttpCachePolicy
 import com.apollographql.apollo.cache.normalized.CacheKey
 import com.apollographql.apollo.cache.normalized.CacheKeyResolver
 import com.apollographql.apollo.cache.normalized.lru.EvictionPolicy
@@ -36,9 +36,9 @@ object Utils {
 
         //Used Normalized Disk Cache: Per node caching of responses in SQL.
         //Persists normalized responses on disk so that they can used after process death.
-        val cacheFactory = LruNormalizedCacheFactory(
-            EvictionPolicy.NO_EVICTION, SqlNormalizedCacheFactory(apolloSqlHelper)
-        )
+        val cacheFactory = LruNormalizedCacheFactory(EvictionPolicy.NO_EVICTION)
+            .chain(SqlNormalizedCacheFactory(apolloSqlHelper))
+
 
         //If Apollo Client is not null, return it else make a new Apollo Client.
         //Helps in singleton pattern.
@@ -136,18 +136,8 @@ object Utils {
     }
 
     private fun cacheResolver(): CacheKeyResolver {
-
-        // Use this resolver to customize the key for fields with variables: eg entry(repoFullName: $repoFullName).
-        // This is useful if you want to make query to be able to resolved, even if it has never been run before.
         return object : CacheKeyResolver() {
-            override fun fromFieldArguments(field: Field, variables: Operation.Variables): CacheKey {
-                Log.e("UtilClass", "fromFieldArguments $variables")
-
-                return CacheKey.NO_KEY
-            }
-
-            override fun fromFieldRecordSet(field: Field, recordSet: MutableMap<String, Any>): CacheKey {
-
+            override fun fromFieldRecordSet(field: ResponseField, recordSet: Map<String, Any>): CacheKey {
                 Log.e("UtilClass", "fromFieldRecordSet ${(recordSet["id"] as String)}")
                 if (recordSet.containsKey("id")) {
                     val typeNameAndIDKey = recordSet["__typename"].toString() + "." + recordSet["id"]
@@ -156,7 +146,15 @@ object Utils {
                 return CacheKey.NO_KEY
             }
 
+            // Use this resolver to customize the key for fields with variables: eg entry(repoFullName: $repoFullName).
+            // This is useful if you want to make query to be able to resolved, even if it has never been run before.
+            override fun fromFieldArguments(field: ResponseField, variables: Operation.Variables): CacheKey {
+                Log.e("UtilClass", "fromFieldArguments $variables")
+                return CacheKey.NO_KEY
+            }
         }
+
+
     }
 }
 
