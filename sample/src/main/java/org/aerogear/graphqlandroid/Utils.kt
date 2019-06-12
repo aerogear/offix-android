@@ -14,6 +14,7 @@ import com.apollographql.apollo.cache.normalized.lru.EvictionPolicy
 import com.apollographql.apollo.cache.normalized.lru.LruNormalizedCacheFactory
 import com.apollographql.apollo.cache.normalized.sql.ApolloSqlHelper
 import com.apollographql.apollo.cache.normalized.sql.SqlNormalizedCacheFactory
+import com.apollographql.apollo.subscription.WebSocketSubscriptionTransport
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -48,8 +49,14 @@ object Utils {
             apClient = ApolloClient.builder()
                 .okHttpClient(getOkhttpClient(context)!!)
                 .normalizedCache(cacheFactory, cacheResolver())
+                .subscriptionTransportFactory(
+                    WebSocketSubscriptionTransport.Factory(
+                        BASE_URL,
+                        getOkhttpClient(context)!!
+                    )
+                )
                 .serverUrl(BASE_URL)
-                .defaultHttpCachePolicy(HttpCachePolicy.NETWORK_ONLY)
+//                .defaultHttpCachePolicy(HttpCachePolicy.CACHE_FIRST)
                 .build()
         }
 

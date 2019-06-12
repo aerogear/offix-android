@@ -66,7 +66,7 @@ class UserData {
         Log.e(TAG, "inside update task")
 
         val client = Utils.getApolloClient(context)?.mutate(
-            UpdateCurrentTask.builder().id(id).title(title).version(version).build()
+            UpdateCurrentTaskMutation.builder().id(id).title(title).version(version).build()
         )
 
 //        client = Utils.getApolloClient(this)?.mutate(mutation)?.refetchQueries(object : OperationName {
@@ -76,12 +76,12 @@ class UserData {
 //
 //        })
 
-        client?.enqueue(object : ApolloCall.Callback<UpdateCurrentTask.Data>() {
+        client?.enqueue(object : ApolloCall.Callback<UpdateCurrentTaskMutation.Data>() {
             override fun onFailure(e: ApolloException) {
                 Log.e("onFailure" + "updateTask", e.toString())
             }
 
-            override fun onResponse(response: Response<UpdateCurrentTask.Data>) {
+            override fun onResponse(response: Response<UpdateCurrentTaskMutation.Data>) {
                 val result = response.data()?.updateTask()
 
                 Log.e(TAG, "onResponse-UpdateTask")
@@ -96,20 +96,20 @@ class UserData {
         })
     }
 
-     fun createtask(title: String, description: String, context: Context) {
+    fun createtask(title: String, description: String, context: Context) {
 
         Log.e(TAG, "inside create task")
 
         val client = Utils.getApolloClient(context)?.mutate(
-            CreateTask.builder().title(title).description(description).build()
+            CreateTaskMutation.builder().title(title).description(description).build()
         )
 
-        client?.enqueue(object : ApolloCall.Callback<CreateTask.Data>() {
+        client?.enqueue(object : ApolloCall.Callback<CreateTaskMutation.Data>() {
             override fun onFailure(e: ApolloException) {
                 Log.e("onFailure" + "createTask", e.toString())
             }
 
-            override fun onResponse(response: Response<CreateTask.Data>) {
+            override fun onResponse(response: Response<CreateTaskMutation.Data>) {
                 val result = response.data()?.createTask()
 
                 Log.e(TAG, "onResponse-CreateTask")
@@ -125,18 +125,18 @@ class UserData {
     }
 
 
-    fun deleteTask(id: String,context: Context) {
+    fun deleteTask(id: String, context: Context) {
         Log.e(TAG, "inside delete task")
 
         val client = Utils.getApolloClient(context)?.mutate(
-            DeleteTask.builder().id(id).build()
+            DeleteTaskMutation.builder().id(id).build()
         )
-        client?.enqueue(object : ApolloCall.Callback<DeleteTask.Data>() {
+        client?.enqueue(object : ApolloCall.Callback<DeleteTaskMutation.Data>() {
             override fun onFailure(e: ApolloException) {
                 Log.e("onFailure" + "deleteTask", e.toString())
             }
 
-            override fun onResponse(response: Response<DeleteTask.Data>) {
+            override fun onResponse(response: Response<DeleteTaskMutation.Data>) {
                 val result = response.data()?.deleteTask()
 
                 Log.e(TAG, "onResponse-DeleteTask")
