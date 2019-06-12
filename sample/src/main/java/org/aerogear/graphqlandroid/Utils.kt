@@ -25,7 +25,7 @@ object Utils {
 
     //To run on emulator
     private const val BASE_URL = "http://192.168.0.105:4000/graphql"
-    private const val SQL_CACHE_NAME = "tasksDb"
+    private const val SQL_CACHE_NAME = "tasks1Db"
 
     private var apClient: ApolloClient? = null
     private var httpClient: OkHttpClient? = null

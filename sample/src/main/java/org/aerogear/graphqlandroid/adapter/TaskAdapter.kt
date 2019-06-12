@@ -18,7 +18,7 @@ class TaskAdapter(private val notes: List<Task>, private val context: Context) :
 
     inner class TaskHolder(view: View) : RecyclerView.ViewHolder(view)
 
-    override fun onCreateViewHolder(container: ViewGroup, p1: Int): TaskAdapter.TaskHolder {
+    override fun onCreateViewHolder(container: ViewGroup, p1: Int): TaskHolder {
 
 
         return TaskHolder(
@@ -32,7 +32,7 @@ class TaskAdapter(private val notes: List<Task>, private val context: Context) :
 
     override fun getItemCount() = notes.size
 
-    override fun onBindViewHolder(holder: TaskAdapter.TaskHolder, position: Int) {
+    override fun onBindViewHolder(holder: TaskHolder, position: Int) {
 
         val currentTask = notes[position]
         with(holder.itemView) {
@@ -56,7 +56,7 @@ class TaskAdapter(private val notes: List<Task>, private val context: Context) :
                     val titleEt = inflatedView.etTitle.text.toString()
                     val versionEt = inflatedView.etVersion.text.toString()
 
-                    Log.e("Adapter", "${inflatedView.etId.text}")
+//                    Log.e("Adapter", "${inflatedView.etId.text}")
 
                     if (context is MainActivity) this.context.updateTask(
                         currentTask.id.toString(),

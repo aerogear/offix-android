@@ -1,0 +1,11 @@
+subscription subscribeAddTask{
+
+    taskAdded{
+        id
+        title
+        description
+        version
+    }
+
+}
+
