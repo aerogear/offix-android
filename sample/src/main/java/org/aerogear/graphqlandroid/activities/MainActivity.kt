@@ -2,6 +2,7 @@ package org.aerogear.graphqlandroid.activities
 
 import android.content.Context
 import android.net.ConnectivityManager
+import android.net.Network
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
@@ -9,12 +10,16 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.widget.Toast
 import com.apollographql.apollo.ApolloCall
+import com.apollographql.apollo.ApolloMutationCall
 import com.apollographql.apollo.ApolloQueryWatcher
+import com.apollographql.apollo.api.Mutation
+import com.apollographql.apollo.api.Operation
 import com.apollographql.apollo.api.Response
 import com.apollographql.apollo.cache.normalized.ApolloStore
 import com.apollographql.apollo.cache.normalized.sql.ApolloSqlHelper
 import com.apollographql.apollo.exception.ApolloException
 import com.apollographql.apollo.fetcher.ApolloResponseFetchers
+import com.apollographql.apollo.interceptor.ApolloInterceptor
 import com.apollographql.apollo.rx2.Rx2Apollo
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -25,11 +30,11 @@ import kotlinx.android.synthetic.main.alertdialog_task.view.*
 import org.aerogear.graphqlandroid.*
 import org.aerogear.graphqlandroid.adapter.TaskAdapter
 import org.aerogear.graphqlandroid.model.Task
+import java.util.*
 import java.util.concurrent.atomic.AtomicReference
 
 
 class MainActivity : AppCompatActivity() {
-
 
     val noteslist = arrayListOf<Task>()
     val TAG = javaClass.simpleName
@@ -66,7 +71,13 @@ class MainActivity : AppCompatActivity() {
             getTasks()
             subscribeUpdatedTaskAdded()
             subscribeNewTaskAdded()
-
+        } else {
+            Toast.makeText(
+                this@MainActivity,
+                "Swipe down to refersh. No network there, so items fethced from db.",
+                Toast.LENGTH_SHORT
+            )
+                .show()
         }
 
         pull_to_refresh.setOnRefreshListener {
@@ -166,6 +177,7 @@ class MainActivity : AppCompatActivity() {
                 ?.enqueue(object : ApolloCall.Callback<AllTasksQuery.Data>() {
 
                     override fun onFailure(e: ApolloException) {
+
                         e.printStackTrace()
                         Log.e(TAG, "----$e ")
                     }
@@ -246,8 +258,15 @@ class MainActivity : AppCompatActivity() {
             CreateTaskMutation.builder().title(title).description(description).build()
         )
             //?.refetchQueries(CreateTaskMutation.builder().title(title).description(description).build()?.name())
-
             ?.refetchQueries(apolloQueryWatcher?.operation()?.name())
+
+
+        Utils?.getApolloClient(this)?.apolloStore()?.writeOptimisticUpdates(
+            AllTasksQuery(), AllTasksQuery.Data(
+                mutableListOf()), UUID.randomUUID()
+
+        )?.execute()
+
 
         client?.enqueue(object : ApolloCall.Callback<CreateTaskMutation.Data>() {
             override fun onFailure(e: ApolloException) {
@@ -265,7 +284,8 @@ class MainActivity : AppCompatActivity() {
                 Log.e(TAG, "${result?.version()}")
 
                 runOnUiThread {
-                    noteslist.clear()
+                    if (!noteslist.isEmpty())
+                        noteslist.clear()
 //                    Thread.sleep(5000)
 //                    Log.e(TAG," Sleep over")
                 }
