@@ -1,6 +1,6 @@
-# Voyager Android
+# Offix Android
 
-Voyager Anderoid extends capabilities of Apollo GraphQL Android providing
+Offix Android extends capabilities of Apollo GraphQL Android providing
 fully featured Offline Workflow and Conflict Resolution.
 
 ## Features 
