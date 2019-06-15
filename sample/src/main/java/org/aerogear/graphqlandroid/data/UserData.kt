@@ -3,78 +3,93 @@ package org.aerogear.graphqlandroid.data
 import android.content.Context
 import android.util.Log
 import com.apollographql.apollo.ApolloCall
+import com.apollographql.apollo.ApolloQueryWatcher
 import com.apollographql.apollo.api.Response
 import com.apollographql.apollo.cache.normalized.ApolloStore
 import com.apollographql.apollo.exception.ApolloException
+import com.apollographql.apollo.fetcher.ApolloResponseFetchers
 import org.aerogear.graphqlandroid.*
 import org.aerogear.graphqlandroid.model.Task
+import java.util.*
+import java.util.concurrent.atomic.AtomicReference
+import kotlin.collections.ArrayList
+import kotlin.concurrent.thread
 
-class UserData {
+class UserData(val context: Context) {
 
+    val noteslist = arrayListOf<Task>()
+
+    var apolloQueryWatcher: ApolloQueryWatcher<AllTasksQuery.Data>? = null
+
+    val watchResponse = AtomicReference<Response<AllTasksQuery.Data>>()
 
     val TAG = javaClass.simpleName
 
     lateinit var apolloStore: ApolloStore
 
-    fun getTasks(context: Context): ArrayList<Task> {
+    fun getTasks(): ArrayList<Task> {
 
-        var noteslist = arrayListOf<Task>()
+        noteslist.clear()
 
         Log.e(TAG, "inside getTasks")
-
-        val client = Utils.getApolloClient(context)?.query(
-            AllTasksQuery.builder().build()
-        )
 
         Log.e(TAG, " getActiveCallsCount : ${Utils.getApolloClient(context)?.activeCallsCount()}")
 
         apolloStore = Utils.getApolloClient(context)?.apolloStore()!!
-
         Log.e(TAG, " apolloStore : ${Utils.getApolloClient(context)?.apolloStore()}")
 
-        client?.enqueue(object : ApolloCall.Callback<AllTasksQuery.Data>() {
+        AllTasksQuery.builder()?.build()?.let {
+            Utils.getApolloClient(context)?.query(it)
+                ?.responseFetcher(ApolloResponseFetchers.CACHE_FIRST)
+                ?.enqueue(object : ApolloCall.Callback<AllTasksQuery.Data>() {
 
-            override fun onFailure(e: ApolloException) {
-                e.printStackTrace()
-                Log.e(TAG, e.toString())
-            }
+                    override fun onFailure(e: ApolloException) {
 
-            override fun onResponse(response: Response<AllTasksQuery.Data>) {
+                        e.printStackTrace()
+                        Log.e(TAG, "----$e ")
+                    }
 
-                val result = response.data()?.allTasks()
-                Log.e(
-                    TAG,
-                    "onResponse-getTasks : ${result?.get(result.size - 1)?.title()} ${result?.get(result.size - 1)?.version()}"
-                )
+                    override fun onResponse(response: Response<AllTasksQuery.Data>) {
 
-                result?.forEach {
-                    val title = it.title()
-                    val desc = it.description()
-                    val id = it.id()
-                    val version: Int? = it.version()
-                    val task = Task(title, desc, id.toInt(), version!!)
-                    noteslist.add(task)
-                }
-            }
-        })
+                        //watchResponse.set(response)
 
+                        Log.e(TAG, "on Response : response.data ${response.data()}")
+
+
+                        val result = response.data()?.allTasks()
+//                        Log.e(
+//                            TAG,
+//                            "onResponse-getTasks : ${result?.get(result.size - 1)?.title()} ${result?.get(result.size - 1)?.version()}"
+//                        )
+
+                        result?.forEach {
+                            val title = it.title()
+                            val desc = it.description()
+                            val id = it.id()
+                            val version: Int? = it.version()
+                            val task = Task(title, desc, id.toInt(), version!!)
+                            noteslist.add(task)
+                        }
+
+                    }
+                })
+        }
         return noteslist
+
+        // Log.e(TAG, "watched operation ${client?.operation()}")
     }
 
-    fun updateTask(id: String, title: String, version: Int, context: Context) {
+    fun updateTask(id: String, title: String, version: Int) {
 
-        Log.e(TAG, "inside update task")
+        Log.e(TAG, "inside update title")
+
+        val mutation = UpdateCurrentTaskMutation.builder().id(id).title(title).version(version).build()
 
         val client = Utils.getApolloClient(context)?.mutate(
-            UpdateCurrentTaskMutation.builder().id(id).title(title).version(version).build()
-        )
+            mutation
+        )?.refetchQueries(apolloQueryWatcher?.operation()?.name())
 
-//        client = Utils.getApolloClient(this)?.mutate(mutation)?.refetchQueries(object : OperationName {
-//            override fun name(): String {
-//                return AllTasksQuery.OPERATION_DEFINITION
-//            }
-//
-//        })
+//        Utils.getApolloClient(this)?.defaultCacheHeaders()
 
         client?.enqueue(object : ApolloCall.Callback<UpdateCurrentTaskMutation.Data>() {
             override fun onFailure(e: ApolloException) {
@@ -91,18 +106,28 @@ class UserData {
                 Log.e(TAG, "${result?.description()}")
                 Log.e(TAG, "${result?.version()}")
 
-                getTasks(context)
             }
         })
     }
 
-    fun createtask(title: String, description: String, context: Context) {
+    fun createtask(title: String, description: String) {
 
-        Log.e(TAG, "inside create task")
+        Log.e(TAG, "inside create title")
 
         val client = Utils.getApolloClient(context)?.mutate(
             CreateTaskMutation.builder().title(title).description(description).build()
-        )
+        )?.refetchQueries(apolloQueryWatcher?.operation()?.name())
+        //?.refetchQueries(CreateTaskMutation.builder().title(title).description(description).build()?.name())
+
+
+//
+//        Utils.getApolloClient(context)?.apolloStore()?.writeOptimisticUpdates(
+//            AllTasksQuery(), AllTasksQuery.Data(
+//                mutableListOf()
+//            ), UUID.randomUUID()
+//
+//        )?.execute()
+
 
         client?.enqueue(object : ApolloCall.Callback<CreateTaskMutation.Data>() {
             override fun onFailure(e: ApolloException) {
@@ -119,14 +144,14 @@ class UserData {
                 Log.e(TAG, "${result?.description()}")
                 Log.e(TAG, "${result?.version()}")
 
-                getTasks(context)
             }
         })
+
+
     }
 
-
-    fun deleteTask(id: String, context: Context) {
-        Log.e(TAG, "inside delete task")
+    fun deleteTask(id: String) {
+        Log.e(TAG, "inside delete title")
 
         val client = Utils.getApolloClient(context)?.mutate(
             DeleteTaskMutation.builder().id(id).build()
@@ -142,9 +167,54 @@ class UserData {
                 Log.e(TAG, "onResponse-DeleteTask")
 
                 Log.e(TAG, "$result")
-                getTasks(context)
+
+                getTasks()
             }
         })
+    }
+
+
+    fun doYourUpdate(): ArrayList<Task> {
+
+        noteslist.clear()
+
+        Utils.getApolloClient(context)?.query(
+            AllTasksQuery.builder().build()
+        )?.watcher()
+            ?.refetchResponseFetcher(ApolloResponseFetchers.CACHE_FIRST)
+            ?.enqueueAndWatch(object : ApolloCall.Callback<AllTasksQuery.Data>() {
+                override fun onFailure(e: ApolloException) {
+                    e.printStackTrace()
+                    Log.e(TAG, " doYourUpdate onFailure----$e ")
+                }
+
+                override fun onResponse(response: Response<AllTasksQuery.Data>) {
+
+                    watchResponse.set(response)
+                    noteslist.clear()
+
+                    Log.e(TAG, "on Response doYourUpdate: Watcher ${response.data()}")
+
+
+                    val result = watchResponse.get()?.data()?.allTasks()
+//                    Log.e(
+//                        TAG,
+//                        "onResponse-getTasks : ${result?.get(result.size - 1)?.title()} ${result?.get(result.size - 1)?.version()}"
+//                    )
+
+                    result?.forEach {
+                        val title = it.title()
+                        val desc = it.description()
+                        val id = it.id()
+                        val version: Int? = it.version()
+                        val task = Task(title, desc, id.toInt(), version!!)
+                        noteslist.add(task)
+                    }
+
+                }
+            })
+
+        return noteslist
     }
 
 

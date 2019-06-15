@@ -106,20 +106,20 @@ object Utils {
                 if (responseBodyString.contains("VoyagerConflict")) {
                     showToast(context)
                 }
-                if (responseBodyString.contains("\"msg\":\"\"") &&
-                    responseBodyString.contains("\"operationType\":\"mutation\"") &&
-                    responseBodyString.contains("\"success\":true")
-                ) {
-                    Log.e("UtilsClass", "mutation operation successfully performed")
-                    (context as MainActivity).onSuccess()
-                }
+//                if (responseBodyString.contains("\"msg\":\"\"") &&
+//                    responseBodyString.contains("\"operationType\":\"mutation\"") &&
+//                    responseBodyString.contains("\"success\":true")
+//                ) {
+//                    Log.e("UtilsClass", "mutation operation successfully performed")
+//                    (context as MainActivity).onSuccess()
+//                }
 
-                if (responseBodyString.contains("\"msg\":\"\",\"operationType\":\"query\"") &&
-                    responseBodyString.contains("\"success\":true")
-                ) {
-                    Log.e("UtilsClass", "query operation successfully performed")
-                    showToast2(context)
-                }
+//                if (responseBodyString.contains("\"msg\":\"\",\"operationType\":\"query\"") &&
+//                    responseBodyString.contains("\"success\":true")
+//                ) {
+//                    Log.e("UtilsClass", "query operation successfully performed")
+//                    showToast2(context)
+//                }
 
                 return@Interceptor response
             }

@@ -1,5 +1,7 @@
 package org.aerogear.graphqlandroid.activities
 
+import android.arch.lifecycle.ViewModelProviders
+import android.arch.persistence.room.Room
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.Network
@@ -29,14 +31,16 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.alertdialog_task.view.*
 import org.aerogear.graphqlandroid.*
 import org.aerogear.graphqlandroid.adapter.TaskAdapter
+import org.aerogear.graphqlandroid.data.ViewModel
 import org.aerogear.graphqlandroid.model.Task
+import org.aerogear.graphqlandroid.persistence.Database
 import java.util.*
 import java.util.concurrent.atomic.AtomicReference
 
 
 class MainActivity : AppCompatActivity() {
 
-    val noteslist = arrayListOf<Task>()
+    var noteslist = arrayListOf<Task>()
     val TAG = javaClass.simpleName
     val taskAdapter by lazy {
         TaskAdapter(noteslist, this)
@@ -55,13 +59,20 @@ class MainActivity : AppCompatActivity() {
         ApolloSqlHelper.TABLE_RECORDS.length
     }
 
+    val myModel: ViewModel by lazy {
+        ViewModelProviders.of(this).get(ViewModel::class.java)
+    }
+
     var apolloQueryWatcher: ApolloQueryWatcher<AllTasksQuery.Data>? = null
+
+
+    val updateDao by lazy {
+        MyApplciation.database.updatDao()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
-//        val myModel = ViewModelProviders.of(this).get(ViewModel::class.java)
 
         val activeNetwork = connectivityManager.activeNetworkInfo
 
@@ -69,6 +80,9 @@ class MainActivity : AppCompatActivity() {
             Log.e(TAG, " User is online ")
             Log.e(TAG, "  apolloSql size: $apolloSqlHelpersize")
             getTasks()
+
+//            noteslist = myModel.getAll()
+
             subscribeUpdatedTaskAdded()
             subscribeNewTaskAdded()
         } else {
@@ -113,6 +127,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun doYourUpdate() {
+
+//        noteslist.clear()
+//
+//        noteslist= myModel.doYourUpdate()
+//
+//        taskAdapter.notifyDataSetChanged()
+//
 
         Utils.getApolloClient(this)?.query(
             AllTasksQuery.builder().build()
@@ -211,12 +232,12 @@ class MainActivity : AppCompatActivity() {
                 })
         }
 
-        // Log.e(TAG, "watched operation ${client?.operation()}")
+//         Log.e(TAG, "watched operation ${client?.operation()}")
     }
 
     fun updateTask(id: String, title: String, version: Int) {
 
-        Log.e(TAG, "inside update task")
+        Log.e(TAG, "inside update title")
 
         val mutation = UpdateCurrentTaskMutation.builder().id(id).title(title).version(version).build()
 
@@ -228,7 +249,12 @@ class MainActivity : AppCompatActivity() {
 
         client?.enqueue(object : ApolloCall.Callback<UpdateCurrentTaskMutation.Data>() {
             override fun onFailure(e: ApolloException) {
-                Log.e("onFailure" + "updateTask", e.toString())
+                Log.e("onFailure--" + "updateTask", e.toString())
+
+                //Save to db when offline
+                doUpdateOffline(title, id, version)
+
+
             }
 
             override fun onResponse(response: Response<UpdateCurrentTaskMutation.Data>) {
@@ -250,9 +276,26 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
+    private fun doUpdateOffline(title: String, id: String, version: Int) {
+
+        val task = Task(title, " ", id.toInt(), version)
+        val dbId = updateDao.insertTask(task)
+
+        Log.e(TAG, " Id in database $dbId ")
+        Log.e(TAG, " Id of note fetched from db ${updateDao.getTaskById(dbId).id} ")
+        Log.e(TAG, " Title of note fetched from db ${updateDao.getTaskById(dbId).title} ")
+
+        noteslist.removeAt(id.toInt() - 1)
+        noteslist.add(id.toInt() - 1, task)
+        taskAdapter.notifyItemChanged(id.toInt() - 1)
+
+        Log.e(TAG, "size of noteslist after update")
+
+    }
+
     fun createtask(title: String, description: String) {
 
-        Log.e(TAG, "inside create task")
+        Log.e(TAG, "inside create title")
 
         val client = Utils.getApolloClient(this)?.mutate(
             CreateTaskMutation.builder().title(title).description(description).build()
@@ -263,7 +306,8 @@ class MainActivity : AppCompatActivity() {
 
         Utils?.getApolloClient(this)?.apolloStore()?.writeOptimisticUpdates(
             AllTasksQuery(), AllTasksQuery.Data(
-                mutableListOf()), UUID.randomUUID()
+                mutableListOf()
+            ), UUID.randomUUID()
 
         )?.execute()
 
@@ -296,7 +340,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun deleteTask(id: String) {
-        Log.e(TAG, "inside delete task")
+        Log.e(TAG, "inside delete title")
 
         val client = Utils.getApolloClient(this)?.mutate(
             DeleteTaskMutation.builder().id(id).build()
@@ -394,7 +438,7 @@ class MainActivity : AppCompatActivity() {
                         val res = response.data()?.taskAdded()
                         res?.let {
 
-                            Log.e(TAG, " inside subscription2 ${it.title()} mutated upon new task")
+                            Log.e(TAG, " inside subscription2 ${it.title()} mutated upon new title")
                             noteslist.add(Task(it.title(), it.description(), it.id().toInt(), it.version()!!))
                         }
 
