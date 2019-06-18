@@ -14,6 +14,7 @@ import com.apollographql.apollo.cache.normalized.lru.EvictionPolicy
 import com.apollographql.apollo.cache.normalized.lru.LruNormalizedCacheFactory
 import com.apollographql.apollo.cache.normalized.sql.ApolloSqlHelper
 import com.apollographql.apollo.cache.normalized.sql.SqlNormalizedCacheFactory
+import com.apollographql.apollo.interceptor.ApolloInterceptor
 import com.apollographql.apollo.subscription.WebSocketSubscriptionTransport
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
@@ -30,6 +31,7 @@ object Utils {
     private var apClient: ApolloClient? = null
     private var httpClient: OkHttpClient? = null
     private var conflictInterceptor: Interceptor? = null
+    private lateinit var apolloInterceptor: ApolloInterceptor
 
     fun getApolloClient(context: Context): ApolloClient? {
 
@@ -49,6 +51,7 @@ object Utils {
             apClient = ApolloClient.builder()
                 .okHttpClient(getOkhttpClient(context)!!)
                 .normalizedCache(cacheFactory, cacheResolver())
+//                .addApplicationInterceptor(getApolloInterceptor())
                 .subscriptionTransportFactory(
                     WebSocketSubscriptionTransport.Factory(
                         BASE_URL,
@@ -81,6 +84,38 @@ object Utils {
         return httpClient
 
     }
+
+
+//    private fun getApolloInterceptor(): ApolloInterceptor {
+//
+//        val apolloInterceptor = object : ApolloInterceptor {
+//            override fun interceptAsync(
+//                request: ApolloInterceptor.InterceptorRequest,
+//                chain: ApolloInterceptorChain,
+//                dispatcher: Executor,
+//                callBack: ApolloInterceptor.CallBack
+//            ) {
+//
+////                callBack.onResponse(ApolloInterceptor.InterceptorResponse(Response.Builder().build()))
+//                Log.e("UtilsClass", " *** response 1${Response.Builder().build().body()}")
+////                Log.e("UtilsClass", " *** response 2${Response.Builder().build().headers()}")
+////                Log.e("UtilsClass", " *** response 2${Response.Builder().build().priorResponse()}")
+//
+//                callBack.onFetch(ApolloInterceptor.FetchSourceType.CACHE)
+//            }
+//
+//            override fun dispose() {
+//
+//                Log.e("UtilsClass", " *** ondispose")
+//            }
+//
+//        }
+//
+//        return apolloInterceptor
+//
+//    }
+//
+
     //function to get the response after query/mutation is performed, can get conflict messages and so on.
 
     private fun getResponseInterceptor(context: Context): Interceptor? {
@@ -101,6 +136,8 @@ object Utils {
                 bufferedSource?.request(Long.MAX_VALUE)
                 val buffer = bufferedSource?.buffer()
                 val responseBodyString = buffer?.clone()?.readString(Charset.forName("UTF-8")) ?: ""
+
+                Log.e("UtillClass",  " Interceptor : $responseBodyString")
 
                 //To see for conflict, "VoyagerConflict" which comes in the message is searched for.
                 if (responseBodyString.contains("VoyagerConflict")) {

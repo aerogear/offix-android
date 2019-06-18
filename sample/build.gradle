@@ -9,6 +9,8 @@ apply plugin: 'kotlin-android-extensions'
 
 android {
     compileSdkVersion 28
+
+//    kapt { generateStubs = true }
     defaultConfig {
         applicationId "org.aerogear.graphqlandroid"
         minSdkVersion 23
@@ -49,6 +51,7 @@ dependencies {
     testCompileOnly 'org.jetbrains:annotations:13.0'
 
     annotationProcessor "android.arch.persistence.room:compiler:1.1.1"
+
     implementation "android.arch.persistence.room:runtime:1.1.1"
     kapt "android.arch.persistence.room:compiler:1.1.1"
 

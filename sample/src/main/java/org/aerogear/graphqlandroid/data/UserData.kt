@@ -8,6 +8,7 @@ import com.apollographql.apollo.api.Response
 import com.apollographql.apollo.cache.normalized.ApolloStore
 import com.apollographql.apollo.exception.ApolloException
 import com.apollographql.apollo.fetcher.ApolloResponseFetchers
+import com.apollographql.apollo.interceptor.ApolloInterceptor
 import org.aerogear.graphqlandroid.*
 import org.aerogear.graphqlandroid.model.Task
 import java.util.*
@@ -26,6 +27,8 @@ class UserData(val context: Context) {
     val TAG = javaClass.simpleName
 
     lateinit var apolloStore: ApolloStore
+
+//    val responseReader = ResponseReader?.ObjectReader {  }
 
     fun getTasks(): ArrayList<Task> {
 
@@ -89,7 +92,42 @@ class UserData(val context: Context) {
             mutation
         )?.refetchQueries(apolloQueryWatcher?.operation()?.name())
 
+        val s: String = com.apollographql.apollo.internal.json.Utils.toJsonString(client.toString())
+        Log.e(TAG, " updateTask 1: - ${s}")
+
+
+        Log.e(TAG, " updateTask 20: - ${client?.requestHeaders(com.apollographql.apollo.request.RequestHeaders.builder().build())}")
+        Log.e(TAG, " updateTask 21: - ${client?.operation()?.queryDocument()}")
+        Log.e(TAG, " updateTask 23: - ${client?.operation()?.variables()?.valueMap()}")
+        Log.e(TAG, " updateTask 24: - ${client?.operation()}")
+        Log.e(TAG, " updateTask 25: - ${client?.operation()?.name()}")
+//        Log.e(TAG, " updateTask 26: - ${client?.operation()?.wrapData(Operation.Data { ResponseFieldMarshaller { watchResponse } })}")
+//        Log.e(TAG, " updateTask 27: - ${client?.operation()?.responseFieldMapper()?.map(ResponseReader?.ObjectReader<>)}")
+//        Log.e(TAG, " updateTask 28: - ${client?.operation()?.responseFieldMapper()}")
+
+
+        val apolloInterceptor = object : ApolloInterceptor.CallBack{
+            override fun onFailure(e: ApolloException) {
+
+            }
+
+            override fun onResponse(response: ApolloInterceptor.InterceptorResponse) {
+            }
+
+            override fun onFetch(sourceType: ApolloInterceptor.FetchSourceType?) {
+            }
+
+            override fun onCompleted() {
+            }
+
+        }
+
+
+
 //        Utils.getApolloClient(this)?.defaultCacheHeaders()
+//        Log.e(TAG, "updateTask 2: - ${client?.toString()}")
+//        Log.e(TAG, "updateTask 3: - ${client?.requestHeaders(RequestHeaders.NONE)}")
+
 
         client?.enqueue(object : ApolloCall.Callback<UpdateCurrentTaskMutation.Data>() {
             override fun onFailure(e: ApolloException) {
