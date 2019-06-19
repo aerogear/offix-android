@@ -49,6 +49,8 @@ class MainActivity : AppCompatActivity() {
 
     private val disposables = CompositeDisposable()
 
+    val watchResponse = AtomicReference<Response<AllTasksQuery.Data>>()
+
     val connectivityManager by lazy {
         getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     }
@@ -122,8 +124,54 @@ class MainActivity : AppCompatActivity() {
 //        Log.e(TAG, "  ${myModel.doYourUpdate().size}")
 //        Log.e(TAG, " on Refersh : doneYourUpdate ")
 
-        noteslist = myModel.doYourUpdate()
-        taskAdapter.notifyDataSetChanged()
+//        noteslist = myModel.doYourUpdate()
+//        taskAdapter.notifyDataSetChanged()
+//
+//
+
+        noteslist.clear()
+
+        Utils.getApolloClient(this)?.query(
+            AllTasksQuery.builder().build()
+        )?.watcher()
+            ?.refetchResponseFetcher(ApolloResponseFetchers.CACHE_FIRST)
+            ?.enqueueAndWatch(object : ApolloCall.Callback<AllTasksQuery.Data>() {
+                override fun onFailure(e: ApolloException) {
+                    e.printStackTrace()
+                    Log.e(TAG, " doYourUpdate onFailure----$e ")
+                }
+
+                override fun onResponse(response: Response<AllTasksQuery.Data>) {
+
+                    watchResponse.set(response)
+
+                    Log.e(TAG, "on Response doYourUpdate: Watcher ${response.data()}")
+
+
+                    val result = watchResponse.get()?.data()?.allTasks()
+                    Log.e(
+                        TAG,
+                        "onResponse-getTasks : ${result?.get(result.size - 1)?.title()} ${result?.get(result.size - 1)?.version()}"
+                    )
+
+                    result?.forEach {
+                        val title = it.title()
+                        val desc = it.description()
+                        val id = it.id()
+                        val version: Int? = it.version()
+                        val task = Task(title, desc, id.toInt(), version!!)
+                        noteslist.add(task)
+                    }
+
+                }
+            })
+
+        runOnUiThread {
+            taskAdapter.notifyDataSetChanged()
+        }
+
+
+
 
         pull_to_refresh.isRefreshing = false
     }
@@ -139,7 +187,7 @@ class MainActivity : AppCompatActivity() {
 
     fun updateTask(id: String, title: String, version: Int) {
 
-        Log.e(TAG, "inside update title")
+        Log.e(TAG, "inside update title in MainActivity")
         myModel.update(id, title, version)
 //        noteslist.clear()
     }
@@ -154,7 +202,7 @@ class MainActivity : AppCompatActivity() {
     private fun subscribeUpdatedTaskAdded() {
 
         val subscription = SubscribeTasksSubscription()
-        val subscriptionCall = Utils?.getApolloClient(this)
+        val subscriptionCall = Utils.getApolloClient(this)
             ?.subscribe(subscription)
 
         disposables.add(Rx2Apollo.from<SubscribeTasksSubscription.Data>(subscriptionCall!!)

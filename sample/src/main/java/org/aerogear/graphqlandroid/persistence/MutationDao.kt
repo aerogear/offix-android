@@ -18,9 +18,12 @@ interface MutationDao {
     @Query("SELECT * FROM MutationOffline")
     fun getAllMutations(): List<Mutation>
 
+    @Query("SELECT * FROM MutationOffline WHERE SNo =:sno")
+    fun getAMutation(sno: Int): Mutation
+
 
     @Query("DELETE FROM MutationOffline WHERE SNo= :sno ")
-    fun deleteCurrentMutation(sno: Int): Mutation
+    fun deleteCurrentMutation(sno: Int)
 
     @Query("DELETE FROM MutationOffline")
     fun deleteAllMutations()

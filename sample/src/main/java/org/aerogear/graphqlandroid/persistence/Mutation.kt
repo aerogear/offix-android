@@ -8,10 +8,10 @@ import org.json.JSONObject
 
 @Entity(tableName = "MutationOffline")
 data class Mutation(
-    @PrimaryKey(autoGenerate = true)
-    val SNo: Int = 0,
-    val operationID: String,
-    val queryDoc: String,
-    val operationName: OperationName,
-    val valuemap: JSONObject
+    var operationID: String,
+    var queryDoc: String,
+    var operationName: OperationName,
+    var valuemap: JSONObject,
+    @PrimaryKey(autoGenerate = true) var SNo: Int = 0
+
 )
