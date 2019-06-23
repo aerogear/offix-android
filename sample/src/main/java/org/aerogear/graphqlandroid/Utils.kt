@@ -1,6 +1,7 @@
 package org.aerogear.graphqlandroid
 
 import android.content.Context
+import android.net.ConnectivityManager
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.widget.Toast
@@ -65,6 +66,7 @@ object Utils {
 
         return apClient
     }
+
 
     private fun getOkhttpClient(context: Context): OkHttpClient? {
 
@@ -137,7 +139,7 @@ object Utils {
                 val buffer = bufferedSource?.buffer()
                 val responseBodyString = buffer?.clone()?.readString(Charset.forName("UTF-8")) ?: ""
 
-                Log.e("UtillClass",  " Interceptor : $responseBodyString")
+                Log.e("UtillClass", " Interceptor : $responseBodyString")
 
                 //To see for conflict, "VoyagerConflict" which comes in the message is searched for.
                 if (responseBodyString.contains("VoyagerConflict")) {
@@ -199,6 +201,13 @@ object Utils {
         }
 
 
+    }
+
+
+    fun isNetwork(context: Context): Boolean {
+        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val activeNetworkInfo = connectivityManager.activeNetworkInfo
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected
     }
 }
 

@@ -13,7 +13,9 @@ class MyApplciation : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        database = Room.databaseBuilder(this, Database::class.java, "myDatabase.db").build()
+        database = Room.databaseBuilder(this, Database::class.java, "myDatabase.db")
+            .fallbackToDestructiveMigration()
+            .build()
 
         Log.e("TAG", "Application was started")
 

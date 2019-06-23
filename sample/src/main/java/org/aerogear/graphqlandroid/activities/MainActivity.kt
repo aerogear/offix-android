@@ -1,40 +1,39 @@
 package org.aerogear.graphqlandroid.activities
 
 import android.arch.lifecycle.ViewModelProviders
-import android.arch.persistence.room.Room
 import android.content.Context
 import android.net.ConnectivityManager
-import android.net.Network
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.util.Log
 import android.view.LayoutInflater
 import android.widget.Toast
+import androidx.work.*
 import com.apollographql.apollo.ApolloCall
-import com.apollographql.apollo.ApolloMutationCall
 import com.apollographql.apollo.ApolloQueryWatcher
-import com.apollographql.apollo.api.Mutation
-import com.apollographql.apollo.api.Operation
 import com.apollographql.apollo.api.Response
 import com.apollographql.apollo.cache.normalized.ApolloStore
-import com.apollographql.apollo.cache.normalized.sql.ApolloSqlHelper
 import com.apollographql.apollo.exception.ApolloException
 import com.apollographql.apollo.fetcher.ApolloResponseFetchers
-import com.apollographql.apollo.interceptor.ApolloInterceptor
 import com.apollographql.apollo.rx2.Rx2Apollo
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subscribers.DisposableSubscriber
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.activity_main.buttonOffline
+import kotlinx.android.synthetic.main.activity_main.fabAdd
+import kotlinx.android.synthetic.main.activity_main.pull_to_refresh
+import kotlinx.android.synthetic.main.activity_main.recycler_view
+import kotlinx.android.synthetic.main.activity_main2.*
 import kotlinx.android.synthetic.main.alertdialog_task.view.*
 import org.aerogear.graphqlandroid.*
+import org.aerogear.graphqlandroid.R
 import org.aerogear.graphqlandroid.adapter.TaskAdapter
 import org.aerogear.graphqlandroid.data.ViewModel
 import org.aerogear.graphqlandroid.model.Task
-import org.aerogear.graphqlandroid.persistence.Database
-import java.util.*
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
 
 class MainActivity : AppCompatActivity() {
@@ -46,6 +45,19 @@ class MainActivity : AppCompatActivity() {
     }
 
     lateinit var apolloStore: ApolloStore
+
+    val constraints by lazy {
+        Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .setRequiresBatteryNotLow(true)
+            .build()
+    }
+
+    val periodicWorkRequest by lazy {
+        PeriodicWorkRequestBuilder<OfflineMutationsWorker>(5, TimeUnit.MINUTES)
+//                .setBackoffCriteria(BackoffPolicy.EXPONENTIAL,60,TimeUnit.SECONDS)
+            .setConstraints(constraints).build()
+    }
 
     private val disposables = CompositeDisposable()
 
@@ -63,7 +75,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(R.layout.activity_main2)
 
         val activeNetwork = connectivityManager.activeNetworkInfo
 
@@ -86,13 +98,22 @@ class MainActivity : AppCompatActivity() {
 
         pull_to_refresh.setOnRefreshListener {
             doYourUpdate()
-
+            pull_to_refresh.isRefreshing =false
         }
 
         recycler_view.layoutManager = LinearLayoutManager(this)
         recycler_view.adapter = taskAdapter
 
-        fabAdd.setOnClickListener {
+        buttonOffline.setOnClickListener {
+
+            Log.e(TAG, "buttonOffline clicked")
+
+            WorkManager.getInstance().enqueue(periodicWorkRequest)
+
+        }
+
+
+        insertbutton.setOnClickListener {
 
             val inflatedView = LayoutInflater.from(this).inflate(R.layout.alertfrag_create, null, false)
 
@@ -169,10 +190,6 @@ class MainActivity : AppCompatActivity() {
         runOnUiThread {
             taskAdapter.notifyDataSetChanged()
         }
-
-
-
-
         pull_to_refresh.isRefreshing = false
     }
 
@@ -300,31 +317,6 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    fun deleteTask(id: String) {
-        Log.e(TAG, "inside delete title")
-
-        val client = Utils.getApolloClient(this)?.mutate(
-            DeleteTaskMutation.builder().id(id).build()
-        )
-        client?.enqueue(object : ApolloCall.Callback<DeleteTaskMutation.Data>() {
-            override fun onFailure(e: ApolloException) {
-                Log.e("onFailure" + "deleteTask", e.toString())
-            }
-
-            override fun onResponse(response: Response<DeleteTaskMutation.Data>) {
-                val result = response.data()?.deleteTask()
-
-                Log.e(TAG, "onResponse-DeleteTask")
-
-                Log.e(TAG, "$result")
-
-                runOnUiThread {
-                    getTasks()
-                }
-            }
-        })
-    }
-
     fun onSuccess() {
 
         Log.e(TAG, "onSuccess in MainActivity")
@@ -334,11 +326,16 @@ class MainActivity : AppCompatActivity() {
         taskAdapter.notifyDataSetChanged()
     }
 
+
     override fun onDestroy() {
         apolloQueryWatcher?.cancel()
         disposables.dispose()
         super.onDestroy()
     }
 
+    override fun onStop() {
+        WorkManager.getInstance().enqueue(periodicWorkRequest)
+        super.onStop()
+    }
 }
 
