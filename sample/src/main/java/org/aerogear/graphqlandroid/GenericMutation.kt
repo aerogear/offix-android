@@ -1,5 +1,6 @@
 package org.aerogear.graphqlandroid
 
+import android.util.Log
 import com.apollographql.apollo.api.*
 import com.apollographql.apollo.api.internal.UnmodifiableMapBuilder
 import com.apollographql.apollo.api.internal.Utils
@@ -21,6 +22,8 @@ class GenericMutation(
 ) : Mutation<GenericMutation.Data, GenericMutation.Data, Variables> {
 
     val fieldname = getFieldname(queryDoc)
+
+    val TAG = javaClass.simpleName
 
     private val variables: Variables = Variables(valueMap)
 
@@ -83,7 +86,7 @@ class GenericMutation(
     inner class Variables(valueMap: MutableMap<String, Any>) : Operation.Variables() {
 
         @Transient
-        var valmap: LinkedHashMap<String, Any> = valueMap as LinkedHashMap<String, Any>
+        var valmap: LinkedHashMap<String, Any> = LinkedHashMap(valueMap)
 
         override fun valueMap(): Map<String, Any> {
             return Collections.unmodifiableMap(valmap)
@@ -160,10 +163,10 @@ class GenericMutation(
 //        constructor(__typename: String, vararg values: ResponseField) : this(){
 //
 //        }
-
         internal val arrayList: ArrayList<ResponseField> = responseFieldsArraylist()
 
         internal val `$responseFields`: Array<ResponseField> = arrayList.toArray() as Array<ResponseField>
+
 
         internal val __typename: String = ""
 
@@ -172,11 +175,26 @@ class GenericMutation(
 //
 //        }
 
+        fun logger(){
+            Log.e(TAG, "${arrayList.size}")
+            for( i in 0 until arrayList.size){
+                Log.e(TAG, " inside logger : $i")
+            }
+        }
+
         fun responseFieldsArraylist(): ArrayList<ResponseField> {
             val list: ArrayList<ResponseField> = arrayListOf()
             list.add(ResponseField.forString("__typename", "__typename", null, false, emptyList()))
             valueMap.forEach { (key, value) ->
-                list.add(ResponseField.forCustomType(key, key, null, false, value as ScalarType, emptyList()))
+                if (value is String) {
+                    list.add(ResponseField.forString(key, key, null, false, emptyList()))
+                } else if (value is Int) {
+                    list.add(ResponseField.forInt(key, key, null, false, emptyList()))
+                } else if (value is Boolean) {
+                    list.add(ResponseField.forBoolean(key, key, null, false, emptyList()))
+                } else {
+                    list.add(ResponseField.forCustomType(key, key, null, false, value as ScalarType, emptyList()))
+                }
             }
 
             return list

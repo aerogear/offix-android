@@ -21,9 +21,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subscribers.DisposableSubscriber
-import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_main.buttonOffline
-import kotlinx.android.synthetic.main.activity_main.fabAdd
 import kotlinx.android.synthetic.main.activity_main.pull_to_refresh
 import kotlinx.android.synthetic.main.activity_main.recycler_view
 import kotlinx.android.synthetic.main.activity_main2.*
@@ -53,8 +51,15 @@ class MainActivity : AppCompatActivity() {
             .build()
     }
 
-    val periodicWorkRequest by lazy {
-        PeriodicWorkRequestBuilder<OfflineMutationsWorker>(5, TimeUnit.MINUTES)
+//    val periodicWorkRequest by lazy {
+//        PeriodicWorkRequestBuilder<OfflineMutationsWorker>(5, TimeUnit.MINUTES)
+////                .setBackoffCriteria(BackoffPolicy.EXPONENTIAL,60,TimeUnit.SECONDS)
+//            .setConstraints(constraints).build()
+//    }
+
+    val oneTimeWorkRequest by lazy {
+        OneTimeWorkRequestBuilder<OfflineMutationsWorker>()
+            .setInitialDelay(60, TimeUnit.SECONDS)
 //                .setBackoffCriteria(BackoffPolicy.EXPONENTIAL,60,TimeUnit.SECONDS)
             .setConstraints(constraints).build()
     }
@@ -108,7 +113,8 @@ class MainActivity : AppCompatActivity() {
 
             Log.e(TAG, "buttonOffline clicked")
 
-            WorkManager.getInstance().enqueue(periodicWorkRequest)
+//            WorkManager.getInstance().enqueue(periodicWorkRequest)
+            WorkManager.getInstance().enqueue(oneTimeWorkRequest)
 
         }
 
@@ -334,7 +340,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onStop() {
-        WorkManager.getInstance().enqueue(periodicWorkRequest)
+        WorkManager.getInstance().enqueue(oneTimeWorkRequest)
         super.onStop()
     }
 }
