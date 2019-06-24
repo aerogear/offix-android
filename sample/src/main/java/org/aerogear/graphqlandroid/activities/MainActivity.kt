@@ -22,9 +22,7 @@ import io.reactivex.schedulers.Schedulers
 import io.reactivex.subscribers.DisposableSubscriber
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.alertdialog_task.view.*
-import org.aerogear.graphqlandroid.AllTasksQuery
-import org.aerogear.graphqlandroid.R
-import org.aerogear.graphqlandroid.Utils
+import org.aerogear.graphqlandroid.*
 import org.aerogear.graphqlandroid.adapter.TaskAdapter
 import org.aerogear.graphqlandroid.data.ViewModel
 import org.aerogear.graphqlandroid.model.Task

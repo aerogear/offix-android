@@ -9,8 +9,7 @@ import com.apollographql.apollo.cache.normalized.ApolloStore
 import com.apollographql.apollo.exception.ApolloException
 import com.apollographql.apollo.fetcher.ApolloResponseFetchers
 import com.apollographql.apollo.interceptor.ApolloInterceptor
-import org.aerogear.graphqlandroid.AllTasksQuery
-import org.aerogear.graphqlandroid.Utils
+import org.aerogear.graphqlandroid.*
 import org.aerogear.graphqlandroid.model.Task
 import java.util.concurrent.atomic.AtomicReference
 
