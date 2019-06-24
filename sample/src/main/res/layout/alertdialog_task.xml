@@ -12,6 +12,7 @@
                   android:layout_height="wrap_content"
                   android:id="@+id/etId"
                   android:layout_marginStart="24dp"
+                  android:inputType="number"
                   android:layout_marginEnd="24dp"
                   android:hint="Id of the Note"/>
     </android.support.design.widget.TextInputLayout>
@@ -34,6 +35,7 @@
                   android:layout_height="wrap_content"
                   android:id="@+id/etVersion"
                   android:layout_marginStart="24dp"
+                  android:inputType="number"
                   android:layout_marginEnd="24dp"
                   android:hint="Version of the Note"/>
     </android.support.design.widget.TextInputLayout>

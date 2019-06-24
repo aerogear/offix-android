@@ -3,7 +3,6 @@ package org.aerogear.graphqlandroid.adapter
 import android.content.Context
 import android.support.v7.app.AlertDialog
 import android.support.v7.widget.RecyclerView
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,7 +17,7 @@ class TaskAdapter(private val notes: List<Task>, private val context: Context) :
 
     inner class TaskHolder(view: View) : RecyclerView.ViewHolder(view)
 
-    override fun onCreateViewHolder(container: ViewGroup, p1: Int): TaskAdapter.TaskHolder {
+    override fun onCreateViewHolder(container: ViewGroup, p1: Int): TaskHolder {
 
 
         return TaskHolder(
@@ -32,11 +31,11 @@ class TaskAdapter(private val notes: List<Task>, private val context: Context) :
 
     override fun getItemCount() = notes.size
 
-    override fun onBindViewHolder(holder: TaskAdapter.TaskHolder, position: Int) {
+    override fun onBindViewHolder(holder: TaskHolder, position: Int) {
 
         val currentTask = notes[position]
         with(holder.itemView) {
-            task_tv.text = currentTask.task
+            task_tv.text = currentTask.title
             desc_tv.text = currentTask.desc
             id_tv.text = currentTask.id.toString()
             version_tv.text = currentTask.version.toString()
@@ -56,7 +55,7 @@ class TaskAdapter(private val notes: List<Task>, private val context: Context) :
                     val titleEt = inflatedView.etTitle.text.toString()
                     val versionEt = inflatedView.etVersion.text.toString()
 
-                    Log.e("Adapter", "${inflatedView.etId.text}")
+//                    Log.e("Adapter", "${inflatedView.etId.text}")
 
                     if (context is MainActivity) this.context.updateTask(
                         currentTask.id.toString(),
