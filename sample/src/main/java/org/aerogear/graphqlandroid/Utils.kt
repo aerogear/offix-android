@@ -7,7 +7,6 @@ import android.widget.Toast
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.api.Operation
 import com.apollographql.apollo.api.ResponseField
-import com.apollographql.apollo.api.cache.http.HttpCachePolicy
 import com.apollographql.apollo.cache.normalized.CacheKey
 import com.apollographql.apollo.cache.normalized.CacheKeyResolver
 import com.apollographql.apollo.cache.normalized.lru.EvictionPolicy
@@ -19,13 +18,12 @@ import com.apollographql.apollo.subscription.WebSocketSubscriptionTransport
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
-import org.aerogear.graphqlandroid.activities.MainActivity
 import java.nio.charset.Charset
 
 object Utils {
 
     //To run on emulator
-    private const val BASE_URL = "http://192.168.0.105:4000/graphql"
+    private const val BASE_URL = "http://10.0.2.2:4000/graphql"
     private const val SQL_CACHE_NAME = "tasks1Db"
 
     private var apClient: ApolloClient? = null
@@ -108,13 +106,9 @@ object Utils {
 //
 //                Log.e("UtilsClass", " *** ondispose")
 //            }
-//
 //        }
-//
 //        return apolloInterceptor
-//
 //    }
-//
 
     //function to get the response after query/mutation is performed, can get conflict messages and so on.
 
