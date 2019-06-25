@@ -6,6 +6,7 @@ import android.arch.lifecycle.LiveData
 import android.util.Log
 import com.apollographql.apollo.ApolloCall
 import com.apollographql.apollo.ApolloQueryWatcher
+import com.apollographql.apollo.api.Operation
 import com.apollographql.apollo.api.Response
 import com.apollographql.apollo.exception.ApolloException
 import com.apollographql.apollo.fetcher.ApolloResponseFetchers
@@ -49,7 +50,7 @@ class ViewModel(application: Application) :
 
     }
 
-    fun getOfflineList() : ArrayList<Any> = UserData(apcontext).OfflineArraylist()
+    fun getOfflineList() : ArrayList<com.apollographql.apollo.api.Mutation<Operation.Data,Void, Operation.Variables>> = UserData(apcontext).OfflineArraylist()
 
     fun doYourUpdate(): ArrayList<Task> {
         return UserData(apcontext).doYourUpdate()

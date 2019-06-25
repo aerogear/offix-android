@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import com.apollographql.apollo.ApolloCall
 import com.apollographql.apollo.ApolloQueryWatcher
+import com.apollographql.apollo.api.Operation
 import com.apollographql.apollo.api.Response
 import com.apollographql.apollo.cache.normalized.ApolloStore
 import com.apollographql.apollo.exception.ApolloException
@@ -23,7 +24,7 @@ class UserData(val context: Context) {
 
     companion object {
 
-        val offlineArrayList = arrayListOf<Any>()
+        val offlineArrayList = arrayListOf<com.apollographql.apollo.api.Mutation<Operation.Data,Void, Operation.Variables>>()
     }
 
     var apolloQueryWatcher: ApolloQueryWatcher<AllTasksQuery.Data>? = null
@@ -133,7 +134,7 @@ class UserData(val context: Context) {
             override fun onFailure(e: ApolloException) {
                 Log.e("onFailure" + "updateTask", e.toString())
 
-                offlineArrayList.add(mutation)
+                offlineArrayList.add(mutation as com.apollographql.apollo.api.Mutation<Operation.Data, Void, Operation.Variables>)
 
 //                val operationID = client.operation().operationId()
 //                val queryDoc = client.operation().queryDocument()
@@ -236,7 +237,7 @@ class UserData(val context: Context) {
         Log.e("UtilClass ", " OffCreateMut 3: ${dbDao.getAMutation(mutationObj.SNo)} ")
     }
 
-    fun OfflineArraylist(): ArrayList<Any> {
+    fun OfflineArraylist(): ArrayList<com.apollographql.apollo.api.Mutation<Operation.Data,Void, Operation.Variables>> {
         return offlineArrayList
     }
 

@@ -123,8 +123,6 @@ class MainActivity : AppCompatActivity() {
             OfflineMutationSender()
 
         }
-
-
         insertbutton.setOnClickListener {
 
             val inflatedView = LayoutInflater.from(this).inflate(R.layout.alertfrag_create, null, false)
@@ -147,7 +145,6 @@ class MainActivity : AppCompatActivity() {
             customAlert.show()
 
         }
-
     }
 
     fun OfflineMutationSender() {
@@ -161,18 +158,16 @@ class MainActivity : AppCompatActivity() {
 
             Log.e(TAG, "OfflineMutationSender 1 : $it ")
             val client = Utils.getApolloClient(this)?.mutate(
-                it as CustomMutation
+                it
             )?.refetchQueries(apolloQueryWatcher?.operation()?.name())
 
             client?.enqueue(object : CustomApolloCall.CustomCallback() {
                 override fun onResponse(response: Response<Void>) {
                     arrayList.remove(it)
                 }
-
                 override fun onFailure(e: ApolloException) {
                     Log.e(TAG, "OfflineMutationSender 3: ${e.message} ")
                 }
-
             })
         }
     }
