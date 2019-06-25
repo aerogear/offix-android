@@ -12,6 +12,7 @@ import android.widget.Toast
 import androidx.work.*
 import com.apollographql.apollo.ApolloCall
 import com.apollographql.apollo.ApolloQueryWatcher
+import com.apollographql.apollo.api.Mutation
 import com.apollographql.apollo.api.Response
 import com.apollographql.apollo.cache.normalized.ApolloStore
 import com.apollographql.apollo.exception.ApolloException
@@ -29,10 +30,13 @@ import kotlinx.android.synthetic.main.alertdialog_task.view.*
 import org.aerogear.graphqlandroid.*
 import org.aerogear.graphqlandroid.R
 import org.aerogear.graphqlandroid.adapter.TaskAdapter
+import org.aerogear.graphqlandroid.data.UserData
 import org.aerogear.graphqlandroid.data.ViewModel
 import org.aerogear.graphqlandroid.model.Task
+import java.util.*
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
+import kotlin.collections.ArrayList
 
 class MainActivity : AppCompatActivity() {
 
@@ -103,7 +107,7 @@ class MainActivity : AppCompatActivity() {
 
         pull_to_refresh.setOnRefreshListener {
             doYourUpdate()
-            pull_to_refresh.isRefreshing =false
+            pull_to_refresh.isRefreshing = false
         }
 
         recycler_view.layoutManager = LinearLayoutManager(this)
@@ -114,7 +118,9 @@ class MainActivity : AppCompatActivity() {
             Log.e(TAG, "buttonOffline clicked")
 
 //            WorkManager.getInstance().enqueue(periodicWorkRequest)
-            WorkManager.getInstance().enqueue(oneTimeWorkRequest)
+//            WorkManager.getInstance().enqueue(oneTimeWorkRequest)
+
+            OfflineMutationSender()
 
         }
 
@@ -142,6 +148,33 @@ class MainActivity : AppCompatActivity() {
 
         }
 
+    }
+
+    fun OfflineMutationSender() {
+
+        Log.e(TAG, "OfflineMutationSender inside")
+
+        val arrayList = myModel.getOfflineList()
+        Log.e(TAG, "OfflineMutationSender  :  ${arrayList.size} ")
+
+        arrayList.forEach {
+
+            Log.e(TAG, "OfflineMutationSender 1 : $it ")
+            val client = Utils.getApolloClient(this)?.mutate(
+                it as CustomMutation
+            )?.refetchQueries(apolloQueryWatcher?.operation()?.name())
+
+            client?.enqueue(object : CustomApolloCall.CustomCallback() {
+                override fun onResponse(response: Response<Void>) {
+                    arrayList.remove(it)
+                }
+
+                override fun onFailure(e: ApolloException) {
+                    Log.e(TAG, "OfflineMutationSender 3: ${e.message} ")
+                }
+
+            })
+        }
     }
 
     private fun doYourUpdate() {
@@ -207,14 +240,12 @@ class MainActivity : AppCompatActivity() {
         taskAdapter.notifyDataSetChanged()
     }
 
-
     fun updateTask(id: String, title: String, version: Int) {
 
         Log.e(TAG, "inside update title in MainActivity")
         myModel.update(id, title, version)
 //        noteslist.clear()
     }
-
 
     fun createtask(title: String, description: String) {
 
@@ -322,7 +353,6 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
-
     fun onSuccess() {
 
         Log.e(TAG, "onSuccess in MainActivity")
@@ -331,7 +361,6 @@ class MainActivity : AppCompatActivity() {
         getTasks()
         taskAdapter.notifyDataSetChanged()
     }
-
 
     override fun onDestroy() {
         apolloQueryWatcher?.cancel()
@@ -343,5 +372,6 @@ class MainActivity : AppCompatActivity() {
         WorkManager.getInstance().enqueue(oneTimeWorkRequest)
         super.onStop()
     }
+
 }
 

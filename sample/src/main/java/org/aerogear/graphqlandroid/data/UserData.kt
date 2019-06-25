@@ -13,11 +13,18 @@ import org.aerogear.graphqlandroid.*
 import org.aerogear.graphqlandroid.model.Task
 import org.aerogear.graphqlandroid.persistence.Mutation
 import org.json.JSONObject
+import java.util.*
 import java.util.concurrent.atomic.AtomicReference
+import kotlin.collections.ArrayList
 
 class UserData(val context: Context) {
 
     val noteslist = arrayListOf<Task>()
+
+    companion object {
+
+        val offlineArrayList = arrayListOf<Any>()
+    }
 
     var apolloQueryWatcher: ApolloQueryWatcher<AllTasksQuery.Data>? = null
 
@@ -94,8 +101,7 @@ class UserData(val context: Context) {
         )?.refetchQueries(apolloQueryWatcher?.operation()?.name())
 
         val s: String = com.apollographql.apollo.internal.json.Utils.toJsonString(client.toString())
-        Log.e(TAG, " updateTask 1: - ${s}")
-
+        Log.e(TAG, " updateTask 1: - $s")
 
         Log.e(
             TAG,
@@ -108,7 +114,6 @@ class UserData(val context: Context) {
 //        Log.e(TAG, " updateTask 26: - ${client?.operation()?.wrapData(Operation.Data { ResponseFieldMarshaller { watchResponse } })}")
 //        Log.e(TAG, " updateTask 27: - ${client?.operation()?.responseFieldMapper()?.map(ResponseReader?.ObjectReader<>)}")
 //        Log.e(TAG, " updateTask 28: - ${client?.operation()?.responseFieldMapper()}")
-
 
         val apolloInterceptor = object : ApolloInterceptor.CallBack {
             override fun onFailure(e: ApolloException) {
@@ -124,27 +129,24 @@ class UserData(val context: Context) {
             }
         }
 
-//        Utils.getApolloClient(this)?.defaultCacheHeaders()
-//        Log.e(TAG, "updateTask 2: - ${client?.toString()}")
-//        Log.e(TAG, "updateTask 3: - ${client?.requestHeaders(RequestHeaders.NONE)}")
-
         client?.enqueue(object : ApolloCall.Callback<UpdateCurrentTaskMutation.Data>() {
             override fun onFailure(e: ApolloException) {
                 Log.e("onFailure" + "updateTask", e.toString())
 
-                val operationID = client.operation().operationId()
-                val queryDoc = client.operation().queryDocument()
-                val operationName = client.operation().name()
-                val valuemap = client.operation().variables().valueMap()
+                offlineArrayList.add(mutation)
 
-                val jsonObject = JSONObject(valuemap)
-                val mutationObj = Mutation(operationID, queryDoc, operationName, jsonObject)
-
-                OffUpdateMut(mutationObj)
-
+//                val operationID = client.operation().operationId()
+//                val queryDoc = client.operation().queryDocument()
+//                val operationName = client.operation().name()
+//                val valuemap = client.operation().variables().valueMap()
+//                val jsonObject = JSONObject(valuemap)
+//                val mutationObj = Mutation(operationID, queryDoc, operationName, jsonObject)
+//                OffUpdateMut(mutationObj)
             }
 
             override fun onResponse(response: Response<UpdateCurrentTaskMutation.Data>) {
+//                if(offlineArrayList.size!=0)
+//                offlineArrayList.removeAt(offlineArrayList.size-1)
                 val result = response.data()?.updateTask()
 
                 Log.e(TAG, "onResponse-UpdateTask")
@@ -201,7 +203,7 @@ class UserData(val context: Context) {
                 val jsonObject = JSONObject(valuemap)
                 val mutationObj = Mutation(operationID, queryDoc, operationName, jsonObject)
 
-                OffCreateMut(mutationObj)
+//                OffCreateMut(mutationObj)
 
             }
 
@@ -232,6 +234,10 @@ class UserData(val context: Context) {
         val getInsertedMutation = dbDao.getAllMutations()
         Log.e("UtilClass ", " OffCreateMut 2 : ${getInsertedMutation.size} ")
         Log.e("UtilClass ", " OffCreateMut 3: ${dbDao.getAMutation(mutationObj.SNo)} ")
+    }
+
+    fun OfflineArraylist(): ArrayList<Any> {
+        return offlineArrayList
     }
 
     fun deleteTask(id: String) {
@@ -299,6 +305,4 @@ class UserData(val context: Context) {
 
         return noteslist
     }
-
-
 }

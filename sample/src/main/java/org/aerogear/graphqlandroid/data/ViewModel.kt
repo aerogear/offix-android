@@ -13,7 +13,9 @@ import kotlinx.android.synthetic.main.activity_main.*
 import org.aerogear.graphqlandroid.AllTasksQuery
 import org.aerogear.graphqlandroid.Utils
 import org.aerogear.graphqlandroid.model.Task
+import java.util.*
 import java.util.concurrent.atomic.AtomicReference
+import kotlin.collections.ArrayList
 
 class ViewModel(application: Application) :
     AndroidViewModel(application) {
@@ -46,6 +48,8 @@ class ViewModel(application: Application) :
         UserData(apcontext).createtask(title, description)
 
     }
+
+    fun getOfflineList() : ArrayList<Any> = UserData(apcontext).OfflineArraylist()
 
     fun doYourUpdate(): ArrayList<Task> {
         return UserData(apcontext).doYourUpdate()

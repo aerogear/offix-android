@@ -43,7 +43,6 @@ object Utils {
         val cacheFactory = LruNormalizedCacheFactory(EvictionPolicy.NO_EVICTION)
             .chain(SqlNormalizedCacheFactory(apolloSqlHelper))
 
-
         //If Apollo Client is not null, return it else make a new Apollo Client.
         //Helps in singleton pattern.
         apClient?.let {
