@@ -9,6 +9,10 @@ import android.support.v7.widget.LinearLayoutManager
 import android.util.Log
 import android.view.LayoutInflater
 import android.widget.Toast
+import androidx.work.Constraints
+import androidx.work.NetworkType
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
 import com.apollographql.apollo.ApolloCall
 import com.apollographql.apollo.ApolloQueryWatcher
 import com.apollographql.apollo.api.Response
@@ -20,12 +24,15 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subscribers.DisposableSubscriber
-import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.activity_main.pull_to_refresh
+import kotlinx.android.synthetic.main.activity_main.recycler_view
+import kotlinx.android.synthetic.main.activity_main2.*
 import kotlinx.android.synthetic.main.alertdialog_task.view.*
 import org.aerogear.graphqlandroid.*
 import org.aerogear.graphqlandroid.adapter.TaskAdapter
 import org.aerogear.graphqlandroid.data.ViewModel
 import org.aerogear.graphqlandroid.model.Task
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
 
 class MainActivity : AppCompatActivity() {
@@ -54,7 +61,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(R.layout.activity_main2)
 
         val activeNetwork = connectivityManager.activeNetworkInfo
 
@@ -77,13 +84,19 @@ class MainActivity : AppCompatActivity() {
 
         pull_to_refresh.setOnRefreshListener {
             doYourUpdate()
-
+            pull_to_refresh.isRefreshing = false
         }
 
         recycler_view.layoutManager = LinearLayoutManager(this)
         recycler_view.adapter = taskAdapter
 
-        fabAdd.setOnClickListener {
+        buttonOffline.setOnClickListener {
+
+            Log.e(TAG, "buttonOffline clicked")
+            OfflineMutationSender()
+        }
+
+        insertbutton.setOnClickListener {
 
             val inflatedView = LayoutInflater.from(this).inflate(R.layout.alertfrag_create, null, false)
 
@@ -98,14 +111,37 @@ class MainActivity : AppCompatActivity() {
                     val desc = inflatedView.etDesc.text.toString()
                     createtask(title, desc)
                     Log.e(TAG, "jhjj")
-//                    taskAdapter.notifyItemInserted(noteslist.size - 1)
                     dialog.dismiss()
                 }
                 .create()
             customAlert.show()
-
         }
+    }
 
+    fun OfflineMutationSender() {
+
+        Log.e(TAG, "OfflineMutationSender inside")
+
+        val arrayList = myModel.getOfflineList()
+        Log.e(TAG, "OfflineMutationSender  :  ${arrayList.size} ")
+
+        arrayList.forEach {
+
+            Log.e(TAG, "OfflineMutationSender 1 : $it ")
+            val client = Utils.getApolloClient(this)?.mutate(
+                it
+            )?.refetchQueries(apolloQueryWatcher?.operation()?.name())
+
+            client?.enqueue(object : CustomApolloCall.CustomCallback() {
+                override fun onResponse(response: Response<Void>) {
+                    arrayList.remove(it)
+                }
+
+                override fun onFailure(e: ApolloException) {
+                    Log.e(TAG, "OfflineMutationSender 3: ${e.message} ")
+                }
+            })
+        }
     }
 
     private fun doYourUpdate() {
@@ -114,11 +150,8 @@ class MainActivity : AppCompatActivity() {
 //        getTasks()
 //        Log.e(TAG, "  ${myModel.doYourUpdate().size}")
 //        Log.e(TAG, " on Refersh : doneYourUpdate ")
-
 //        noteslist = myModel.doYourUpdate()
 //        taskAdapter.notifyDataSetChanged()
-//
-//
 
         noteslist.clear()
 
@@ -138,7 +171,6 @@ class MainActivity : AppCompatActivity() {
 
                     Log.e(TAG, "on Response doYourUpdate: Watcher ${response.data()}")
 
-
                     val result = watchResponse.get()?.data()?.allTasks()
                     Log.e(
                         TAG,
@@ -153,17 +185,12 @@ class MainActivity : AppCompatActivity() {
                         val task = Task(title, desc, id.toInt(), version!!)
                         noteslist.add(task)
                     }
-
                 }
             })
 
         runOnUiThread {
             taskAdapter.notifyDataSetChanged()
         }
-
-
-
-
         pull_to_refresh.isRefreshing = false
     }
 
@@ -175,17 +202,12 @@ class MainActivity : AppCompatActivity() {
         taskAdapter.notifyDataSetChanged()
     }
 
-
     fun updateTask(id: String, title: String, version: Int) {
-
         Log.e(TAG, "inside update title in MainActivity")
         myModel.update(id, title, version)
-//        noteslist.clear()
     }
 
-
     fun createtask(title: String, description: String) {
-
         Log.e(TAG, "inside create title")
         myModel.create(title, description)
     }
@@ -213,7 +235,6 @@ class MainActivity : AppCompatActivity() {
 //                                it.id().toInt() - 1,
 //                                Task(it.title(), it.description(), it.id().toInt(), it.version()!!)
 //                            )
-                            //taskAdapter.notifyDataSetChanged()
                         }
 //
 //                        runOnUiThread {
@@ -262,7 +283,6 @@ class MainActivity : AppCompatActivity() {
                             Log.e(TAG, " inside subscription2 ${it.title()} mutated upon new title")
                             noteslist.add(Task(it.title(), it.description(), it.id().toInt(), it.version()!!))
                         }
-//
                         runOnUiThread {
                             taskAdapter.notifyDataSetChanged()
                         }
@@ -290,7 +310,6 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
-
     fun onSuccess() {
 
         Log.e(TAG, "onSuccess in MainActivity")
@@ -304,6 +323,5 @@ class MainActivity : AppCompatActivity() {
         disposables.dispose()
         super.onDestroy()
     }
-
 }
 

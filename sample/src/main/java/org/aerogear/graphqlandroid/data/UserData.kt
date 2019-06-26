@@ -4,6 +4,8 @@ import android.content.Context
 import android.util.Log
 import com.apollographql.apollo.ApolloCall
 import com.apollographql.apollo.ApolloQueryWatcher
+import com.apollographql.apollo.api.Mutation
+import com.apollographql.apollo.api.Operation
 import com.apollographql.apollo.api.Response
 import com.apollographql.apollo.cache.normalized.ApolloStore
 import com.apollographql.apollo.exception.ApolloException
@@ -16,6 +18,11 @@ import java.util.concurrent.atomic.AtomicReference
 class UserData(val context: Context) {
 
     val noteslist = arrayListOf<Task>()
+
+    companion object {
+
+        val offlineArrayList = arrayListOf<com.apollographql.apollo.api.Mutation<Operation.Data,Void, Operation.Variables>>()
+    }
 
     var apolloQueryWatcher: ApolloQueryWatcher<AllTasksQuery.Data>? = null
 
@@ -90,8 +97,7 @@ class UserData(val context: Context) {
         )?.refetchQueries(apolloQueryWatcher?.operation()?.name())
 
         val s: String = com.apollographql.apollo.internal.json.Utils.toJsonString(client.toString())
-        Log.e(TAG, " updateTask 1: - ${s}")
-
+        Log.e(TAG, " updateTask 1: - $s")
 
         Log.e(
             TAG,
@@ -104,7 +110,6 @@ class UserData(val context: Context) {
 //        Log.e(TAG, " updateTask 26: - ${client?.operation()?.wrapData(Operation.Data { ResponseFieldMarshaller { watchResponse } })}")
 //        Log.e(TAG, " updateTask 27: - ${client?.operation()?.responseFieldMapper()?.map(ResponseReader?.ObjectReader<>)}")
 //        Log.e(TAG, " updateTask 28: - ${client?.operation()?.responseFieldMapper()}")
-
 
         val apolloInterceptor = object : ApolloInterceptor.CallBack {
             override fun onFailure(e: ApolloException) {
@@ -120,16 +125,17 @@ class UserData(val context: Context) {
             }
         }
 
-//        Utils.getApolloClient(this)?.defaultCacheHeaders()
-//        Log.e(TAG, "updateTask 2: - ${client?.toString()}")
-//        Log.e(TAG, "updateTask 3: - ${client?.requestHeaders(RequestHeaders.NONE)}")
-
         client?.enqueue(object : ApolloCall.Callback<UpdateCurrentTaskMutation.Data>() {
             override fun onFailure(e: ApolloException) {
                 Log.e("onFailure" + "updateTask", e.toString())
+
+                offlineArrayList.add(mutation as com.apollographql.apollo.api.Mutation<Operation.Data, Void, Operation.Variables>)
+
             }
 
             override fun onResponse(response: Response<UpdateCurrentTaskMutation.Data>) {
+//                if(offlineArrayList.size!=0)
+//                offlineArrayList.removeAt(offlineArrayList.size-1)
                 val result = response.data()?.updateTask()
 
                 Log.e(TAG, "onResponse-UpdateTask")
@@ -147,8 +153,10 @@ class UserData(val context: Context) {
 
         Log.e(TAG, "inside create title")
 
+        val mutation = CreateTaskMutation.builder().title(title).description(description).build()
+
         val client = Utils.getApolloClient(context)?.mutate(
-            CreateTaskMutation.builder().title(title).description(description).build()
+          mutation
         )?.refetchQueries(apolloQueryWatcher?.operation()?.name())
         //?.refetchQueries(CreateTaskMutation.builder().title(title).description(description).build()?.name())
 
@@ -164,6 +172,8 @@ class UserData(val context: Context) {
         client?.enqueue(object : ApolloCall.Callback<CreateTaskMutation.Data>() {
             override fun onFailure(e: ApolloException) {
                 Log.e("onFailure" + "createTask", e.toString())
+
+                offlineArrayList.add(mutation as com.apollographql.apollo.api.Mutation<Operation.Data, Void, Operation.Variables>)
 
             }
 
@@ -181,6 +191,10 @@ class UserData(val context: Context) {
         })
 
 
+    }
+
+    fun OfflineArraylist(): ArrayList<com.apollographql.apollo.api.Mutation<Operation.Data,Void, Operation.Variables>> {
+        return offlineArrayList
     }
 
     fun deleteTask(id: String) {
@@ -248,6 +262,4 @@ class UserData(val context: Context) {
 
         return noteslist
     }
-
-
 }
