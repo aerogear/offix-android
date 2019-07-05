@@ -149,17 +149,10 @@ class MainActivity : AppCompatActivity() {
 
                 val jsonMediaType: MediaType = MediaType.get("application/json")
 
-//                val body: RequestBody = RequestBody.create(
-//                    jsonMediaType, "{\"operationName\":" + "\"" + operationName + "\"" + "," +
-//                            "\"variables\":" + variables + "," +
-//                            "\"extensions\":{\"persistedQuery\":{\"version\":1,\"sha256Hash\":" + "\"" + operationID + "\"" + "}}," +
-//                            "\"query\":" + "\"" + stringQueryDoc + "\"" + "}"
-//                )
+                val pojo = Pojo(operationName, variables,stringQueryDoc)
 
-                val body: RequestBody = RequestBody.create(
-                    jsonMediaType, "{\"operationName\":" + "\"" + operationName + "\"" + "," +
-                            "\"variables\":" + variables + "," +
-                            "\"query\":" + "\"" + stringQueryDoc + "\"" + "}"
+                val body :RequestBody = RequestBody.create(
+                    jsonMediaType,Gson().toJson(pojo)
                 )
 
                 val request = Request.Builder()
