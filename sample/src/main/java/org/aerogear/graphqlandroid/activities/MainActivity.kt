@@ -18,6 +18,7 @@ import com.apollographql.apollo.cache.normalized.ApolloStore
 import com.apollographql.apollo.exception.ApolloException
 import com.apollographql.apollo.fetcher.ApolloResponseFetchers
 import com.apollographql.apollo.rx2.Rx2Apollo
+import com.google.gson.Gson
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
@@ -27,12 +28,16 @@ import kotlinx.android.synthetic.main.activity_main.pull_to_refresh
 import kotlinx.android.synthetic.main.activity_main.recycler_view
 import kotlinx.android.synthetic.main.activity_main2.*
 import kotlinx.android.synthetic.main.alertdialog_task.view.*
+import okhttp3.*
+import okhttp3.internal.Util
 import org.aerogear.graphqlandroid.*
 import org.aerogear.graphqlandroid.R
 import org.aerogear.graphqlandroid.adapter.TaskAdapter
 import org.aerogear.graphqlandroid.data.UserData
 import org.aerogear.graphqlandroid.data.ViewModel
 import org.aerogear.graphqlandroid.model.Task
+import org.json.JSONObject
+import java.io.IOException
 import java.util.*
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
@@ -46,7 +51,11 @@ class MainActivity : AppCompatActivity() {
         TaskAdapter(noteslist, this)
     }
 
+    private val HEADER_USER_AGENT = "User-Agent"
+
     lateinit var apolloStore: ApolloStore
+
+    lateinit var httpCallFactory: Call.Factory
 
     val constraints by lazy {
         Constraints.Builder()
@@ -55,18 +64,7 @@ class MainActivity : AppCompatActivity() {
             .build()
     }
 
-//    val periodicWorkRequest by lazy {
-//        PeriodicWorkRequestBuilder<OfflineMutationsWorker>(5, TimeUnit.MINUTES)
-////                .setBackoffCriteria(BackoffPolicy.EXPONENTIAL,60,TimeUnit.SECONDS)
-//            .setConstraints(constraints).build()
-//    }
-
-    val oneTimeWorkRequest by lazy {
-        OneTimeWorkRequestBuilder<OfflineMutationsWorker>()
-            .setInitialDelay(60, TimeUnit.SECONDS)
-//                .setBackoffCriteria(BackoffPolicy.EXPONENTIAL,60,TimeUnit.SECONDS)
-            .setConstraints(constraints).build()
-    }
+    val dbDao = MyApplciation.database.mutationDao()
 
     private val disposables = CompositeDisposable()
 
@@ -113,16 +111,88 @@ class MainActivity : AppCompatActivity() {
         recycler_view.layoutManager = LinearLayoutManager(this)
         recycler_view.adapter = taskAdapter
 
+        //Used for in-memory mutations
         buttonOffline.setOnClickListener {
 
             Log.e(TAG, "buttonOffline clicked")
-
-//            WorkManager.getInstance().enqueue(periodicWorkRequest)
-//            WorkManager.getInstance().enqueue(oneTimeWorkRequest)
-
             OfflineMutationSender()
+        }
+
+        //Used for persistent mutations
+        persistence.setOnClickListener {
+
+            Log.e(TAG, "in persistence")
+
+            val listOfMutations = dbDao.getAllMutations()
+            Log.e(TAG, "in persistence size of list : ${listOfMutations.size}")
+
+            val client = OkHttpClient.Builder()
+                .addInterceptor(LoggingInterceptor()).build()
+
+            Log.e(TAG, "in persistence size of list : ${listOfMutations.size}")
+
+
+            listOfMutations.forEach {
+                val mutationnum = it
+
+                val valuemapasjsonn = mutationnum.valuemap
+
+                val variables = valuemapasjsonn.toString()
+
+                val querydoc = mutationnum.queryDoc
+
+                val operationName = mutationnum.operationName.name()
+
+                val operationID = mutationnum.operationID
+
+                val stringQueryDoc: String = querydoc.replace("\n", " ")
+
+                val jsonMediaType: MediaType = MediaType.get("application/json")
+
+//                val body: RequestBody = RequestBody.create(
+//                    jsonMediaType, "{\"operationName\":" + "\"" + operationName + "\"" + "," +
+//                            "\"variables\":" + variables + "," +
+//                            "\"extensions\":{\"persistedQuery\":{\"version\":1,\"sha256Hash\":" + "\"" + operationID + "\"" + "}}," +
+//                            "\"query\":" + "\"" + stringQueryDoc + "\"" + "}"
+//                )
+
+                val body: RequestBody = RequestBody.create(
+                    jsonMediaType, "{\"operationName\":" + "\"" + operationName + "\"" + "," +
+                            "\"variables\":" + variables + "," +
+                            "\"query\":" + "\"" + stringQueryDoc + "\"" + "}"
+                )
+
+                val request = Request.Builder()
+                    .url(Utils.getBaseurl())
+                    .post(body)
+                    .build()
+
+                client.newCall(request).enqueue(object : Callback {
+                    override fun onFailure(call: Call, e: IOException) {
+                        Log.e("TAG", "persistence onFailure")
+                    }
+
+                    override fun onResponse(call: Call, response: okhttp3.Response) {
+
+                        val result= response.body()?.string()
+                        Log.e("TAG ***", result)
+
+                        val classname= Class.forName(mutationnum.responseClassName)
+                        classname.classes.forEach {
+                            Log.e("TAG class names ***", "${it.name}")
+                        }
+                        dbDao.deleteCurrentMutation(mutationnum.SNo)
+                    }
+
+                })
+
+                Log.e(TAG, "in persistence size of list after sending mutation : ${listOfMutations.size}")
+            }
+
 
         }
+
+        //Used for creating a new task
         insertbutton.setOnClickListener {
 
             val inflatedView = LayoutInflater.from(this).inflate(R.layout.alertfrag_create, null, false)
@@ -147,6 +217,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    //When app is in foreground, in-memory approach used and mutations fetched from arraylist ( no resposne is received )
     fun OfflineMutationSender() {
 
         Log.e(TAG, "OfflineMutationSender inside")
@@ -165,6 +236,7 @@ class MainActivity : AppCompatActivity() {
                 override fun onResponse(response: Response<Void>) {
                     arrayList.remove(it)
                 }
+
                 override fun onFailure(e: ApolloException) {
                     Log.e(TAG, "OfflineMutationSender 3: ${e.message} ")
                 }
@@ -175,14 +247,6 @@ class MainActivity : AppCompatActivity() {
     private fun doYourUpdate() {
 
         Log.e(TAG, " ----- doYourUpdate")
-//        getTasks()
-//        Log.e(TAG, "  ${myModel.doYourUpdate().size}")
-//        Log.e(TAG, " on Refersh : doneYourUpdate ")
-
-//        noteslist = myModel.doYourUpdate()
-//        taskAdapter.notifyDataSetChanged()
-//
-//
 
         noteslist.clear()
 
@@ -348,24 +412,10 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
-    fun onSuccess() {
-
-        Log.e(TAG, "onSuccess in MainActivity")
-
-        noteslist.clear()
-        getTasks()
-        taskAdapter.notifyDataSetChanged()
-    }
-
     override fun onDestroy() {
         apolloQueryWatcher?.cancel()
         disposables.dispose()
         super.onDestroy()
-    }
-
-    override fun onStop() {
-        WorkManager.getInstance().enqueue(oneTimeWorkRequest)
-        super.onStop()
     }
 
 }

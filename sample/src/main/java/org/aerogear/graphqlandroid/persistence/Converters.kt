@@ -11,7 +11,6 @@ class Converters {
         return jsonObject.toString()
     }
 
-
     @TypeConverter
     fun OperationNameToString(name: OperationName): String {
         return name.name()
@@ -19,18 +18,15 @@ class Converters {
 
     @TypeConverter
     fun StringToJson(string: String): JSONObject {
-
         val jsonObject = JSONObject(string)
         return jsonObject
     }
 
     @TypeConverter
     fun StringToOperName(string: String): OperationName {
-
         val operationName = OperationName {
             string
         }
         return operationName
     }
-
 }
