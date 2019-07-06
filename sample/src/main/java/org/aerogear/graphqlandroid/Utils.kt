@@ -1,12 +1,15 @@
+
 package org.aerogear.graphqlandroid
 
 import android.content.Context
+import android.net.ConnectivityManager
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.widget.Toast
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.api.Operation
 import com.apollographql.apollo.api.ResponseField
+import com.apollographql.apollo.api.cache.http.HttpCachePolicy
 import com.apollographql.apollo.cache.normalized.CacheKey
 import com.apollographql.apollo.cache.normalized.CacheKeyResolver
 import com.apollographql.apollo.cache.normalized.lru.EvictionPolicy
@@ -14,22 +17,27 @@ import com.apollographql.apollo.cache.normalized.lru.LruNormalizedCacheFactory
 import com.apollographql.apollo.cache.normalized.sql.ApolloSqlHelper
 import com.apollographql.apollo.cache.normalized.sql.SqlNormalizedCacheFactory
 import com.apollographql.apollo.interceptor.ApolloInterceptor
+import com.apollographql.apollo.interceptor.ApolloInterceptorChain
 import com.apollographql.apollo.subscription.WebSocketSubscriptionTransport
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import org.aerogear.graphqlandroid.activities.MainActivity
 import java.nio.charset.Charset
+import java.util.concurrent.Executor
 
 object Utils {
 
     //To run on emulator
-    private const val BASE_URL = "http://10.0.2.2:4000/graphql"
-    private const val SQL_CACHE_NAME = "tasks1Db"
+    const val BASE_URL = "http://192.168.0.102:4000/graphql"
+    private const val SQL_CACHE_NAME = "tasks3Db"
 
     private var apClient: ApolloClient? = null
     private var httpClient: OkHttpClient? = null
     private var conflictInterceptor: Interceptor? = null
     private lateinit var apolloInterceptor: ApolloInterceptor
+
+    fun getBaseurl() = BASE_URL
 
     fun getApolloClient(context: Context): ApolloClient? {
 
@@ -40,7 +48,6 @@ object Utils {
         val cacheFactory = LruNormalizedCacheFactory(EvictionPolicy.NO_EVICTION)
             .chain(SqlNormalizedCacheFactory(apolloSqlHelper))
 
-
         //If Apollo Client is not null, return it else make a new Apollo Client.
         //Helps in singleton pattern.
         apClient?.let {
@@ -49,7 +56,7 @@ object Utils {
             apClient = ApolloClient.builder()
                 .okHttpClient(getOkhttpClient(context)!!)
                 .normalizedCache(cacheFactory, cacheResolver())
-//                .addApplicationInterceptor(getApolloInterceptor())
+//              .addApplicationInterceptor(getApolloInterceptor())
                 .subscriptionTransportFactory(
                     WebSocketSubscriptionTransport.Factory(
                         BASE_URL,
@@ -57,7 +64,7 @@ object Utils {
                     )
                 )
                 .serverUrl(BASE_URL)
-//                .defaultHttpCachePolicy(HttpCachePolicy.CACHE_FIRST)
+//              .defaultHttpCachePolicy(HttpCachePolicy.CACHE_FIRST)
                 .build()
         }
 
@@ -67,51 +74,42 @@ object Utils {
     private fun getOkhttpClient(context: Context): OkHttpClient? {
 
         //Adding HttpLoggingInterceptor() to see the response body and the results.
-        val loggingInterceptor = HttpLoggingInterceptor()
-
-        loggingInterceptor.level = HttpLoggingInterceptor.Level.BODY
-
         httpClient?.let {
             return it
         } ?: kotlin.run {
             httpClient = OkHttpClient.Builder()
-                .addInterceptor(loggingInterceptor)
+                .addInterceptor(LoggingInterceptor())
                 .addInterceptor(getResponseInterceptor(context)!!)
                 .build()
         }
         return httpClient
-
     }
 
+    private fun getApolloInterceptor(): ApolloInterceptor {
+        val apolloInterceptor = object : ApolloInterceptor {
+            override fun interceptAsync(
+                request: ApolloInterceptor.InterceptorRequest,
+                chain: ApolloInterceptorChain,
+                dispatcher: Executor,
+                callBack: ApolloInterceptor.CallBack
+            ) {
+                Log.e("ApolloInterceptor----", "$request")
+                Log.e("ApolloInterceptor----", "${request.operation.queryDocument()}")
+                Log.e("ApolloInterceptor----", "${request.operation.variables().valueMap()}")
+                Log.e("ApolloInterceptor----", "${request.operation.operationId()}")
+                Log.e("ApolloInterceptor----", "${request.requestHeaders}")
+//                Log.e("ApolloInterceptor----", "${chain.}")
+            }
 
-//    private fun getApolloInterceptor(): ApolloInterceptor {
-//
-//        val apolloInterceptor = object : ApolloInterceptor {
-//            override fun interceptAsync(
-//                request: ApolloInterceptor.InterceptorRequest,
-//                chain: ApolloInterceptorChain,
-//                dispatcher: Executor,
-//                callBack: ApolloInterceptor.CallBack
-//            ) {
-//
-////                callBack.onResponse(ApolloInterceptor.InterceptorResponse(Response.Builder().build()))
-//                Log.e("UtilsClass", " *** response 1${Response.Builder().build().body()}")
-////                Log.e("UtilsClass", " *** response 2${Response.Builder().build().headers()}")
-////                Log.e("UtilsClass", " *** response 2${Response.Builder().build().priorResponse()}")
-//
-//                callBack.onFetch(ApolloInterceptor.FetchSourceType.CACHE)
-//            }
-//
-//            override fun dispose() {
-//
-//                Log.e("UtilsClass", " *** ondispose")
-//            }
-//        }
-//        return apolloInterceptor
-//    }
+            override fun dispose() {
+                Log.e("UtilsClass", " *** ondispose")
+            }
+        }
+
+        return apolloInterceptor
+    }
 
     //function to get the response after query/mutation is performed, can get conflict messages and so on.
-
     private fun getResponseInterceptor(context: Context): Interceptor? {
 
         conflictInterceptor?.let {
@@ -131,7 +129,7 @@ object Utils {
                 val buffer = bufferedSource?.buffer()
                 val responseBodyString = buffer?.clone()?.readString(Charset.forName("UTF-8")) ?: ""
 
-                Log.e("UtillClass",  " Interceptor : $responseBodyString")
+                Log.e("UtillClass", " Interceptor : $responseBodyString")
 
                 //To see for conflict, "VoyagerConflict" which comes in the message is searched for.
                 if (responseBodyString.contains("VoyagerConflict")) {
@@ -161,7 +159,7 @@ object Utils {
 
     //Toast shown to the user displaying conflict detected.
     private fun showToast(context: Context) {
-        (context as AppCompatActivity).runOnUiThread {
+        (context as MainActivity).runOnUiThread {
             Toast.makeText(context, "Conflict Detected", Toast.LENGTH_SHORT).show()
         }
     }
@@ -193,6 +191,12 @@ object Utils {
         }
 
 
+    }
+
+    fun isNetwork(context: Context): Boolean {
+        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val activeNetworkInfo = connectivityManager.activeNetworkInfo
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected
     }
 }
 

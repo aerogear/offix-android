@@ -9,24 +9,41 @@ import android.support.v7.widget.LinearLayoutManager
 import android.util.Log
 import android.view.LayoutInflater
 import android.widget.Toast
+import androidx.work.*
 import com.apollographql.apollo.ApolloCall
+import com.apollographql.apollo.ApolloCallback
 import com.apollographql.apollo.ApolloQueryWatcher
+import com.apollographql.apollo.api.Input
+import com.apollographql.apollo.api.Mutation
+import com.apollographql.apollo.api.Operation
 import com.apollographql.apollo.api.Response
 import com.apollographql.apollo.cache.normalized.ApolloStore
 import com.apollographql.apollo.exception.ApolloException
 import com.apollographql.apollo.fetcher.ApolloResponseFetchers
 import com.apollographql.apollo.rx2.Rx2Apollo
+import com.google.gson.Gson
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subscribers.DisposableSubscriber
-import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.activity_main.pull_to_refresh
+import kotlinx.android.synthetic.main.activity_main.recycler_view
+import kotlinx.android.synthetic.main.activity_main2.*
 import kotlinx.android.synthetic.main.alertdialog_task.view.*
+import okhttp3.*
+import okhttp3.internal.Util
 import org.aerogear.graphqlandroid.*
+import org.aerogear.graphqlandroid.R
 import org.aerogear.graphqlandroid.adapter.TaskAdapter
+import org.aerogear.graphqlandroid.data.UserData
 import org.aerogear.graphqlandroid.data.ViewModel
 import org.aerogear.graphqlandroid.model.Task
+import org.json.JSONObject
+import java.io.IOException
+import java.util.*
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
+import kotlin.collections.ArrayList
 
 class MainActivity : AppCompatActivity() {
 
@@ -36,7 +53,15 @@ class MainActivity : AppCompatActivity() {
         TaskAdapter(noteslist, this)
     }
 
-    lateinit var apolloStore: ApolloStore
+
+    val constraints by lazy {
+        Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .setRequiresBatteryNotLow(true)
+            .build()
+    }
+
+    val dbDao = MyApplciation.database.mutationDao()
 
     private val disposables = CompositeDisposable()
 
@@ -54,7 +79,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(R.layout.activity_main2)
 
         val activeNetwork = connectivityManager.activeNetworkInfo
 
@@ -77,13 +102,91 @@ class MainActivity : AppCompatActivity() {
 
         pull_to_refresh.setOnRefreshListener {
             doYourUpdate()
-
+            pull_to_refresh.isRefreshing = false
         }
 
         recycler_view.layoutManager = LinearLayoutManager(this)
         recycler_view.adapter = taskAdapter
 
-        fabAdd.setOnClickListener {
+        //Used for in-memory mutations
+        buttonOffline.setOnClickListener {
+
+            Log.e(TAG, "buttonOffline clicked")
+            OfflineMutationSender()
+        }
+
+        //Used for persistent mutations
+        persistence.setOnClickListener {
+
+
+            Log.e(TAG, "in persistence")
+            val listOfMutations = dbDao.getAllMutations()
+            Log.e(TAG, "in persistence size of list : ${listOfMutations.size}")
+
+            listOfMutations.forEach { storedmutation ->
+
+                val responseClassName = storedmutation.responseClassName
+
+                val classReflected: Class<*> = Class.forName(responseClassName)
+
+                val constructor = classReflected.constructors.first()
+
+                val parameters = constructor.parameterTypes
+
+                val jsonValues = arrayListOf<Any>()
+
+                //Put all the json values into a list
+                val jsonObj = storedmutation.valuemap
+
+                val iter = jsonObj.keys()
+                iter.forEach { key ->
+                    jsonValues.add(jsonObj.get(key))
+                }
+
+                Log.e("jsonValuesList ", " ${jsonValues.size}")
+
+                jsonValues.forEach {
+                    Log.e("jsonValuesList : ", " $it")
+                }
+
+
+                parameters.forEachIndexed { index, clazz ->
+                    //                println(clazz.name)
+                    Log.e("parameters : ", " ${clazz.name}")
+                    if (clazz.name.equals("com.apollographql.apollo.api.Input")) {
+                        jsonValues[index] = Input.optional(jsonValues[index])
+                        Log.e("parameters **: ", " ${jsonValues[index].javaClass.name}")
+
+                    }
+                }
+
+                val obj = constructor.newInstance(*jsonValues.toArray())
+
+                val client = Utils.getApolloClient(this)?.mutate(
+                    obj as Mutation<Operation.Data, Operation.Data, Operation.Variables>
+                )?.refetchQueries(apolloQueryWatcher?.operation()?.name())
+
+                client?.enqueue(object : ApolloCall.Callback<Operation.Data>() {
+                    override fun onFailure(e: ApolloException) {
+                        e.printStackTrace()
+                    }
+
+                    override fun onResponse(response: Response<Operation.Data>) {
+                        Log.e(TAG, response.hasErrors().toString())
+                        Log.e(TAG, response.data().toString())
+                        Log.e(TAG, response.errors().toString())
+
+                        dbDao.deleteCurrentMutation(storedmutation.SNo)
+                    }
+
+                })
+            }
+
+
+        }
+
+        //Used for creating a new task
+        insertbutton.setOnClickListener {
 
             val inflatedView = LayoutInflater.from(this).inflate(R.layout.alertfrag_create, null, false)
 
@@ -105,20 +208,38 @@ class MainActivity : AppCompatActivity() {
             customAlert.show()
 
         }
+    }
 
+    //When app is in foreground, in-memory approach used and mutations fetched from arraylist ( no resposne is received )
+    fun OfflineMutationSender() {
+
+        Log.e(TAG, "OfflineMutationSender inside")
+
+        val arrayList = myModel.getOfflineList()
+        Log.e(TAG, "OfflineMutationSender  :  ${arrayList.size} ")
+
+        arrayList.forEach {
+
+            Log.e(TAG, "OfflineMutationSender 1 : $it ")
+            val client = Utils.getApolloClient(this)?.mutate(
+                it
+            )?.refetchQueries(apolloQueryWatcher?.operation()?.name())
+
+            client?.enqueue(object : CustomApolloCall.CustomCallback() {
+                override fun onResponse(response: Response<Void>) {
+                    arrayList.remove(it)
+                }
+
+                override fun onFailure(e: ApolloException) {
+                    Log.e(TAG, "OfflineMutationSender 3: ${e.message} ")
+                }
+            })
+        }
     }
 
     private fun doYourUpdate() {
 
         Log.e(TAG, " ----- doYourUpdate")
-//        getTasks()
-//        Log.e(TAG, "  ${myModel.doYourUpdate().size}")
-//        Log.e(TAG, " on Refersh : doneYourUpdate ")
-
-//        noteslist = myModel.doYourUpdate()
-//        taskAdapter.notifyDataSetChanged()
-//
-//
 
         noteslist.clear()
 
@@ -140,10 +261,10 @@ class MainActivity : AppCompatActivity() {
 
 
                     val result = watchResponse.get()?.data()?.allTasks()
-                    Log.e(
-                        TAG,
-                        "onResponse-getTasks : ${result?.get(result.size - 1)?.title()} ${result?.get(result.size - 1)?.version()}"
-                    )
+//                    Log.e(
+//                        TAG,
+//                        "onResponse-getTasks : ${result?.get(result.size - 1)?.title()} ${result?.get(result.size - 1)?.version()}"
+//                    )
 
                     result?.forEach {
                         val title = it.title()
@@ -160,10 +281,6 @@ class MainActivity : AppCompatActivity() {
         runOnUiThread {
             taskAdapter.notifyDataSetChanged()
         }
-
-
-
-
         pull_to_refresh.isRefreshing = false
     }
 
@@ -175,14 +292,12 @@ class MainActivity : AppCompatActivity() {
         taskAdapter.notifyDataSetChanged()
     }
 
-
     fun updateTask(id: String, title: String, version: Int) {
 
         Log.e(TAG, "inside update title in MainActivity")
         myModel.update(id, title, version)
 //        noteslist.clear()
     }
-
 
     fun createtask(title: String, description: String) {
 
@@ -288,15 +403,6 @@ class MainActivity : AppCompatActivity() {
                 }
             )
         )
-    }
-
-
-    fun onSuccess() {
-
-        Log.e(TAG, "onSuccess in MainActivity")
-        noteslist.clear()
-        getTasks()
-        taskAdapter.notifyDataSetChanged()
     }
 
     override fun onDestroy() {
