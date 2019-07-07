@@ -4,18 +4,26 @@ import android.content.Context
 import android.util.Log
 import com.apollographql.apollo.ApolloCall
 import com.apollographql.apollo.ApolloQueryWatcher
+import com.apollographql.apollo.api.Operation
 import com.apollographql.apollo.api.Response
 import com.apollographql.apollo.cache.normalized.ApolloStore
 import com.apollographql.apollo.exception.ApolloException
 import com.apollographql.apollo.fetcher.ApolloResponseFetchers
 import com.apollographql.apollo.interceptor.ApolloInterceptor
 import org.aerogear.graphqlandroid.*
+import org.aerogear.graphqlandroid.adapter.TaskAdapter
 import org.aerogear.graphqlandroid.model.Task
+import org.aerogear.graphqlandroid.persistence.Mutation
+import org.json.JSONObject
+import java.lang.reflect.Constructor
 import java.util.concurrent.atomic.AtomicReference
+import kotlin.collections.ArrayList
 
 class UserData(val context: Context) {
 
     val noteslist = arrayListOf<Task>()
+
+    val adapter = TaskAdapter(noteslist, context)
 
     var apolloQueryWatcher: ApolloQueryWatcher<AllTasksQuery.Data>? = null
 
@@ -25,7 +33,7 @@ class UserData(val context: Context) {
 
     lateinit var apolloStore: ApolloStore
 
-//    val responseReader = ResponseReader?.ObjectReader {  }
+    val dbDao = MyApplciation.database.mutationDao()
 
     fun getTasks(): ArrayList<Task> {
 
@@ -69,8 +77,9 @@ class UserData(val context: Context) {
                             val version: Int? = it.version()
                             val task = Task(title, desc, id.toInt(), version!!)
                             noteslist.add(task)
-                        }
 
+                            adapter.notifyDataSetChanged()
+                        }
                     }
                 })
         }
@@ -85,13 +94,16 @@ class UserData(val context: Context) {
 
         val mutation = UpdateCurrentTaskMutation.builder().id(id).title(title).version(version).build()
 
+        val responseClassName = mutation.javaClass.name
+
+        Log.e(TAG, " updateTask ********: - $mutation")
+
         val client = Utils.getApolloClient(context)?.mutate(
             mutation
         )?.refetchQueries(apolloQueryWatcher?.operation()?.name())
 
         val s: String = com.apollographql.apollo.internal.json.Utils.toJsonString(client.toString())
-        Log.e(TAG, " updateTask 1: - ${s}")
-
+        Log.e(TAG, " updateTask 1: - $s")
 
         Log.e(
             TAG,
@@ -99,37 +111,24 @@ class UserData(val context: Context) {
         )
         Log.e(TAG, " updateTask 21: - ${client?.operation()?.queryDocument()}")
         Log.e(TAG, " updateTask 23: - ${client?.operation()?.variables()?.valueMap()}")
-        Log.e(TAG, " updateTask 24: - ${client?.operation()}")
         Log.e(TAG, " updateTask 25: - ${client?.operation()?.name()}")
-//        Log.e(TAG, " updateTask 26: - ${client?.operation()?.wrapData(Operation.Data { ResponseFieldMarshaller { watchResponse } })}")
-//        Log.e(TAG, " updateTask 27: - ${client?.operation()?.responseFieldMapper()?.map(ResponseReader?.ObjectReader<>)}")
-//        Log.e(TAG, " updateTask 28: - ${client?.operation()?.responseFieldMapper()}")
-
-
-        val apolloInterceptor = object : ApolloInterceptor.CallBack {
-            override fun onFailure(e: ApolloException) {
-            }
-
-            override fun onResponse(response: ApolloInterceptor.InterceptorResponse) {
-            }
-
-            override fun onFetch(sourceType: ApolloInterceptor.FetchSourceType?) {
-            }
-
-            override fun onCompleted() {
-            }
-        }
-
-//        Utils.getApolloClient(this)?.defaultCacheHeaders()
-//        Log.e(TAG, "updateTask 2: - ${client?.toString()}")
-//        Log.e(TAG, "updateTask 3: - ${client?.requestHeaders(RequestHeaders.NONE)}")
 
         client?.enqueue(object : ApolloCall.Callback<UpdateCurrentTaskMutation.Data>() {
             override fun onFailure(e: ApolloException) {
                 Log.e("onFailure" + "updateTask", e.toString())
+
+                val operationID = client.operation().operationId()
+                val queryDoc = client.operation().queryDocument()
+                val operationName = client.operation().name()
+                val valuemap = client.operation().variables().valueMap()
+                val jsonObject = JSONObject(valuemap)
+                val mutationObj = Mutation(operationID, queryDoc, operationName, jsonObject, responseClassName)
+                OffUpdateMut(mutationObj)
             }
 
             override fun onResponse(response: Response<UpdateCurrentTaskMutation.Data>) {
+//                if(offlineArrayList.size!=0)
+//                offlineArrayList.removeAt(offlineArrayList.size-1)
                 val result = response.data()?.updateTask()
 
                 Log.e(TAG, "onResponse-UpdateTask")
@@ -143,27 +142,44 @@ class UserData(val context: Context) {
         })
     }
 
+    fun OffUpdateMut(mutationObj: Mutation) {
+
+        Log.e("UtilClass ", " Offline Update Mutation function called")
+
+        val longid = dbDao.insertMutation(mutationObj)
+
+        Log.e("UtilClass ", " OffUpdateMut id of inserted mutation : $longid ")
+
+        val getListOfInsertedMutation = dbDao.getAllMutations()
+        Log.e("UtilClass ", " OffUpdateMut size of list : ${getListOfInsertedMutation.size} ")
+        Log.e("UtilClass ", " OffUpdateMut valuemap : ${getListOfInsertedMutation[0].valuemap} ")
+        Log.e("UtilClass ", " OffUpdateMut valuemap : ${getListOfInsertedMutation[0].queryDoc} ")
+    }
+
     fun createtask(title: String, description: String) {
 
         Log.e(TAG, "inside create title")
 
+        val mutation = CreateTaskMutation.builder().title(title).description(description).build()
+
         val client = Utils.getApolloClient(context)?.mutate(
-            CreateTaskMutation.builder().title(title).description(description).build()
+            mutation
         )?.refetchQueries(apolloQueryWatcher?.operation()?.name())
         //?.refetchQueries(CreateTaskMutation.builder().title(title).description(description).build()?.name())
-
-
-//        Utils.getApolloClient(context)?.apolloStore()?.writeOptimisticUpdates(
-//            AllTasksQuery(), AllTasksQuery.Data(
-//                mutableListOf()
-//            ), UUID.randomUUID()
-//
-//        )?.execute()
-
 
         client?.enqueue(object : ApolloCall.Callback<CreateTaskMutation.Data>() {
             override fun onFailure(e: ApolloException) {
                 Log.e("onFailure" + "createTask", e.toString())
+
+                val operationID = client.operation().operationId()
+                val queryDoc = client.operation().queryDocument()
+                val operationName = client.operation().name()
+                val valuemap = client.operation().variables().valueMap()
+
+                val jsonObject = JSONObject(valuemap)
+                val mutationObj = Mutation(operationID, queryDoc, operationName, jsonObject, mutation.javaClass.name)
+
+                OffCreateMut(mutationObj)
 
             }
 
@@ -183,15 +199,40 @@ class UserData(val context: Context) {
 
     }
 
+    fun OffCreateMut(mutationObj: Mutation) {
+
+        Log.e("UtilClass ", " OffCreateMut function called")
+
+        val longid = dbDao.insertMutation(mutationObj)
+
+        Log.e("UtilClass ", " OffCreateMut id of inserted mutation : $longid ")
+
+        val getInsertedMutation = dbDao.getAllMutations()
+        Log.e("UtilClass ", " OffCreateMut 2 : ${getInsertedMutation.size} ")
+        Log.e("UtilClass ", " OffCreateMut 3: ${dbDao.getAMutation(mutationObj.SNo)} ")
+    }
+
     fun deleteTask(id: String) {
         Log.e(TAG, "inside delete title")
 
+        val mutation =  DeleteTaskMutation.builder().id(id).build()
+
         val client = Utils.getApolloClient(context)?.mutate(
-            DeleteTaskMutation.builder().id(id).build()
+           mutation
         )
         client?.enqueue(object : ApolloCall.Callback<DeleteTaskMutation.Data>() {
             override fun onFailure(e: ApolloException) {
                 Log.e("onFailure" + "deleteTask", e.toString())
+
+                val operationID = client.operation().operationId()
+                val queryDoc = client.operation().queryDocument()
+                val operationName = client.operation().name()
+                val valuemap = client.operation().variables().valueMap()
+
+                val jsonObject = JSONObject(valuemap)
+                val mutationObj = Mutation(operationID, queryDoc, operationName, jsonObject, mutation.javaClass.name)
+
+                OffDeleteMut(mutationObj)
             }
 
             override fun onResponse(response: Response<DeleteTaskMutation.Data>) {
@@ -204,6 +245,16 @@ class UserData(val context: Context) {
                 getTasks()
             }
         })
+    }
+
+    fun OffDeleteMut(mutationObj: Mutation) {
+
+        Log.e("UtilClass ", " OffDeleteMut function called")
+
+        val longid = dbDao.insertMutation(mutationObj)
+
+        Log.e("UtilClass ", " OffDeleteMut id of inserted mutation : $longid ")
+
     }
 
     fun doYourUpdate(): ArrayList<Task> {
@@ -248,6 +299,4 @@ class UserData(val context: Context) {
 
         return noteslist
     }
-
-
 }
