@@ -44,8 +44,9 @@ class ViewModel(application: Application) :
         UserData(apcontext).createtask(title, description)
     }
 
-    fun getOfflineList(): ArrayList<com.apollographql.apollo.api.Mutation<Operation.Data, Void, Operation.Variables>> =
-        UserData(apcontext).OfflineArraylist()
+    fun delete(id: String) {
+        UserData(apcontext).deleteTask(id)
+    }
 
     fun doYourUpdate(): ArrayList<Task> {
         return UserData(apcontext).doYourUpdate()

@@ -37,8 +37,6 @@ object Utils {
     private var conflictInterceptor: Interceptor? = null
     private lateinit var apolloInterceptor: ApolloInterceptor
 
-    fun getBaseurl() = BASE_URL
-
     fun getApolloClient(context: Context): ApolloClient? {
 
         val apolloSqlHelper = ApolloSqlHelper(context, SQL_CACHE_NAME)

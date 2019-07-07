@@ -9,19 +9,17 @@ import android.support.v7.widget.LinearLayoutManager
 import android.util.Log
 import android.view.LayoutInflater
 import android.widget.Toast
-import androidx.work.*
+import androidx.work.Constraints
+import androidx.work.NetworkType
 import com.apollographql.apollo.ApolloCall
-import com.apollographql.apollo.ApolloCallback
 import com.apollographql.apollo.ApolloQueryWatcher
 import com.apollographql.apollo.api.Input
 import com.apollographql.apollo.api.Mutation
 import com.apollographql.apollo.api.Operation
 import com.apollographql.apollo.api.Response
-import com.apollographql.apollo.cache.normalized.ApolloStore
 import com.apollographql.apollo.exception.ApolloException
 import com.apollographql.apollo.fetcher.ApolloResponseFetchers
 import com.apollographql.apollo.rx2.Rx2Apollo
-import com.google.gson.Gson
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
@@ -30,20 +28,11 @@ import kotlinx.android.synthetic.main.activity_main.pull_to_refresh
 import kotlinx.android.synthetic.main.activity_main.recycler_view
 import kotlinx.android.synthetic.main.activity_main2.*
 import kotlinx.android.synthetic.main.alertdialog_task.view.*
-import okhttp3.*
-import okhttp3.internal.Util
 import org.aerogear.graphqlandroid.*
-import org.aerogear.graphqlandroid.R
 import org.aerogear.graphqlandroid.adapter.TaskAdapter
-import org.aerogear.graphqlandroid.data.UserData
 import org.aerogear.graphqlandroid.data.ViewModel
 import org.aerogear.graphqlandroid.model.Task
-import org.json.JSONObject
-import java.io.IOException
-import java.util.*
-import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
-import kotlin.collections.ArrayList
 
 class MainActivity : AppCompatActivity() {
 
@@ -52,7 +41,6 @@ class MainActivity : AppCompatActivity() {
     val taskAdapter by lazy {
         TaskAdapter(noteslist, this)
     }
-
 
     val constraints by lazy {
         Constraints.Builder()
@@ -108,13 +96,6 @@ class MainActivity : AppCompatActivity() {
         recycler_view.layoutManager = LinearLayoutManager(this)
         recycler_view.adapter = taskAdapter
 
-        //Used for in-memory mutations
-        buttonOffline.setOnClickListener {
-
-            Log.e(TAG, "buttonOffline clicked")
-            OfflineMutationSender()
-        }
-
         //Used for persistent mutations
         persistence.setOnClickListener {
 
@@ -125,19 +106,23 @@ class MainActivity : AppCompatActivity() {
 
             listOfMutations.forEach { storedmutation ->
 
+                //Get the class name of the mutation to which it has to be mapped
                 val responseClassName = storedmutation.responseClassName
 
                 val classReflected: Class<*> = Class.forName(responseClassName)
 
+                //Get the constructor of the class, and as apollo generated classes have only one constructor, so take the first one.
                 val constructor = classReflected.constructors.first()
 
+                //Get the parameterTypes
                 val parameters = constructor.parameterTypes
 
                 val jsonValues = arrayListOf<Any>()
 
-                //Put all the json values into a list
+                //Get the json object i.e the variables map given as input by the user
                 val jsonObj = storedmutation.valuemap
 
+                //Put all the json values into a list
                 val iter = jsonObj.keys()
                 iter.forEach { key ->
                     jsonValues.add(jsonObj.get(key))
@@ -149,7 +134,7 @@ class MainActivity : AppCompatActivity() {
                     Log.e("jsonValuesList : ", " $it")
                 }
 
-
+                //Check if the input parameter is of type Input<*>, if yes typecast it to be of the type Input<*>
                 parameters.forEachIndexed { index, clazz ->
                     //                println(clazz.name)
                     Log.e("parameters : ", " ${clazz.name}")
@@ -160,8 +145,10 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
 
+                //Make an object of mutation (done by reflection)
                 val obj = constructor.newInstance(*jsonValues.toArray())
 
+                //Make an apollo client which takes in mutation object and makes a call to server.
                 val client = Utils.getApolloClient(this)?.mutate(
                     obj as Mutation<Operation.Data, Operation.Data, Operation.Variables>
                 )?.refetchQueries(apolloQueryWatcher?.operation()?.name())
@@ -208,32 +195,24 @@ class MainActivity : AppCompatActivity() {
             customAlert.show()
 
         }
-    }
 
-    //When app is in foreground, in-memory approach used and mutations fetched from arraylist ( no resposne is received )
-    fun OfflineMutationSender() {
+        //Used for deleting task
+        deletetask.setOnClickListener {
+            val inflatedView = LayoutInflater.from(this).inflate(R.layout.alertdelete, null, false)
 
-        Log.e(TAG, "OfflineMutationSender inside")
-
-        val arrayList = myModel.getOfflineList()
-        Log.e(TAG, "OfflineMutationSender  :  ${arrayList.size} ")
-
-        arrayList.forEach {
-
-            Log.e(TAG, "OfflineMutationSender 1 : $it ")
-            val client = Utils.getApolloClient(this)?.mutate(
-                it
-            )?.refetchQueries(apolloQueryWatcher?.operation()?.name())
-
-            client?.enqueue(object : CustomApolloCall.CustomCallback() {
-                override fun onResponse(response: Response<Void>) {
-                    arrayList.remove(it)
+            val customAlert: android.support.v7.app.AlertDialog = android.support.v7.app.AlertDialog.Builder(this)
+                .setView(inflatedView)
+                .setTitle("Delete a  task")
+                .setNegativeButton("No") { dialog, which ->
+                    dialog.dismiss()
                 }
-
-                override fun onFailure(e: ApolloException) {
-                    Log.e(TAG, "OfflineMutationSender 3: ${e.message} ")
+                .setPositiveButton("Yes") { dialog, which ->
+                    val id = inflatedView.etId.text.toString()
+                    deleteTask(id)
+                    dialog.dismiss()
                 }
-            })
+                .create()
+            customAlert.show()
         }
     }
 
@@ -303,6 +282,11 @@ class MainActivity : AppCompatActivity() {
 
         Log.e(TAG, "inside create title")
         myModel.create(title, description)
+    }
+
+    fun deleteTask(id: String) {
+        Log.e(TAG, "inside delete task")
+        myModel.delete(id)
     }
 
     private fun subscribeUpdatedTaskAdded() {

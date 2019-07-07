@@ -10,18 +10,6 @@
     <LinearLayout android:layout_width="match_parent"
                   android:layout_height="wrap_content">
 
-
-
-        <Button android:layout_width="0dp"
-                android:layout_weight="1"
-                android:id="@+id/buttonOffline"
-                android:checked="true"
-                android:text="In Memory"
-                android:background="#008577"
-                android:layout_margin="16dp"
-                android:textColor="#000000"
-                android:layout_height="40dp"/>
-
         <Button android:layout_width="0dp"
                 android:layout_weight="1"
                 android:id="@+id/insertbutton"
@@ -40,6 +28,17 @@
                 android:checked="true"
                 android:text="FromDB"
                 android:background="#008577"
+                android:textColor="#000000"
+                android:layout_height="40dp"/>
+
+
+        <Button android:layout_width="0dp"
+                android:layout_weight="1"
+                android:id="@+id/deletetask"
+                android:checked="true"
+                android:text="Delete"
+                android:background="#008577"
+                android:layout_margin="16dp"
                 android:textColor="#000000"
                 android:layout_height="40dp"/>
 
