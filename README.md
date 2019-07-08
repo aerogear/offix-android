@@ -6,11 +6,6 @@ fully featured Offline Workflow and Conflict Resolution.
 ## Features 
 
 - Offline support. Mutations are persisted when Offline.
-- Offline Listeners and workflows for seamless UI.
-- Flexible, out of the box Conflict Resolution implementations
-- Subscriptions and Binary Upload that works offline.
-
-#### Implemented offline support.
 
 ## Example application
 
@@ -39,5 +34,5 @@ See `sample` for example application. For now it's using ionic showcase as its b
 
 Here the client performs a mutation of updating the Task3 when it is offline and when it comes online back again, changes are refelected back in the application on clicking on the "FromDB" button present on the top of the screen.
 
+![hehegif](https://user-images.githubusercontent.com/33238323/60838680-e8b26200-a1e8-11e9-8c52-c0cc3c2f5f98.gif)
 
-![aa1gif](https://user-images.githubusercontent.com/33238323/60811412-d0bced00-a1ac-11e9-907a-e5a903c001fc.gif)
