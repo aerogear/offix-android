@@ -12,6 +12,7 @@
                   android:layout_height="wrap_content"
                   android:id="@+id/etID"
                   android:layout_marginStart="24dp"
+                  android:inputType="number"
                   android:layout_marginEnd="24dp"
                   android:hint="Id of the note to be deleted"/>
     </android.support.design.widget.TextInputLayout>
