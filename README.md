@@ -10,7 +10,7 @@ fully featured Offline Workflow and Conflict Resolution.
 - Flexible, out of the box Conflict Resolution implementations
 - Subscriptions and Binary Upload that works offline.
 
-#### Offline Support is implemented in the application where the mutations are persisted when the client goes offline.
+#### Implemented offline support.
 
 ## Example application
 
@@ -28,14 +28,14 @@ See `sample` for example application. For now it's using ionic showcase as its b
 - Now clone this repository (https://github.com/aerogear/voyager-android.git)
 - Run the application to send query and mutation to the server and displaying to the user.
 
-## Try offline capabilities of Offix-Android
+## Running the sample app
 
 1. Make a mutation by going offline.
 2. Then, come online and click on "FromDb" button and you will see the results.
 3. Also, refresh the application to see the updated cache.
 
 
-### Short demo of the offline capabilites 
+### Demo 
 
 Here the client performs a mutation of updating the Task3 when it is offline and when it comes online back again, changes are refelected back in the application on clicking on the "FromDB" button present on the top of the screen.
 
