@@ -4,24 +4,21 @@ import android.content.Context
 import android.util.Log
 import com.apollographql.apollo.ApolloCall
 import com.apollographql.apollo.ApolloQueryWatcher
-import com.apollographql.apollo.api.Operation
 import com.apollographql.apollo.api.Response
 import com.apollographql.apollo.cache.normalized.ApolloStore
 import com.apollographql.apollo.exception.ApolloException
 import com.apollographql.apollo.fetcher.ApolloResponseFetchers
-import com.apollographql.apollo.interceptor.ApolloInterceptor
 import org.aerogear.graphqlandroid.*
 import org.aerogear.graphqlandroid.adapter.TaskAdapter
 import org.aerogear.graphqlandroid.model.Task
 import org.aerogear.graphqlandroid.persistence.Mutation
 import org.json.JSONObject
-import java.lang.reflect.Constructor
 import java.util.concurrent.atomic.AtomicReference
-import kotlin.collections.ArrayList
 
 class UserData(val context: Context) {
 
     val noteslist = arrayListOf<Task>()
+    val newNotes = arrayListOf<Task>()
 
     val adapter = TaskAdapter(noteslist, context)
 
@@ -77,8 +74,6 @@ class UserData(val context: Context) {
                             val version: Int? = it.version()
                             val task = Task(title, desc, id.toInt(), version!!)
                             noteslist.add(task)
-
-                            adapter.notifyDataSetChanged()
                         }
                     }
                 })
@@ -137,7 +132,6 @@ class UserData(val context: Context) {
                 Log.e(TAG, "${result?.title()}")
                 Log.e(TAG, "${result?.description()}")
                 Log.e(TAG, "${result?.version()}")
-
             }
         })
     }
@@ -156,7 +150,7 @@ class UserData(val context: Context) {
         Log.e("UtilClass ", " OffUpdateMut valuemap : ${getListOfInsertedMutation[0].queryDoc} ")
     }
 
-    fun createtask(title: String, description: String) {
+    fun createtask(title: String, description: String): ArrayList<Task> {
 
         Log.e(TAG, "inside create title")
 
@@ -193,9 +187,18 @@ class UserData(val context: Context) {
                 Log.e(TAG, "${result?.description()}")
                 Log.e(TAG, "${result?.version()}")
 
+                val obj = result?.title()?.let {
+                    Task(
+                        it, result.description(), result.id().toInt(),
+                        result.version()!!.toInt()
+                    )
+                }
+                if (obj != null) {
+                    newNotes.add(obj)
+                }
             }
         })
-
+        return newNotes
 
     }
 
@@ -215,10 +218,10 @@ class UserData(val context: Context) {
     fun deleteTask(id: String) {
         Log.e(TAG, "inside delete title")
 
-        val mutation =  DeleteTaskMutation.builder().id(id).build()
+        val mutation = DeleteTaskMutation.builder().id(id).build()
 
         val client = Utils.getApolloClient(context)?.mutate(
-           mutation
+            mutation
         )
         client?.enqueue(object : ApolloCall.Callback<DeleteTaskMutation.Data>() {
             override fun onFailure(e: ApolloException) {

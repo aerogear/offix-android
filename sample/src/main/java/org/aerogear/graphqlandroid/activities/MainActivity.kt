@@ -99,6 +99,8 @@ class MainActivity : AppCompatActivity() {
         //Used for persistent mutations
         persistence.setOnClickListener {
 
+            Toast.makeText(this, "FromDB button clicked", Toast.LENGTH_SHORT).show()
+
 
             Log.e(TAG, "in persistence")
             val listOfMutations = dbDao.getAllMutations()
@@ -193,7 +195,6 @@ class MainActivity : AppCompatActivity() {
                 }
                 .create()
             customAlert.show()
-
         }
 
         //Used for deleting task
@@ -219,7 +220,6 @@ class MainActivity : AppCompatActivity() {
     private fun doYourUpdate() {
 
         Log.e(TAG, " ----- doYourUpdate")
-
         noteslist.clear()
 
         Utils.getApolloClient(this)?.query(
@@ -243,30 +243,28 @@ class MainActivity : AppCompatActivity() {
 //                    Log.e(
 //                        TAG,
 //                        "onResponse-getTasks : ${result?.get(result.size - 1)?.title()} ${result?.get(result.size - 1)?.version()}"
-//                    )
-
+//              )
                     result?.forEach {
                         val title = it.title()
                         val desc = it.description()
                         val id = it.id()
                         val version: Int? = it.version()
                         val task = Task(title, desc, id.toInt(), version!!)
-                        noteslist.add(task)
-                    }
+                        runOnUiThread {
+                            noteslist.add(task)
+                            taskAdapter.notifyDataSetChanged()
+                        }
 
+                    }
                 }
             })
 
-        runOnUiThread {
-            taskAdapter.notifyDataSetChanged()
-        }
         pull_to_refresh.isRefreshing = false
     }
 
     fun getTasks() {
 
         Log.e(TAG, " ----- getTasks")
-        noteslist.clear()
         noteslist = myModel.getAll()
         taskAdapter.notifyDataSetChanged()
     }
@@ -275,13 +273,17 @@ class MainActivity : AppCompatActivity() {
 
         Log.e(TAG, "inside update title in MainActivity")
         myModel.update(id, title, version)
-//        noteslist.clear()
+//      noteslist.clear()
     }
 
     fun createtask(title: String, description: String) {
-
+        Toast.makeText(this, "Mutation with title $title created", Toast.LENGTH_SHORT).show()
         Log.e(TAG, "inside create title")
-        myModel.create(title, description)
+        val mylist = myModel.create(title, description)
+        for (task in mylist) {
+            noteslist.add(task)
+        }
+        taskAdapter.notifyDataSetChanged()
     }
 
     fun deleteTask(id: String) {
@@ -307,17 +309,17 @@ class MainActivity : AppCompatActivity() {
 
                             Log.e(TAG, " inside subscription1 ${it.title()} mutated upon updating")
                             Log.e(TAG, " inside subscription1 ${res.title()}")
-                            //  noteslist.add(Task(it.title(), it.description(), it.id().toInt(), it.version()!!))
-//                            noteslist.add(
-//                                it.id().toInt() - 1,
-//                                Task(it.title(), it.description(), it.id().toInt(), it.version()!!)
-//                            )
-                            //taskAdapter.notifyDataSetChanged()
-                        }
 //
-//                        runOnUiThread {
-//                            taskAdapter.notifyDataSetChanged()
-//                        }
+//                            runOnUiThread {
+//                                Log.e(TAG, " inside subscription1  *** ${it.title()} mutated upon updating")
+//                                val tasktoberemoved =
+//                                Task(it.title(), it.description(), it.id().toInt(), it.version()!! - 1)
+//                                noteslist.remove(tasktoberemoved)
+//                                noteslist.add(Task(it.title(), it.description(), it.id().toInt(), it.version()!!))
+//                                taskAdapter.notifyDataSetChanged()
+//                            }
+                        }
+
                         Toast.makeText(
                             this@MainActivity,
                             "Subscription1 response received",
@@ -359,11 +361,11 @@ class MainActivity : AppCompatActivity() {
                         res?.let {
 
                             Log.e(TAG, " inside subscription2 ${it.title()} mutated upon new title")
-                            noteslist.add(Task(it.title(), it.description(), it.id().toInt(), it.version()!!))
-                        }
 //
-                        runOnUiThread {
-                            taskAdapter.notifyDataSetChanged()
+//                            runOnUiThread {
+//                                noteslist.add(Task(it.title(), it.description(), it.id().toInt(), it.version()!!))
+//                                taskAdapter.notifyDataSetChanged()
+//                            }
                         }
                         Toast.makeText(
                             this@MainActivity,

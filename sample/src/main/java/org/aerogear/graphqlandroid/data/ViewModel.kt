@@ -40,8 +40,8 @@ class ViewModel(application: Application) :
         UserData(apcontext).updateTask(id, title, version)
     }
 
-    fun create(title: String, description: String) {
-        UserData(apcontext).createtask(title, description)
+    fun create(title: String, description: String): ArrayList<Task> {
+        return UserData(apcontext).createtask(title, description)
     }
 
     fun delete(id: String) {
