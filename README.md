@@ -33,3 +33,7 @@ See `sample` for example application. For now it's using ionic showcase as its b
 1. Make a mutation by going offline.
 2. Then, come online and click on "FromDb" button and you will see the results.
 3. Also, refresh the application to see the updated cache.
+
+
+#### Here is a short demo of the offline capabilites where the client performs a mutation of updating the Task3:
+![aa1gif](https://user-images.githubusercontent.com/33238323/60811412-d0bced00-a1ac-11e9-907a-e5a903c001fc.gif)
