@@ -35,6 +35,9 @@ See `sample` for example application. For now it's using ionic showcase as its b
 3. Also, refresh the application to see the updated cache.
 
 
-#### Here is a short demo of the offline capabilites where the client performs a mutation of updating the Task3 and when it comes online again, changes are refelected back in the application.
+### Short demo of the offline capabilites 
+
+Here the client performs a mutation of updating the Task3 when it is offline and when it comes online back again, changes are refelected back in the application on clicking on the "FromDB" button present on the top of the screen.
+
 
 ![aa1gif](https://user-images.githubusercontent.com/33238323/60811412-d0bced00-a1ac-11e9-907a-e5a903c001fc.gif)
