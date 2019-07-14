@@ -1,4 +1,4 @@
-package org.aerogear.offixOffline
+package org.aerogear.offixoffline
 
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -10,7 +10,7 @@ import com.apollographql.apollo.api.Operation
 
 
 /*
- BroadcastReceiver that listens for connectivity change while tha app is in foreground (in-memory).
+ BroadcastReceiver that listens for connectivity change while the app is in foreground (in-memory).
  In it's onReceive() method we check the network connection. If the user is connected to the net, then get access to the arraylist
  of mutations and callbacks, get the apollo client provided by the user and make a call to the server.
  */
@@ -23,14 +23,14 @@ class NetworkChangeReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context?, intent: Intent?) {
 
-        val bool = Offline.isNetwork()
+        val isNetworkAvail = Offline.isNetwork()
         Log.d(TAG, "${intent?.data}")
 
-        if (bool) {
+        if (isNetworkAvail) {
             /*
              Active network connection is there.
              */
-            Log.d(TAG, "Network connectivity change $bool")
+            Log.d(TAG, "Network connectivity change $isNetworkAvail")
             val mutationList = Utils.offlineArrayList
             val callbackList = Utils.callbacksList
             val apolloClient = Utils.getApolloClient()

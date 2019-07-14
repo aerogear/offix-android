@@ -1,4 +1,4 @@
-package org.aerogear.offixOffline.worker
+package org.aerogear.offixoffline.worker
 
 import android.arch.persistence.room.Room
 import android.content.Context
@@ -11,9 +11,9 @@ import com.apollographql.apollo.api.Mutation
 import com.apollographql.apollo.api.Operation
 import com.apollographql.apollo.api.Response
 import com.apollographql.apollo.exception.ApolloException
-import org.aerogear.offixOffline.ClientGenerator
-import org.aerogear.offixOffline.InputTypeChecker
-import org.aerogear.offixOffline.persistence.Database
+import org.aerogear.offixoffline.ClientGenerator
+import org.aerogear.offixoffline.InputTypeChecker
+import org.aerogear.offixoffline.persistence.Database
 
 /**
  * Workmanager that replicates the mutations to the server that are stored in the database.
@@ -96,7 +96,7 @@ class OfflineMutationsWorker(context: Context, workerParameters: WorkerParameter
             When the app is in background, then we can't access to the client made by the user. In this scenario, we have to make a
             custom minimal client to make the server call in the background.
             */
-            val customClient = ClientGenerator(serverUrl!!).getApolloClient()?.mutate(
+            val customClient = ClientGenerator.getApolloClient()?.mutate(
                 obj as Mutation<Operation.Data, Operation.Data, Operation.Variables>
             )
 

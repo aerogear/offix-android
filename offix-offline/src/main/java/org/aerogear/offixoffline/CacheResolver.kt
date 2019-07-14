@@ -1,4 +1,4 @@
-package org.aerogear.offixOffline
+package org.aerogear.offixoffline
 
 import android.util.Log
 import com.apollographql.apollo.api.Operation
@@ -6,10 +6,16 @@ import com.apollographql.apollo.api.ResponseField
 import com.apollographql.apollo.cache.normalized.CacheKey
 import com.apollographql.apollo.cache.normalized.CacheKeyResolver
 
+/*
+Cache Resolver which is passed as a parameter while making apollo client.
+ */
 class CacheResolver {
 
     private val TAG = javaClass.simpleName
 
+    /*
+    Resolves a cache key for a JSON object.
+     */
     fun cacheResolver(): CacheKeyResolver {
         return object : CacheKeyResolver() {
             override fun fromFieldRecordSet(field: ResponseField, recordSet: Map<String, Any>): CacheKey {
@@ -19,7 +25,6 @@ class CacheResolver {
                     return CacheKey.from(typeNameAndIDKey)
                 }
                 return CacheKey.NO_KEY
-
             }
 
             /*

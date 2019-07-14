@@ -1,8 +1,8 @@
-package org.aerogear.offixOffline
+package org.aerogear.offixoffline
 
 import android.content.Context
 import okhttp3.OkHttpClient
-import org.aerogear.offixOffline.Interceptor.LoggingInterceptor
+import org.aerogear.offixoffline.Interceptor.LoggingInterceptor
 
 class OkHttpClient(context: Context) {
 
@@ -10,7 +10,6 @@ class OkHttpClient(context: Context) {
     private var httpClient: OkHttpClient? = null
 
     fun getOkhttpClient(): OkHttpClient? {
-
         //Adding HttpLoggingInterceptor() to see the response body and the results.
         httpClient?.let {
             return it

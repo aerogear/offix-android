@@ -1,4 +1,4 @@
-package org.aerogear.offixOffline.persistence
+package org.aerogear.offixoffline.persistence
 
 import android.arch.persistence.room.*
 

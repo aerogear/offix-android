@@ -1,4 +1,4 @@
-package org.aerogear.offixOffline
+package org.aerogear.offixoffline
 
 import android.app.Activity
 import android.app.Application
@@ -15,8 +15,8 @@ import androidx.work.Constraints
 import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
-import org.aerogear.offixOffline.persistence.Mutation
-import org.aerogear.offixOffline.worker.OfflineMutationsWorker
+import org.aerogear.offixoffline.persistence.Mutation
+import org.aerogear.offixoffline.worker.OfflineMutationsWorker
 import org.json.JSONObject
 import java.util.concurrent.TimeUnit
 
@@ -45,7 +45,7 @@ class Offline private constructor(context: Context) {
     /**
      * Event database is initialized and stored once
      */
-    private var libdb: org.aerogear.offixOffline.persistence.Database? = null
+    private var libdb: org.aerogear.offixoffline.persistence.Database? = null
 
     /**
      * Return the appName with the app by using the context provided by the content provider
@@ -151,7 +151,7 @@ class Offline private constructor(context: Context) {
         (ctx.applicationContext as Application).registerActivityLifecycleCallbacks(activityLifecycleCallbacks)
         libdb = Room.databaseBuilder(
             ctx,
-            org.aerogear.offixOffline.persistence.Database::class.java, "offline_db"
+            org.aerogear.offixoffline.persistence.Database::class.java, "offline_db"
         )
             .fallbackToDestructiveMigration()
             .build()

@@ -1,9 +1,12 @@
-package org.aerogear.offixOffline.persistence
+package org.aerogear.offixoffline.persistence
 
 import android.arch.persistence.room.TypeConverter
 import com.apollographql.apollo.api.OperationName
 import org.json.JSONObject
 
+/*
+Converters are used to serialise and de-serialise objects for storing and fetching from database.
+ */
 class Converters {
 
     @TypeConverter

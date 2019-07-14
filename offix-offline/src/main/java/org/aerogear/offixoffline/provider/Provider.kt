@@ -1,10 +1,10 @@
-package org.aerogear.offixOffline.provider
+package org.aerogear.offixoffline.provider
 
 import android.content.ContentProvider
 import android.content.ContentValues
 import android.database.Cursor
 import android.net.Uri
-import org.aerogear.offixOffline.Offline
+import org.aerogear.offixoffline.Offline
 
 /**
  * This content provider is needed as it's automatically invoked when the app which uses the library is started.
@@ -24,7 +24,10 @@ internal class Provider : ContentProvider() {
     ): Cursor? = null
 
     override fun onCreate(): Boolean {
-
+/*
+  This initialises the object of Offline class and also the database object whenever the application using our library is created.
+  Also we get the context after the Offline object is initialised in the provider's onCreate() method.
+ */
         context?.let {
             Offline.with(it).start()
             return true

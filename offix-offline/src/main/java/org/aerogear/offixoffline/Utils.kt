@@ -1,4 +1,4 @@
-package org.aerogear.offixOffline
+package org.aerogear.offixoffline
 
 import android.content.Context
 import com.apollographql.apollo.ApolloCall

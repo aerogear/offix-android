@@ -1,4 +1,4 @@
-package org.aerogear.offixOffline.Interceptor
+package org.aerogear.offixoffline.Interceptor
 
 import android.content.Context
 import android.util.Log
@@ -7,10 +7,9 @@ import okhttp3.Interceptor
 import okhttp3.Request
 import okhttp3.Response
 import okio.Buffer
-import org.aerogear.offixOffline.Offline
-import org.aerogear.offixOffline.Utils
+import org.aerogear.offixoffline.Offline
+import org.aerogear.offixoffline.Utils
 import java.io.IOException
-
 
 /* With the help of this interceptor, we can get access to the requests and responses.
  */
@@ -33,7 +32,7 @@ class LoggingInterceptor : Interceptor {
          */
 
         if (isUrlPresent.equals(stringUrl)) {
-
+        //nothing
         } else {
             Utils.editSharedPref(stringUrl)
         }
