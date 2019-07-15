@@ -32,9 +32,9 @@ class LoggingInterceptor : Interceptor {
          */
 
         if (isUrlPresent.equals(stringUrl)) {
-        //nothing
+            //nothing
         } else {
-            Utils.editSharedPref(stringUrl)
+            Offline.editSharedPref(stringUrl)
         }
 
         /*

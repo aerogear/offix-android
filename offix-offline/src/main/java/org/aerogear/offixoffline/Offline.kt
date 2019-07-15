@@ -52,6 +52,14 @@ class Offline private constructor(context: Context) {
             ).toString()
     }
 
+    /*
+    sharedPref for storing url of the server (will be used when app is in background)
+     */
+    val sharedPreferences by lazy {
+        ctx.getSharedPreferences("libSharedPref", Context.MODE_PRIVATE)
+    }
+
+
     /**
      * Callback that's invoked every time a new activity's lifecycle method was called
      */
@@ -133,6 +141,16 @@ class Offline private constructor(context: Context) {
                 offline?.ctx?.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
             val activeNetworkInfo = connectivityManager.activeNetworkInfo
             return activeNetworkInfo != null && activeNetworkInfo.isConnected
+        }
+
+        /*
+         Function to set the url of the server to which call is made and save it in shared prefernces.
+         */
+        fun editSharedPref(string: String) {
+            val editor = getContextOffline()?.getSharedPreferences("libSharedPref", Context.MODE_PRIVATE)?.edit()
+            editor?.let {
+                it.putString("url", string).apply()
+            }
         }
     }
 }
