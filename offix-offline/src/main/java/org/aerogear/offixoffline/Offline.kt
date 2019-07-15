@@ -9,16 +9,7 @@ import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.net.ConnectivityManager
 import android.os.Bundle
-import android.support.v4.content.LocalBroadcastManager
 import android.util.Log
-import androidx.work.Constraints
-import androidx.work.NetworkType
-import androidx.work.PeriodicWorkRequestBuilder
-import androidx.work.WorkManager
-import org.aerogear.offixoffline.persistence.Mutation
-import org.aerogear.offixoffline.worker.OfflineMutationsWorker
-import org.json.JSONObject
-import java.util.concurrent.TimeUnit
 
 class Offline private constructor(context: Context) {
 
@@ -61,15 +52,6 @@ class Offline private constructor(context: Context) {
             ).toString()
     }
 
-    val constraints = Constraints.Builder()
-        .setRequiredNetworkType(NetworkType.CONNECTED)
-        .build()
-
-    val periodicWorker = PeriodicWorkRequestBuilder<OfflineMutationsWorker>(
-        15,
-        TimeUnit.MINUTES
-    ).setConstraints(constraints).build()
-
     /**
      * Callback that's invoked every time a new activity's lifecycle method was called
      */
@@ -81,8 +63,12 @@ class Offline private constructor(context: Context) {
         override fun onActivityCreated(activity: Activity?, savedInstanceState: Bundle?) = Unit
 
         override fun onActivityStarted(activity: Activity?) {
-            val filter = IntentFilter(NetworkChangeReceiver().NETWORK_AVAILABLE_ACTION)
-            LocalBroadcastManager.getInstance(ctx).registerReceiver(br, filter)
+            /*
+            Register the broadcast receiver which listens to the connectivity changes.
+             */
+            Log.d(TAG, "Offline Library, onActivityStarted")
+            val filter = IntentFilter("android.net.conn.CONNECTIVITY_CHANGE")
+            context.registerReceiver(br, filter)
         }
 
         override fun onActivityResumed(activity: Activity?) = Unit
@@ -95,59 +81,15 @@ class Offline private constructor(context: Context) {
          * When an activity was stopped, fire a worker that tries the requests stored in the database
          */
         override fun onActivityStopped(activity: Activity?) {
-
-            /*
-            When onActivityStopped() is called, then the app is in background :
-            1. We get access to the array list of mutations and apollo call.
-            2.We extract the data from the mutation and store it in database.
-            3.We fire a worker to make the call to the server for the requests stored in database.
-             */
-
-            val mutationList = Utils.offlineArrayList
-            val callbackList = Utils.callbacksList
-            val apolloClient = Utils.getApolloClient()
-
-            Log.d(TAG, "mutation list : ${mutationList.size}, callback list : ${callbackList.size}")
-
-            if (mutationList.size != 0) {
-
-                mutationList.forEachIndexed { index, mutation ->
-
-                    val client = apolloClient?.mutate(mutation)
-                    val clientOp = client?.operation()
-                    val responseClassName = mutation.javaClass.name
-
-                    clientOp?.let {
-
-                        val operationID = it.operationId()
-                        val queryDoc = it.queryDocument()
-                        val operationName = it.name()
-                        val valuemap = it.variables().valueMap()
-                        val jsonObject = JSONObject(valuemap)
-                        val mutationObj = Mutation(operationID, queryDoc, operationName, jsonObject, responseClassName)
-                        libdb?.mutationDao()?.insertMutation(mutationObj)
-                    }
-                }
-            }
-
-            /* If the user is offline:
-               1. Store the object in database.
-               2. Schedule a work manager to process that request in future. Execute a periodic work Request with the set constraints
-             */
-            WorkManager
-                .getInstance()
-                .enqueue(
-                    periodicWorker
-                )
-
-            LocalBroadcastManager.getInstance(ctx).unregisterReceiver(br)
+            Log.d(TAG, "Offline Library, onActivityStopped")
+            context.unregisterReceiver(br)
         }
 
-        override fun onActivityDestroyed(activity: Activity?) {
-        }
+        override fun onActivityDestroyed(activity: Activity?) = Unit
     }
 
     fun start() {
+        //TODO This database approach will be used when solving for background.
         (ctx.applicationContext as Application).registerActivityLifecycleCallbacks(activityLifecycleCallbacks)
         libdb = Room.databaseBuilder(
             ctx,
@@ -186,11 +128,11 @@ class Offline private constructor(context: Context) {
          Function to check the network connectivity.
          */
         internal fun isNetwork(): Boolean {
+            Log.d(TAG, "isNetwork() of Offline class called")
             val connectivityManager =
                 offline?.ctx?.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
             val activeNetworkInfo = connectivityManager.activeNetworkInfo
             return activeNetworkInfo != null && activeNetworkInfo.isConnected
         }
-
     }
 }
