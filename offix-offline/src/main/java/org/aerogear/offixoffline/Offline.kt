@@ -96,6 +96,9 @@ class Offline private constructor(context: Context) {
         override fun onActivityDestroyed(activity: Activity?) = Unit
     }
 
+    /*
+      Objects in this function will be initialised when the application using the library starts, i.e. in content provider.
+     */
     fun start() {
         //TODO This database approach will be used when solving for background.
         (ctx.applicationContext as Application).registerActivityLifecycleCallbacks(activityLifecycleCallbacks)

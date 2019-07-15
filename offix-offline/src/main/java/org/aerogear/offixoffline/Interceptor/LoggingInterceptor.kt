@@ -8,7 +8,6 @@ import okhttp3.Request
 import okhttp3.Response
 import okio.Buffer
 import org.aerogear.offixoffline.Offline
-import org.aerogear.offixoffline.Utils
 import java.io.IOException
 
 /* With the help of this interceptor, we can get access to the requests and responses.

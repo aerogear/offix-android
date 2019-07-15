@@ -21,9 +21,9 @@ class NetworkChangeReceiver : BroadcastReceiver() {
         if (intent?.action == "android.net.conn.CONNECTIVITY_CHANGE") {
             if (isNetworkAvail) {
                 Log.d(TAG, "Network connectivity change $isNetworkAvail")
-                val mutationList = Utils.offlineArrayList
-                val callbackList = Utils.callbacksList
-                val apolloClient = Utils.apClient
+                val mutationList = Singleton.getInstance().offlineArrayList
+                val callbackList = Singleton.getInstance().callbacksList
+                val apolloClient = Singleton.apClient
 
                 Log.d(TAG, "mutation list : ${mutationList.size}, callback list : ${callbackList.size}")
                 mutationList.forEachIndexed { index, mutation ->
@@ -32,11 +32,11 @@ class NetworkChangeReceiver : BroadcastReceiver() {
             } else {
                 Log.d(TAG, "Network connectivity change $isNetworkAvail")
             }
-            /*
-             Clear the array list of mutations and callbacks after the call to the server is made with them.
+
+            /* Clear the array list of mutations and callbacks after the call to the server is made with them.
              */
-            Utils.offlineArrayList.clear()
-            Utils.callbacksList.clear()
+            Singleton.getInstance().offlineArrayList.clear()
+            Singleton.getInstance().callbacksList.clear()
         }
     }
 }
