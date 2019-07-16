@@ -5,14 +5,15 @@ import android.app.Application
 import android.arch.persistence.room.Room
 import android.content.BroadcastReceiver
 import android.content.Context
-import android.content.IntentFilter
-import android.content.pm.PackageManager
 import android.net.ConnectivityManager
 import android.os.Bundle
 import android.util.Log
 
 class Offline private constructor(context: Context) {
 
+    /*
+    For initialising the context.
+     */
     internal val ctx by lazy {
         context
     }

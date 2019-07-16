@@ -11,6 +11,9 @@ Database persistence approach is used when the app is in background.
 @TypeConverters(Converters::class)
 abstract class Database : RoomDatabase() {
 
+    /*
+    Dao object to access methods of the database.
+     */
     abstract fun mutationDao(): MutationDao
 
 }

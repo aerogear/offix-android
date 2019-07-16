@@ -22,10 +22,10 @@ fun ApolloClient.enqueue(
     /* Check is the network is available or not.
      */
     if (Offline.isNetwork()) {
-        Log.d("Extension", " Network is there.")
+        Log.d("Extension", " Network connected")
         this.mutate(mutation).enqueue(callback)
     } else {
-        Log.d("Extension", "Network not there.")
+        Log.d("Extension", "Network not connected")
 
         /* If the user is offline: (Case 1: When the app is in foreground, i.e. in-memory)
            1. Store the mutation object and callback in an array-list.
@@ -36,7 +36,7 @@ fun ApolloClient.enqueue(
     }
 }
 
-/*  Extension function where:
+/*  Extension function for ApolloClient Builder
     @receiver param: ApolloClient.Buidler, which can be used by the user for creating a custom client.
     @return ApolloClient.Buidler
  */
