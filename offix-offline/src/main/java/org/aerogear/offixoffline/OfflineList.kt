@@ -25,10 +25,12 @@ class OfflineList {
          */
         @JvmStatic
         fun getInstance(): OfflineList {
-            if (instance == null) {
+            return instance?.let {
+                instance
+            } ?: run {
                 instance = OfflineList()
+                instance!!
             }
-            return instance!!
         }
     }
 }
