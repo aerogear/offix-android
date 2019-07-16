@@ -48,21 +48,15 @@ class MainActivity : AppCompatActivity() {
             .setRequiresBatteryNotLow(true)
             .build()
     }
-
     val dbDao = MyApplciation.database.mutationDao()
-
     private val disposables = CompositeDisposable()
-
     val watchResponse = AtomicReference<Response<AllTasksQuery.Data>>()
-
     val connectivityManager by lazy {
         getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     }
-
     val myModel: ViewModel by lazy {
         ViewModelProviders.of(this).get(ViewModel::class.java)
     }
-
     var apolloQueryWatcher: ApolloQueryWatcher<AllTasksQuery.Data>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -70,7 +64,6 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main2)
 
         val activeNetwork = connectivityManager.activeNetworkInfo
-
         if (activeNetwork != null && activeNetwork.isConnected) {
             Log.e(TAG, " User is online ")
 
@@ -176,9 +169,7 @@ class MainActivity : AppCompatActivity() {
 
         //Used for creating a new task
         insertbutton.setOnClickListener {
-
             val inflatedView = LayoutInflater.from(this).inflate(R.layout.alertfrag_create, null, false)
-
             val customAlert: android.support.v7.app.AlertDialog = android.support.v7.app.AlertDialog.Builder(this)
                 .setView(inflatedView)
                 .setTitle("Create a new Note")
@@ -189,8 +180,6 @@ class MainActivity : AppCompatActivity() {
                     val title = inflatedView.etTitle.text.toString()
                     val desc = inflatedView.etDesc.text.toString()
                     createtask(title, desc)
-                    Log.e(TAG, "jhjj")
-//                    taskAdapter.notifyItemInserted(noteslist.size - 1)
                     dialog.dismiss()
                 }
                 .create()
@@ -199,16 +188,15 @@ class MainActivity : AppCompatActivity() {
 
         //Used for deleting task
         deletetask.setOnClickListener {
-            val inflatedView = LayoutInflater.from(this).inflate(R.layout.alertdelete, null, false)
-
+            val inflated = LayoutInflater.from(this).inflate(R.layout.alertdelete, null, false)
             val customAlert: android.support.v7.app.AlertDialog = android.support.v7.app.AlertDialog.Builder(this)
-                .setView(inflatedView)
+                .setView(inflated)
                 .setTitle("Delete a  task")
                 .setNegativeButton("No") { dialog, which ->
                     dialog.dismiss()
                 }
                 .setPositiveButton("Yes") { dialog, which ->
-                    val id = inflatedView.etId.text.toString()
+                    val id = inflated.etId.text.toString()
                     deleteTask(id)
                     dialog.dismiss()
                 }
@@ -263,27 +251,20 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun getTasks() {
-
         Log.e(TAG, " ----- getTasks")
         noteslist = myModel.getAll()
         taskAdapter.notifyDataSetChanged()
     }
 
     fun updateTask(id: String, title: String, version: Int) {
-
         Log.e(TAG, "inside update title in MainActivity")
         myModel.update(id, title, version)
-//      noteslist.clear()
     }
 
     fun createtask(title: String, description: String) {
         Toast.makeText(this, "Mutation with title $title created", Toast.LENGTH_SHORT).show()
         Log.e(TAG, "inside create title")
-        val mylist = myModel.create(title, description)
-        for (task in mylist) {
-            noteslist.add(task)
-        }
-        taskAdapter.notifyDataSetChanged()
+        myModel.create(title, description)
     }
 
     fun deleteTask(id: String) {
@@ -396,6 +377,5 @@ class MainActivity : AppCompatActivity() {
         disposables.dispose()
         super.onDestroy()
     }
-
 }
 

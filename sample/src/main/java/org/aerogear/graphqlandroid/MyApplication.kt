@@ -17,8 +17,6 @@ class MyApplciation : Application() {
             .fallbackToDestructiveMigration()
             .allowMainThreadQueries()
             .build()
-
         Log.e("TAG", "Application was started")
-
     }
 }

@@ -20,28 +20,23 @@ import kotlin.collections.ArrayList
 
 class ViewModel(application: Application) :
     AndroidViewModel(application) {
-
     val apcontext = application
-
     lateinit var apolloQueryWatcher: ApolloQueryWatcher<AllTasksQuery.Data>
-
     lateinit var tasksList: LiveData<List<Task>>
 
     val TAG = javaClass.simpleName
 
     fun getAll(): ArrayList<Task> {
-
         Log.e(TAG, "${UserData(apcontext).getTasks().size}")
         return UserData(apcontext).getTasks()
-
     }
 
     fun update(id: String, title: String, version: Int) {
         UserData(apcontext).updateTask(id, title, version)
     }
 
-    fun create(title: String, description: String): ArrayList<Task> {
-        return UserData(apcontext).createtask(title, description)
+    fun create(title: String, description: String) {
+        UserData(apcontext).createtask(title, description)
     }
 
     fun delete(id: String) {
