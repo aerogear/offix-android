@@ -6,7 +6,7 @@ import com.apollographql.apollo.api.Operation
 
 /* This class helps in creating an array list of mutations and callbacks associated with the apollo call.
  */
-class Singleton {
+class OfflineList {
 
     /* Array List to store mutation objects.
         */
@@ -19,14 +19,14 @@ class Singleton {
 
     companion object {
         var apClient: ApolloClient? = null
-        private var instance: Singleton? = null
+        private var instance: OfflineList? = null
 
-        /* Returns an existing instance of the Singleton class if it exists, else returns a new instance
+        /* Returns an existing instance of the OfflineList class if it exists, else returns a new instance
          */
         @JvmStatic
-        fun getInstance(): Singleton {
+        fun getInstance(): OfflineList {
             if (instance == null) {
-                instance = Singleton()
+                instance = OfflineList()
             }
             return instance!!
         }

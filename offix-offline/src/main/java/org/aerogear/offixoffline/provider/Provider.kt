@@ -2,8 +2,11 @@ package org.aerogear.offixoffline.provider
 
 import android.content.ContentProvider
 import android.content.ContentValues
+import android.content.IntentFilter
 import android.database.Cursor
 import android.net.Uri
+import android.util.Log
+import org.aerogear.offixoffline.NetworkChangeReceiver
 import org.aerogear.offixoffline.Offline
 
 /**
@@ -30,6 +33,11 @@ internal class Provider : ContentProvider() {
  */
         context?.let {
             Offline.with(it).start()
+
+            /*Register the broadcast receiver which listens to the connectivity changes.
+            */
+            val filter = IntentFilter("android.net.conn.CONNECTIVITY_CHANGE")
+            it.registerReceiver(NetworkChangeReceiver(), filter)
             return true
         }
         return false

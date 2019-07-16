@@ -11,13 +11,13 @@ import com.apollographql.apollo.api.Operation
    @param mutation which will be stored in the list if network connection is not there.
    @param callback which will be stored in the list if network connection is not there.
  */
-fun ApolloClient.enterQueue(
+fun ApolloClient.enqueue(
     mutation: Mutation<Operation.Data, Any, Operation.Variables>,
     callback: ApolloCall.Callback<Any>
 ) {
     /* Set apollo client given by the user.
      */
-    Singleton.apClient = this
+    OfflineList.apClient = this
 
     /* Check is the network is available or not.
      */
@@ -31,9 +31,8 @@ fun ApolloClient.enterQueue(
            1. Store the mutation object and callback in an array-list.
          */
         Log.d("Extension", " mutation : ${mutation.variables().valueMap()}")
-        Log.d("Extension", " callback : $callback")
-        Singleton.getInstance().offlineArrayList.add(mutation)
-        Singleton.getInstance().callbacksList.add(callback)
+        OfflineList.getInstance().offlineArrayList.add(mutation)
+        OfflineList.getInstance().callbacksList.add(callback)
     }
 }
 
@@ -43,9 +42,4 @@ fun ApolloClient.enterQueue(
  */
 fun ApolloClient.Builder.OfflineClientBuilder(): ApolloClient.Builder = this
 
-/*Extension function for logging.
-  */
-fun Class<Any>.logd(message: String) {
-    if (BuildConfig.DEBUG) Log.d(this.simpleName, message)
-}
 

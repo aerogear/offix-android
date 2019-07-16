@@ -8,9 +8,9 @@ import org.json.JSONObject
 /*
 persistent offline mutation object
  */
-@Entity(tableName = "MutationOffline")
+@Entity(tableName = "mutationOffline")
 data class Mutation(
-    var operationID: String,
+    var operationId: String,
     var queryDoc: String,
     var operationName: OperationName,
     var valueMap: JSONObject,

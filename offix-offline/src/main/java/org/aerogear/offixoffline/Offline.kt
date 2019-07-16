@@ -27,30 +27,9 @@ class Offline private constructor(context: Context) {
     private val br: BroadcastReceiver = NetworkChangeReceiver()
 
     /**
-     * Package appName with the app
-     */
-    private val applicationId by lazy {
-        ctx.packageName
-    }
-
-    /**
      * Event database is initialized and stored once
      */
     private var libdb: org.aerogear.offixoffline.persistence.Database? = null
-
-    /**
-     * Return the appName with the app by using the context provided by the content provider
-     */
-    private val applicationName by lazy {
-        packageManager
-            .getApplicationLabel(
-                packageManager
-                    .getApplicationInfo(
-                        applicationId,
-                        PackageManager.GET_META_DATA
-                    )
-            ).toString()
-    }
 
     /*
     sharedPref for storing url of the server (will be used when app is in background)
@@ -71,12 +50,7 @@ class Offline private constructor(context: Context) {
         override fun onActivityCreated(activity: Activity?, savedInstanceState: Bundle?) = Unit
 
         override fun onActivityStarted(activity: Activity?) {
-            /*
-            Register the broadcast receiver which listens to the connectivity changes.
-             */
             Log.d(TAG, "Offline Library, onActivityStarted")
-            val filter = IntentFilter("android.net.conn.CONNECTIVITY_CHANGE")
-            context.registerReceiver(br, filter)
         }
 
         override fun onActivityResumed(activity: Activity?) = Unit
@@ -90,7 +64,6 @@ class Offline private constructor(context: Context) {
          */
         override fun onActivityStopped(activity: Activity?) {
             Log.d(TAG, "Offline Library, onActivityStopped")
-            context.unregisterReceiver(br)
         }
 
         override fun onActivityDestroyed(activity: Activity?) = Unit

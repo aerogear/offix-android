@@ -12,7 +12,7 @@ import com.apollographql.apollo.exception.ApolloException
 import com.apollographql.apollo.fetcher.ApolloResponseFetchers
 import org.aerogear.graphqlandroid.*
 import org.aerogear.graphqlandroid.model.Task
-import org.aerogear.offixoffline.enterQueue
+import org.aerogear.offixoffline.enqueue
 import java.util.concurrent.atomic.AtomicReference
 
 class UserData(val context: Context) {
@@ -97,7 +97,7 @@ class UserData(val context: Context) {
             }
         }
 
-        Utils.getApolloClient(context)?.enterQueue(
+        Utils.getApolloClient(context)?.enqueue(
             mutation as com.apollographql.apollo.api.Mutation<Operation.Data, Any, Operation.Variables>,
             callback as ApolloCall.Callback<Any>
         )
@@ -123,7 +123,7 @@ class UserData(val context: Context) {
             }
         }
 
-        Utils.getApolloClient(context)?.enterQueue(
+        Utils.getApolloClient(context)?.enqueue(
             mutation as com.apollographql.apollo.api.Mutation<Operation.Data, Any, Operation.Variables>,
             callback as ApolloCall.Callback<Any>
         )
@@ -144,7 +144,7 @@ class UserData(val context: Context) {
             }
         }
 
-        Utils.getApolloClient(context)?.enterQueue(
+        Utils.getApolloClient(context)?.enqueue(
             mutation as com.apollographql.apollo.api.Mutation<Operation.Data, Any, Operation.Variables>,
             callback as ApolloCall.Callback<Any>
         )

@@ -40,10 +40,7 @@ class LoggingInterceptor : Interceptor {
          For logging the request sent to the server.
          */
         val t1 = System.nanoTime()
-        Log.d(
-            TAG + "1",
-            " ${request.url()}  ---   ${bodyToString(request)}   ---  ${request.headers()}"
-        )
+        Log.d("$TAG 1", " ${request.url()}  ---   ${bodyToString(request)}   ---  ${request.headers()}")
 
         /*
          For logging the response received from the server.
@@ -51,7 +48,7 @@ class LoggingInterceptor : Interceptor {
         val response = chain.proceed(request)
         val t2 = System.nanoTime()
 
-        Log.d(TAG + "2 ", " ${response.request().url()}  ${t2 - t1}  ${request.headers()}")
+        Log.d("$TAG 2", " ${response.request().url()}  $t2  ${request.headers()}")
         return response
     }
 

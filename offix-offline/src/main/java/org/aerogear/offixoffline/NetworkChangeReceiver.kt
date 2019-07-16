@@ -3,7 +3,6 @@ package org.aerogear.offixoffline
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 
 /*
  BroadcastReceiver that listens for connectivity change while the app is in foreground (in-memory).
@@ -13,30 +12,15 @@ import android.util.Log
 class NetworkChangeReceiver : BroadcastReceiver() {
 
     val ctx = Offline.getContextOffline()
-    val TAG = javaClass.simpleName
+    val TAG: String = javaClass.simpleName
 
     override fun onReceive(context: Context?, intent: Intent?) {
-        val isNetworkAvail = Offline.isNetwork()
-        Log.d(TAG, "${intent?.data}")
+        /*
+        Offload the work to an IntentService that syncs the mutations with the server
+         */
         if (intent?.action == "android.net.conn.CONNECTIVITY_CHANGE") {
-            if (isNetworkAvail) {
-                Log.d(TAG, "Network connectivity change $isNetworkAvail")
-                val mutationList = Singleton.getInstance().offlineArrayList
-                val callbackList = Singleton.getInstance().callbacksList
-                val apolloClient = Singleton.apClient
-
-                Log.d(TAG, "mutation list : ${mutationList.size}, callback list : ${callbackList.size}")
-                mutationList.forEachIndexed { index, mutation ->
-                    apolloClient?.mutate(mutation)?.enqueue(callbackList[index])
-                }
-            } else {
-                Log.d(TAG, "Network connectivity change $isNetworkAvail")
-            }
-
-            /* Clear the array list of mutations and callbacks after the call to the server is made with them.
-             */
-            Singleton.getInstance().offlineArrayList.clear()
-            Singleton.getInstance().callbacksList.clear()
+            val foregroundService = Intent(context, OfflineSyncService::class.java)
+            context?.startService(foregroundService)
         }
     }
 }
