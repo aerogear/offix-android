@@ -31,13 +31,13 @@ For now it's using ionic showcase as its backened (https://github.com/aerogear/i
 
 - Ensure that the app's build.gradle has the apollo plugin and dependencies of the apollo libraries.
 
-- #### Include the library **offix-offline**.
+#### Include the library **offix-offline**.
 
   Put the following dependency in your **app's build.gradle**.
   
   ``` implementation project(":offix-offline") ```
 
-  **Sample project's build.gradle**
+**Sample project's build.gradle**
 
 ```groovy
     // Top-level build file where you can add configuration options common to all sub-projects/modules.
@@ -53,7 +53,7 @@ For now it's using ionic showcase as its backened (https://github.com/aerogear/i
     }
 ```
   
-  **App's AndroidManifest.xml**
+**App's AndroidManifest.xml**
 
  Add the permissions to access network state to determine if the device is offline and to access Internet while using the app.
 
@@ -110,4 +110,14 @@ For now it's using ionic showcase as its backened (https://github.com/aerogear/i
 ## Demo 
 
 ![OfflineFore1gif](https://user-images.githubusercontent.com/33238323/61216474-1177b180-a72b-11e9-883a-8592d09ee290.gif)
+
+
+## Bugs
+
+Offline implementation works only when the app is not closed. If you close the app, the mutationns done while you are offline are not persisted yet. 
+
+## Features in Development 
+
+1. Adding Background Sync capabilities to offix-offline so that mutations are pesisted after the app is closed.
+2. Adding Conflict Resolution Strategy to the librray.
 
