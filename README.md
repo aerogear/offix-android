@@ -39,7 +39,7 @@ For now it's using ionic showcase as its backened (https://github.com/aerogear/i
 
 **Sample project's build.gradle**
 
-```groovy
+```kotlin
     // Top-level build file where you can add configuration options common to all sub-projects/modules.
     buildscript {
         // ..other code..
@@ -51,16 +51,7 @@ For now it's using ionic showcase as its backened (https://github.com/aerogear/i
             // in the individual module build.gradle files
         }
     }
-```
-  
-**App's AndroidManifest.xml**
-
- Add the permissions to access network state to determine if the device is offline and to access Internet while using the app.
-
-```xml
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.INTERNET"/>
-```  
+``` 
 
 - Generate your queries and mutations `.graphql files`, add the schema file for your app, build up the project to generate       the apollo generated code for the abbove files, and create an apollo-client in your application as mentioned in the apollo-   android documentation.
 
@@ -68,7 +59,9 @@ For now it's using ionic showcase as its backened (https://github.com/aerogear/i
 
   **Code for performing Mutations** 
   
-  ```groovy
+  - **In Kotlin**
+  
+  ```kotlin
     //Create an Object of mutation by passing in the build parameters according to the scehma.
     val mutation = UpdateCurrentTaskMutation.builder().id(id).title(title).version(version).build()
     
@@ -97,9 +90,43 @@ For now it's using ionic showcase as its backened (https://github.com/aerogear/i
         )
 ```
 
+  - **In Java**
+  
+  ```java
+    //Create an Object of mutation by passing in the build parameters according to the scehma.
+    Mutation mutation = UpdateCurrentTaskMutation.builder().id(id).title(title).version(version).build();
+    
+    //Create a client which is an object of ApolloCall on which call would be made.
+    ApolloMutationCall<UpdateCurrentTaskMutation.Data> client = Utils.INSTANCE.getApolloClient(context).mutate(mutation)
+                .refetchQueries(apolloQueryWatcher.operation().name());  
+                
+    //Create a callback object of type ApolloCall.Callback<UpdateCurrentTaskMutation.Data>
+     ApolloCall.Callback callback = new ApolloCall.Callback<UpdateCurrentTaskMutation.Data>(){
+            @Override
+            public void onResponse(@NotNull Response<UpdateCurrentTaskMutation.Data> response) {
+            //Perform UI Bindings here.
+            }
+
+            @Override
+            public void onFailure(@NotNull ApolloException e) {
+            }
+        };
+        
+     /* Call the enqueue function present in the file ExtensionKt which takes in 3 parameters:
+        1. apollo client 
+        2. mutation object              
+        3. callback object
+      */
+        ExtensionKt.enqueue(Utils.INSTANCE.getApolloClient(context),
+                mutation,
+                callback
+        );
+  ```
+
 ## Run the sample app
 
-- Run the application to send query and mutation to the server and displaying the results to the user.
+- Make any mutation or query to the server.
+- Refresh the app to see the updated results.
 
 ### Display of Offline Capabilities 
 
@@ -114,10 +141,11 @@ For now it's using ionic showcase as its backened (https://github.com/aerogear/i
 
 ## Bugs
 
-Offline implementation works only when the app is not closed. If you close the app, the mutationns done while you are offline are not persisted yet. 
+1. Offline mutations are lost when the app is closed.
+2. No UI Bindings, you will have to update your UI manually.
 
 ## Features in Development 
 
 1. Adding Background Sync capabilities to offix-offline so that mutations are pesisted after the app is closed.
-2. Adding Conflict Resolution Strategy to the librray.
+2. Adding Conflict Resolution Strategy to the library.
 
