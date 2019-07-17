@@ -4,7 +4,11 @@ Offix Android extends capabilities of Apollo GraphQL Android providing fully fea
 
 ## Features 
 
-- Offline support. Mutations are persisted when Offline.
+### Offline support
+Mutations are persisted when Offline
+and replicated back to server when online.
+
+
 
 ## Example application
 
@@ -114,7 +118,7 @@ Add the following dependency in your **module's build.gradle**.
 ![OfflineFore1gif](https://user-images.githubusercontent.com/33238323/61216474-1177b180-a72b-11e9-883a-8592d09ee290.gif)
 
 
-## Bugs
+## Limitations
 
 1. Offline mutations are lost when the app is closed.
 2. No UI Bindings, you will have to update your UI manually.
@@ -122,5 +126,5 @@ Add the following dependency in your **module's build.gradle**.
 ## Features in Development 
 
 1. Adding Background Sync capabilities to offix-offline so that mutations are pesisted after the app is closed.
-2. Adding Conflict Resolution Strategy to the library.
+2. Adding Conflict Resolution mechanism to the library.
 
