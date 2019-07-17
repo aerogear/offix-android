@@ -31,7 +31,7 @@ For now it's using ionic showcase as its backened (https://github.com/aerogear/i
 
 - Ensure that the app's build.gradle has the apollo plugin and dependencies of the apollo libraries.
 
-#### Include the library **offix-offline**.
+### Include the library **offix-offline**.
 
   Put the following dependency in your **app's build.gradle**.
   
