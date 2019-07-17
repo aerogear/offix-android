@@ -37,22 +37,6 @@ For now it's using ionic showcase as its backened (https://github.com/aerogear/i
   
   ``` implementation project(":offix-offline") ```
 
-**Sample project's build.gradle**
-
-```kotlin
-    // Top-level build file where you can add configuration options common to all sub-projects/modules.
-    buildscript {
-        // ..other code..
-        dependencies {
-          classpath 'com.android.tools.build:gradle:3.4.1'
-          classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-          classpath 'com.apollographql.apollo:apollo-gradle-plugin:1.0.0'
-            // NOTE: Do not place your application dependencies here; they belong
-            // in the individual module build.gradle files
-        }
-    }
-``` 
-
 **Consuming Code**
 
   **Code for performing Mutations** 
