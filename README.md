@@ -27,7 +27,7 @@ For now it's using ionic showcase as its backened (https://github.com/aerogear/i
 
 - Clone [this](https://github.com/aerogear/offix-android.git) repository. 
 - Open Android Studio, choose `Import project` navigate to the repository folder that was cloned and select open.
-- For **Apollo Setup**, refer to the apollo repository (https://github.com/apollographql/apollo-android) 
+- For **Apollo Setup**, refer to the [apollo repository](https://github.com/apollographql/apollo-android) 
 
 - Ensure that the app's build.gradle has the apollo plugin and dependencies of the apollo libraries.
 
