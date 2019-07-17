@@ -10,34 +10,26 @@ import java.io.IOException
 
 class LoggingInterceptor : Interceptor {
 
-    val TAG = javaClass.simpleName
+    val TAG = javaClass.simpleName + "Sample"
 
-    lateinit var headers : Headers
+    lateinit var headers: Headers
 
     override fun intercept(chain: Interceptor.Chain): Response {
         val request = chain.request()
         headers = request.headers()
-
         val t1 = System.nanoTime()
-
         Log.e(
             TAG + "1",
             " ${request.url()}  ---   ${bodyToString(request)}   ---  ${request.headers()}"
         )
 
-
-
         val response = chain.proceed(request)
-
         val t2 = System.nanoTime()
-
         Log.e(TAG + "2 ", " ${response.request().url()}  ${t2 - t1}  ${request.headers()}")
-
         return response
     }
 
     private fun bodyToString(request: Request): String {
-
         try {
             val copy = request.newBuilder().build()
             val buffer = Buffer()
@@ -46,8 +38,5 @@ class LoggingInterceptor : Interceptor {
         } catch (e: IOException) {
             return "did not work"
         }
-
     }
-
-
 }
