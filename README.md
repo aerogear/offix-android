@@ -99,7 +99,7 @@ For now it's using ionic showcase as its backened (https://github.com/aerogear/i
         2. mutation object              
         3. callback object
       */
-        OffixKt.enqueue(apolloClient, mutation, callback);
+        Offix.enqueue(apolloClient, mutation, callback);
   ```
 
 ## Run the sample app
