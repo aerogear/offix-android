@@ -1,3 +1,4 @@
+@file:JvmName("Offix")
 package org.aerogear.offixoffline
 
 import android.util.Log
