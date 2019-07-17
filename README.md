@@ -66,7 +66,7 @@ For now it's using ionic showcase as its backened (https://github.com/aerogear/i
     val mutation = UpdateCurrentTaskMutation.builder().id(id).title(title).version(version).build()
     
     //Create a client which is an object of ApolloCall on which call would be made.
-     val client = Utils.getApolloClient(context)?.mutate(mutation)?.refetchQueries(apolloQueryWatcher?.operation()?.name())
+     val client = apolloClient.mutate(mutation)?.refetchQueries(apolloQueryWatcher?.operation()?.name())
      
     //Create a callback object of type ApolloCall.Callback<UpdateCurrentTaskMutation.Data>
      val callback = object : ApolloCall.Callback<UpdateCurrentTaskMutation.Data>() {
@@ -84,7 +84,7 @@ For now it's using ionic showcase as its backened (https://github.com/aerogear/i
           com.apollographql.apollo.api.Mutation<Operation.Data, Any, Operation.Variables>                 
        2. callback object typecasted as callback as ApolloCall.Callback<Any>
      */  
-     Utils.getApolloClient(context)?.enqueue(
+    apolloClient.enqueue(
             mutation as com.apollographql.apollo.api.Mutation<Operation.Data, Any, Operation.Variables>,
             callback as ApolloCall.Callback<Any>
         )
@@ -97,7 +97,7 @@ For now it's using ionic showcase as its backened (https://github.com/aerogear/i
     Mutation mutation = UpdateCurrentTaskMutation.builder().id(id).title(title).version(version).build();
     
     //Create a client which is an object of ApolloCall on which call would be made.
-    ApolloMutationCall<UpdateCurrentTaskMutation.Data> client = Utils.INSTANCE.getApolloClient(context).mutate(mutation)
+    ApolloMutationCall<UpdateCurrentTaskMutation.Data> client = apolloClient.mutate(mutation)
                 .refetchQueries(apolloQueryWatcher.operation().name());  
                 
     //Create a callback object of type ApolloCall.Callback<UpdateCurrentTaskMutation.Data>
@@ -117,10 +117,7 @@ For now it's using ionic showcase as its backened (https://github.com/aerogear/i
         2. mutation object              
         3. callback object
       */
-        ExtensionKt.enqueue(Utils.INSTANCE.getApolloClient(context),
-                mutation,
-                callback
-        );
+        OffixKt.enqueue(apolloClient, mutation, callback);
   ```
 
 ## Run the sample app
