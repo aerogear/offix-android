@@ -53,12 +53,7 @@ For now it's using ionic showcase as its backened (https://github.com/aerogear/i
     }
 ``` 
 
-- Generate your queries and mutations `.graphql files`.
-- Add the schema file for your application.
-- Build up the project to generate the apollo generated code for the above files.
-- Create an apollo-client in your application as mentioned in the apollo-android documentation.
-
- **Consuming Code**
+**Consuming Code**
 
   **Code for performing Mutations** 
   
