@@ -35,13 +35,9 @@ For now it's using ionic showcase as its backened (https://github.com/aerogear/i
 
   Put the following dependency in your **app's build.gradle**.
   
-  ``` 
-  implementation project(":offix-offline")
-  
-```
-```
+  ``` implementation project(":offix-offline") ```
 
- **Sample project's build.gradle**
+  **Sample project's build.gradle**
 
 ```groovy
     // Top-level build file where you can add configuration options common to all sub-projects/modules.
@@ -57,9 +53,9 @@ For now it's using ionic showcase as its backened (https://github.com/aerogear/i
     }
 ```
   
- **App's AndroidManifest.xml**
+  **App's AndroidManifest.xml**
 
-Add the permissions to access network state to determine if the device is offline and to access Internet while using the app.
+ Add the permissions to access network state to determine if the device is offline and to access Internet while using the app.
 
 ```xml
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
