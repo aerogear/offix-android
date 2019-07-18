@@ -4,7 +4,11 @@ Offix Android extends capabilities of Apollo GraphQL Android providing fully fea
 
 ## Features 
 
-- Offline support. Mutations are persisted when Offline.
+### Offline support
+Mutations are persisted when Offline
+and replicated back to server when online.
+
+
 
 ## Example application
 
@@ -27,30 +31,26 @@ For now it's using ionic showcase as its backened (https://github.com/aerogear/i
 
 - Clone [this](https://github.com/aerogear/offix-android.git) repository. 
 - Open Android Studio, choose `Import project` navigate to the repository folder that was cloned and select open.
-- For **Apollo Setup**, refer to the [apollo repository](https://github.com/apollographql/apollo-android) 
-
+- For **Apollo Setup**, refer to the [apollo repository](https://github.com/apollographql/apollo-android).
 - Ensure that the app's build.gradle has the apollo plugin and dependencies of the apollo libraries.
 
-### Include the library **offix-offline
-
-  Put the following dependency in your **app's build.gradle**.
+### Include the library 
+Add the following dependency in your **module's build.gradle**.
   
   ``` implementation project(":offix-offline") ```
 
-**Consuming Code**
-
-  **Code for performing Mutations** 
+**Execute mutations via the library**
   
   - **In Kotlin**
   
   ```kotlin
-    //Create an Object of mutation by passing in the build parameters according to the scehma.
+    //Create a mutation object
     val mutation = UpdateCurrentTaskMutation.builder().id(id).title(title).version(version).build()
     
-    //Create a client which is an object of ApolloCall on which call would be made.
+    //Create apolloClient
      val client = apolloClient.mutate(mutation)?.refetchQueries(apolloQueryWatcher?.operation()?.name())
      
-    //Create a callback object of type ApolloCall.Callback<UpdateCurrentTaskMutation.Data>
+    //Create a callback object
      val callback = object : ApolloCall.Callback<UpdateCurrentTaskMutation.Data>() {
             override fun onFailure(e: ApolloException) {
                 e.printStackTrace()
@@ -61,7 +61,7 @@ For now it's using ionic showcase as its backened (https://github.com/aerogear/i
             }
         }
         
-     /*Call the enqueue function on the instance of APolloClient and pass in two parameters here:
+     /*Call the enqueue function on ApolloClient and pass in two parameters :
        1. mutation object typecasted as mutation as 
           com.apollographql.apollo.api.Mutation<Operation.Data, Any, Operation.Variables>                 
        2. callback object typecasted as callback as ApolloCall.Callback<Any>
@@ -75,14 +75,14 @@ For now it's using ionic showcase as its backened (https://github.com/aerogear/i
   - **In Java**
   
   ```java
-    //Create an Object of mutation by passing in the build parameters according to the scehma.
+    //Create a mutation object
     Mutation mutation = UpdateCurrentTaskMutation.builder().id(id).title(title).version(version).build();
     
-    //Create a client which is an object of ApolloCall on which call would be made.
+    //Create apolloClient
     ApolloMutationCall<UpdateCurrentTaskMutation.Data> client = apolloClient.mutate(mutation)
                 .refetchQueries(apolloQueryWatcher.operation().name());  
                 
-    //Create a callback object of type ApolloCall.Callback<UpdateCurrentTaskMutation.Data>
+    //Create a callback object
      ApolloCall.Callback callback = new ApolloCall.Callback<UpdateCurrentTaskMutation.Data>(){
             @Override
             public void onResponse(@NotNull Response<UpdateCurrentTaskMutation.Data> response) {
@@ -107,7 +107,7 @@ For now it's using ionic showcase as its backened (https://github.com/aerogear/i
 - Make any mutation or query to the server.
 - Refresh the app to see the updated results.
 
-### Display of Offline Capabilities 
+### Test Offline Capabilities 
 
 1. Make any mutation by going offline.
 2. Then, after you come online your mutations (made when you are offline) will hit the server and you will get the response      back from the server.
@@ -118,7 +118,7 @@ For now it's using ionic showcase as its backened (https://github.com/aerogear/i
 ![OfflineFore1gif](https://user-images.githubusercontent.com/33238323/61216474-1177b180-a72b-11e9-883a-8592d09ee290.gif)
 
 
-## Bugs
+## Limitations
 
 1. Offline mutations are lost when the app is closed.
 2. No UI Bindings, you will have to update your UI manually.
@@ -126,5 +126,5 @@ For now it's using ionic showcase as its backened (https://github.com/aerogear/i
 ## Features in Development 
 
 1. Adding Background Sync capabilities to offix-offline so that mutations are pesisted after the app is closed.
-2. Adding Conflict Resolution Strategy to the library.
+2. Adding Conflict Resolution mechanism to the library.
 
