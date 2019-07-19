@@ -1,14 +1,13 @@
-
 package org.aerogear.graphqlandroid
 
 import android.content.Context
-import android.net.ConnectivityManager
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.widget.Toast
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.api.Operation
 import com.apollographql.apollo.api.ResponseField
+import com.apollographql.apollo.api.cache.http.HttpCachePolicy
 import com.apollographql.apollo.cache.normalized.CacheKey
 import com.apollographql.apollo.cache.normalized.CacheKeyResolver
 import com.apollographql.apollo.cache.normalized.lru.EvictionPolicy
@@ -18,6 +17,7 @@ import com.apollographql.apollo.cache.normalized.sql.SqlNormalizedCacheFactory
 import com.apollographql.apollo.interceptor.ApolloInterceptor
 import com.apollographql.apollo.interceptor.ApolloInterceptorChain
 import com.apollographql.apollo.subscription.WebSocketSubscriptionTransport
+import com.google.gson.Gson
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import org.aerogear.graphqlandroid.activities.MainActivity
@@ -34,6 +34,8 @@ object Utils {
     private var httpClient: OkHttpClient? = null
     private var conflictInterceptor: Interceptor? = null
     private lateinit var apolloInterceptor: ApolloInterceptor
+    private val gson = Gson()
+    lateinit var parsedObject: ConflictPojo
 
     @JvmStatic
     fun getApolloClient(context: Context): ApolloClient? {
@@ -61,7 +63,7 @@ object Utils {
                     )
                 )
                 .serverUrl(BASE_URL)
-//              .defaultHttpCachePolicy(HttpCachePolicy.CACHE_FIRST)
+                .defaultHttpCachePolicy(HttpCachePolicy.CACHE_FIRST)
                 .build()
         }
 
@@ -126,11 +128,18 @@ object Utils {
                 val buffer = bufferedSource?.buffer()
                 val responseBodyString = buffer?.clone()?.readString(Charset.forName("UTF-8")) ?: ""
 
-                Log.e("UtillClass", " Interceptor : $responseBodyString")
+                Log.e("Util Class in sample", " Interceptor : $responseBodyString")
 
                 //To see for conflict, "VoyagerConflict" which comes in the message is searched for.
                 if (responseBodyString.contains("VoyagerConflict")) {
-                    showToast(context)
+                    Log.e("Util Class in sample : ", "VoyagerConflict")
+
+                    /*
+                    Map the json responseBody of conflict to the Conflict Pojo.
+                     */
+                    makePojoOfResponse(responseBodyString)
+                    //TODO problem in getting activtiy Context to show Conflict Detected message to the user.
+//                    showToast(context)
                 }
 //                if (responseBodyString.contains("\"msg\":\"\"") &&
 //                    responseBodyString.contains("\"operationType\":\"mutation\"") &&
@@ -152,6 +161,14 @@ object Utils {
 
         }
         return conflictInterceptor
+    }
+
+    /*
+     This function parses the response body of the conflict detected and makes an object of ConflictPojo class.
+     */
+    fun makePojoOfResponse(responseBodyString: String) {
+        parsedObject = gson.fromJson(responseBodyString, ConflictPojo::class.java)
+        Log.e("Util makePojoOfResponse", " ${parsedObject.errors[0].extensions.exception.conflictInfo.serverState}")
     }
 
     //Toast shown to the user displaying conflict detected.
@@ -188,12 +205,6 @@ object Utils {
         }
 
 
-    }
-
-    fun isNetwork(context: Context): Boolean {
-        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val activeNetworkInfo = connectivityManager.activeNetworkInfo
-        return activeNetworkInfo != null && activeNetworkInfo.isConnected
     }
 }
 

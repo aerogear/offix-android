@@ -48,7 +48,7 @@ class MainActivity : AppCompatActivity() {
             .setRequiresBatteryNotLow(true)
             .build()
     }
-    val dbDao = MyApplciation.database.mutationDao()
+    val dbDao = MyApplication.database.mutationDao()
     private val disposables = CompositeDisposable()
     val watchResponse = AtomicReference<Response<AllTasksQuery.Data>>()
     val connectivityManager by lazy {
@@ -245,7 +245,7 @@ class MainActivity : AppCompatActivity() {
 
                     }
                 }
-            })
+            })?.refetch()
 
         pull_to_refresh.isRefreshing = false
     }

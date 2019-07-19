@@ -1,16 +1,19 @@
 package org.aerogear.graphqlandroid
 
 import android.util.Log
+import android.widget.Toast
 import okhttp3.Headers
 import okhttp3.Interceptor
 import okhttp3.Request
 import okhttp3.Response
 import okio.Buffer
+import org.aerogear.graphqlandroid.activities.MainActivity
 import java.io.IOException
 
 class LoggingInterceptor : Interceptor {
 
     val TAG = javaClass.simpleName + "Sample"
+    val context = MainActivity()
 
     lateinit var headers: Headers
 
@@ -25,7 +28,11 @@ class LoggingInterceptor : Interceptor {
 
         val response = chain.proceed(request)
         val t2 = System.nanoTime()
-        Log.e(TAG + "2 ", " ${response.request().url()}  ${t2 - t1}  ${request.headers()}")
+
+        Log.e(
+            TAG + "2 ",
+            " ${response.request().url()} -- ${bodyToString(response)}---  ${t2 - t1}  ${request.headers()}"
+        )
         return response
     }
 
@@ -35,6 +42,17 @@ class LoggingInterceptor : Interceptor {
             val buffer = Buffer()
             copy.body()?.writeTo(buffer)
             return buffer.readUtf8()
+        } catch (e: IOException) {
+            return "did not work"
+        }
+    }
+
+    private fun bodyToString(response: Response): String {
+        try {
+            val copy = response.newBuilder().build()
+            //val buffer = Buffer()
+            return copy.body()?.string()!!
+//            return buffer.readUtf8()
         } catch (e: IOException) {
             return "did not work"
         }

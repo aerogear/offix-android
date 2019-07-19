@@ -5,7 +5,7 @@ import android.arch.persistence.room.Room
 import android.util.Log
 import org.aerogear.graphqlandroid.persistence.Database
 
-class MyApplciation : Application() {
+class MyApplication : Application() {
 
     companion object {
         lateinit var database: Database

@@ -89,11 +89,20 @@ class UserData(val context: Context) {
 
             override fun onResponse(response: Response<UpdateCurrentTaskMutation.Data>) {
                 val result = response.data()?.updateTask()
-                Log.e(TAG, "onResponse-UpdateTask")
-                Log.e(TAG, "${result?.id()}")
-                Log.e(TAG, "${result?.title()}")
-                Log.e(TAG, "${result?.description()}")
-                Log.e(TAG, "${result?.version()}")
+
+                //In case of conflicts data returned from the server id null.
+                result?.let {
+                    Log.e(TAG, "onResponse-UpdateTask")
+                    Log.e(TAG, "${result?.id()}")
+                    Log.e(TAG, "${result?.title()}")
+                    Log.e(TAG, "${result?.description()}")
+                    Log.e(TAG, "${result?.version()}")
+                } ?: kotlin.run {
+
+                    val conflictPojo = Utils.parsedObject
+                    val serverVersion = conflictPojo.errors[0].extensions.exception.conflictInfo.serverState.version
+                    updateTask(id, title, serverVersion)
+                }
             }
         }
 
@@ -107,6 +116,12 @@ class UserData(val context: Context) {
 
         Log.e(TAG, "inside create title")
         val mutation = CreateTaskMutation.builder().title(title).description(description).build()
+
+        val client = Utils.getApolloClient(context)?.mutate(
+            mutation
+        )?.refetchQueries(apolloQueryWatcher?.operation()?.name())
+
+        Log.e(TAG, " createtask : - ${client?.operation()?.name()}")
 
         val callback = object : ApolloCall.Callback<CreateTaskMutation.Data>() {
             override fun onFailure(e: ApolloException) {
