@@ -139,7 +139,7 @@ fun objFromStoredMutation(storedmutation: org.aerogear.offixoffline.persistence.
     parameters.forEachIndexed { index, clazz ->
 
         Log.e("parameters : ", " ${clazz.name}")
-        if (InputTypeChecker(clazz.name).inCheck()) {
+        if (inputTypeChecker(clazz.name)) {
             jsonValues[index] = Input.optional(jsonValues[index])
             Log.e("parameters **: ", " ${jsonValues[index].javaClass.name}")
         }
@@ -156,6 +156,11 @@ fun objFromStoredMutation(storedmutation: org.aerogear.offixoffline.persistence.
  @return Database Dao.
  */
 fun getDao() = Offline.getDb()?.mutationDao()
+
+/*
+   To check if the string provided in the function matches apollo Input class or not.
+ */
+fun inputTypeChecker(string: String) = string.equals("com.apollographql.apollo.api.Input")
 
 /*  Extension function for ApolloClient Builder
     @receiver param: ApolloClient.Buidler, which can be used by the user for creating a custom client.
