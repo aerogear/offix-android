@@ -2,6 +2,7 @@ package org.aerogear.offixoffline
 
 import android.app.IntentService
 import android.content.Intent
+import android.os.Build.VERSION_CODES.O
 import android.util.Log
 
 /* Start a service from broadcast receiver which hits mutation to the server.
@@ -40,6 +41,13 @@ class OfflineSyncService : IntentService("OfflineService") {
             */
             mutationList.clear()
             callbackList.clear()
+
+            /* Delete the mutations stored in the database as they have already been replicated to the server
+               via the array list method having mutations and callbacks because the app was still in foreground.
+               (This service starts when the app is in foreground, so no need to take the database approach here.)
+            */
+            Offline.getDb()?.mutationDao()?.deleteAllMutations()
+            Log.e(TAG, " Size of database list : ${Offline.getDb()?.mutationDao()?.getAllMutations()?.size}")
         }
     }
 }

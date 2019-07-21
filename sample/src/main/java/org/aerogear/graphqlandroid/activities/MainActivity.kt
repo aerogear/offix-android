@@ -32,6 +32,7 @@ import org.aerogear.graphqlandroid.*
 import org.aerogear.graphqlandroid.adapter.TaskAdapter
 import org.aerogear.graphqlandroid.data.ViewModel
 import org.aerogear.graphqlandroid.model.Task
+import org.aerogear.offixoffline.scheduleWorker
 import java.util.concurrent.atomic.AtomicReference
 
 class MainActivity : AppCompatActivity() {
@@ -370,6 +371,21 @@ class MainActivity : AppCompatActivity() {
                 }
             )
         )
+    }
+
+    /*
+     In the activity's onStop(), schedule a worker that would try to replicate the mutations done when offline (stored in database )
+     to the server whenever network connection is regained.
+     */
+    override fun onStop() {
+
+        Log.e(TAG, " onStop of app")
+
+        /* Schedule a worker by calling scheduleWorker() of the library.
+           @param Worker class which extend OffixWorker class of the library.
+        */
+        scheduleWorker(SampleWorker::class.java)
+        super.onStop()
     }
 
     override fun onDestroy() {

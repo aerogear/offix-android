@@ -1,4 +1,4 @@
-package org.aerogear.offixoffline.Interceptor
+package org.aerogear.offixoffline.interceptor
 
 import android.content.Context
 import android.util.Log

@@ -30,7 +30,7 @@ class Offline private constructor(context: Context) {
     /**
      * Event database is initialized and stored once
      */
-    private var libdb: org.aerogear.offixoffline.persistence.Database? = null
+    internal var libdb: org.aerogear.offixoffline.persistence.Database? = null
 
     /*
     sharedPref for storing url of the server (will be used when app is in background)
@@ -38,7 +38,6 @@ class Offline private constructor(context: Context) {
     val sharedPreferences by lazy {
         ctx.getSharedPreferences("libSharedPref", Context.MODE_PRIVATE)
     }
-
 
     /**
      * Callback that's invoked every time a new activity's lifecycle method was called
@@ -65,6 +64,7 @@ class Offline private constructor(context: Context) {
          */
         override fun onActivityStopped(activity: Activity?) {
             Log.d(TAG, "Offline Library, onActivityStopped")
+            Log.d(TAG, "Offline Library size of list, ${libdb?.mutationDao()?.getAllMutations()?.size}")
         }
 
         override fun onActivityDestroyed(activity: Activity?) = Unit
@@ -81,6 +81,7 @@ class Offline private constructor(context: Context) {
             org.aerogear.offixoffline.persistence.Database::class.java, "offline_db"
         )
             .fallbackToDestructiveMigration()
+            .allowMainThreadQueries()
             .build()
     }
 
@@ -112,7 +113,7 @@ class Offline private constructor(context: Context) {
         /*
          Function to check the network connectivity.
          */
-        internal fun isNetwork(): Boolean {
+        fun isNetwork(): Boolean {
             Log.d(TAG, "isNetwork() of Offline class called")
             val connectivityManager =
                 offline?.ctx?.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
@@ -129,5 +130,10 @@ class Offline private constructor(context: Context) {
                 it.putString("url", string).apply()
             }
         }
+
+        /*
+        Function to get the database which stored mutations made by the user when offline.
+        */
+        fun getDb() = offline?.libdb
     }
 }
