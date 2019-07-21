@@ -378,9 +378,6 @@ class MainActivity : AppCompatActivity() {
      to the server whenever network connection is regained.
      */
     override fun onStop() {
-
-        Log.e(TAG, " onStop of app")
-
         /* Schedule a worker by calling scheduleWorker() of the library.
            @param Worker class which extend OffixWorker class of the library.
         */

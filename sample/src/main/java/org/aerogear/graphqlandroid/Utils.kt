@@ -131,7 +131,8 @@ object Utils {
 
                 //To see for conflict, "VoyagerConflict" which comes in the message is searched for.
                 if (responseBodyString.contains("VoyagerConflict")) {
-                    showToast(context)
+                    Log.d("Utils conflcit"," VoyagerConflict")
+                   // showToast(context)
                 }
 //                if (responseBodyString.contains("\"msg\":\"\"") &&
 //                    responseBodyString.contains("\"operationType\":\"mutation\"") &&
@@ -155,12 +156,12 @@ object Utils {
         return conflictInterceptor
     }
 
-    //Toast shown to the user displaying conflict detected.
-    private fun showToast(context: Context) {
-        (context as MainActivity).runOnUiThread {
-            Toast.makeText(context, "Conflict Detected", Toast.LENGTH_SHORT).show()
-        }
-    }
+//    //Toast shown to the user displaying conflict detected.
+//    private fun showToast(context: Context) {
+//        (context as MainActivity).runOnUiThread {
+//            Toast.makeText(context, "Conflict Detected", Toast.LENGTH_SHORT).show()
+//        }
+//    }
 
     //Toast shown to the user displaying conflict detected.
     private fun showToast2(context: Context) {

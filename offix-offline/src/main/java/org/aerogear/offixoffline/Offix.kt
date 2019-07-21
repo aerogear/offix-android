@@ -6,6 +6,7 @@ import android.util.Log
 import androidx.work.*
 import com.apollographql.apollo.ApolloCall
 import com.apollographql.apollo.ApolloClient
+import com.apollographql.apollo.api.Input
 import com.apollographql.apollo.api.Mutation
 import com.apollographql.apollo.api.Operation
 import org.json.JSONObject
@@ -48,7 +49,7 @@ fun ApolloClient.enqueue(
 
         /* Get access to the dao of the database
          */
-        val libDao = Offline.getDb()?.mutationDao()
+        val libDao = getDao()
 
         val operationId = mutation.operationId()
         val operationDoc = mutation.queryDocument()
@@ -81,7 +82,7 @@ fun ApolloClient.enqueue(
    @param Class of type worker
    @return unit
  */
-fun <T : Worker> scheduleWorker(workerClass: Class<T>){
+fun <T : Worker> scheduleWorker(workerClass: Class<T>) {
     Log.d("Extension sWorker", "Inside worker")
 
     /* Set the constraints to check the network connection.
@@ -100,6 +101,61 @@ fun <T : Worker> scheduleWorker(workerClass: Class<T>){
     */
     WorkManager.getInstance().enqueue(oneTimeWorkRequest)
 }
+
+/*
+ @param storedmutation : (org.aerogear.offixoffline.persistence)Mutation
+ @return Mutation<Operation.Data, Operation.Data, Operation.Variables>
+ */
+fun objFromStoredMutation(storedmutation: org.aerogear.offixoffline.persistence.Mutation): Mutation<Operation.Data, Operation.Data, Operation.Variables> {
+
+    //Get the class name of the mutation to which it has to be mapped
+    val responseClassName = storedmutation.responseClassName
+
+    val classReflected: Class<*> = Class.forName(responseClassName)
+
+    //Get the constructor of the class, and as apollo generated classes have only one constructor, so take the first one.
+    val constructor = classReflected.constructors.first()
+
+    //Get the parameterTypes
+    val parameters = constructor.parameterTypes
+    val jsonValues = arrayListOf<Any>()
+
+    //Get the json object i.e the variables map given as input by the user
+    val jsonObj = storedmutation.valueMap
+
+    //Put all the json values into a list
+    val iter = jsonObj.keys()
+    iter.forEach { key ->
+        jsonValues.add(jsonObj.get(key))
+    }
+
+    Log.d("jsonValuesList ", " ${jsonValues.size}")
+
+    jsonValues.forEach {
+        Log.d("jsonValuesList : ", " $it")
+    }
+
+    //Check if the input parameter is of type Input<*>, if yes typecast it to be of the type Input<*>
+    parameters.forEachIndexed { index, clazz ->
+
+        Log.e("parameters : ", " ${clazz.name}")
+        if (InputTypeChecker(clazz.name).inCheck()) {
+            jsonValues[index] = Input.optional(jsonValues[index])
+            Log.e("parameters **: ", " ${jsonValues[index].javaClass.name}")
+        }
+    }
+
+    //Make an object of mutation (done by reflection)
+    val obj = constructor.newInstance(*jsonValues.toArray())
+
+    return obj as Mutation<Operation.Data, Operation.Data, Operation.Variables>
+}
+
+/*
+ Get the mutationDao of the database.
+ @return Database Dao.
+ */
+fun getDao() = Offline.getDb()?.mutationDao()
 
 /*  Extension function for ApolloClient Builder
     @receiver param: ApolloClient.Buidler, which can be used by the user for creating a custom client.
