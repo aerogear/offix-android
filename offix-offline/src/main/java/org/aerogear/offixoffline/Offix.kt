@@ -51,30 +51,37 @@ fun ApolloClient.enqueue(
          */
         val libDao = getDao()
 
-        val operationId = mutation.operationId()
-        val operationDoc = mutation.queryDocument()
-        val operationName = mutation.name()
-        val valMap = mutation.variables().valueMap()
-        val jsonObject = JSONObject(valMap)
-        val responseClassName = mutation.javaClass.name
-
-        /* Make an object of Mutation persistence class
-         */
-        val mutationDbObj = org.aerogear.offixoffline.persistence.Mutation(
-            operationId,
-            operationDoc,
-            operationName,
-            jsonObject,
-            responseClassName
-        )
-
         /* Insert mutation object in the database.
         */
-        libDao?.insertMutation(mutationDbObj)
+        libDao?.insertMutation(getPersistenceMutation(mutation))
         Log.d("Extension", " serial number: ${libDao?.getAllMutations()?.get(0)?.sNo}")
         Log.d("Extension", " values of mutation: ${libDao?.getAllMutations()?.get(0)?.valueMap}")
         Log.d("Extension", " size of db list after inserting mutations: ${libDao?.getAllMutations()?.size}")
     }
+}
+
+/*
+ This function takes in an object of Mutation<D,T,V> and returns an object of Mutation persistence.
+ */
+fun getPersistenceMutation(mutation: Mutation<Operation.Data, Any, Operation.Variables>): org.aerogear.offixoffline.persistence.Mutation {
+
+    val operationId = mutation.operationId()
+    val operationDoc = mutation.queryDocument()
+    val operationName = mutation.name()
+    val valMap = mutation.variables().valueMap()
+    val jsonObject = JSONObject(valMap)
+    val responseClassName = mutation.javaClass.name
+
+    /* Make an object of Mutation persistence class
+       */
+    val mutationDbObj = org.aerogear.offixoffline.persistence.Mutation(
+        operationId,
+        operationDoc,
+        operationName,
+        jsonObject,
+        responseClassName
+    )
+    return mutationDbObj
 }
 
 /* scheduleWorker() takes in a worker class and schedule a work manager to replicate all the
@@ -106,7 +113,7 @@ fun <T : Worker> scheduleWorker(workerClass: Class<T>) {
  @param storedmutation : (org.aerogear.offixoffline.persistence)Mutation
  @return Mutation<Operation.Data, Operation.Data, Operation.Variables>
  */
-fun objFromStoredMutation(storedmutation: org.aerogear.offixoffline.persistence.Mutation): Mutation<Operation.Data, Operation.Data, Operation.Variables> {
+fun getMutation(storedmutation: org.aerogear.offixoffline.persistence.Mutation): Mutation<Operation.Data, Operation.Data, Operation.Variables> {
 
     //Get the class name of the mutation to which it has to be mapped
     val responseClassName = storedmutation.responseClassName
@@ -130,10 +137,6 @@ fun objFromStoredMutation(storedmutation: org.aerogear.offixoffline.persistence.
     }
 
     Log.d("jsonValuesList ", " ${jsonValues.size}")
-
-    jsonValues.forEach {
-        Log.d("jsonValuesList : ", " $it")
-    }
 
     //Check if the input parameter is of type Input<*>, if yes typecast it to be of the type Input<*>
     parameters.forEachIndexed { index, clazz ->

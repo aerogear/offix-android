@@ -24,11 +24,6 @@ class NetworkChangeReceiver : BroadcastReceiver() {
         ) {
             val foregroundService = Intent(context, OfflineSyncService::class.java)
             context?.startService(foregroundService)
-//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//                context?.startForegroundService(foregroundService)
-//            } else {
-//                context?.startService(foregroundService)
-//            }
         }
     }
 }

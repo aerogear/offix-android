@@ -9,7 +9,7 @@ import com.apollographql.apollo.api.Response
 import com.apollographql.apollo.exception.ApolloException
 import org.aerogear.offixoffline.OffixWorker
 import org.aerogear.offixoffline.Offline
-import org.aerogear.offixoffline.objFromStoredMutation
+import org.aerogear.offixoffline.getMutation
 
 /*
  This class extends the OffixWorker class of the Offix-Offline library.
@@ -46,7 +46,7 @@ class SampleWorker(context: Context, workParameters: WorkerParameters) : OffixWo
                 /*
                  Create an object of Mutation<D,T,V> from the stored mutation in the database.
                  */
-                val obj = objFromStoredMutation(storedmutation)
+                val obj = getMutation(storedmutation)
 
                 /* Make an apollo client which takes in mutation object and makes a call to server.
                 When the app is in background, then we can't access to the client made by the user. In this scenario, we have to make a
