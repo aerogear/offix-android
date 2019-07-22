@@ -61,7 +61,7 @@ fun ApolloClient.enqueue(
 }
 
 /*
- This function takes in an object of Mutation<D,T,V> and returns an object of Mutation persistence.
+ This function takes in an object of Mutation<D,T,V> and returns an object of com.aerogear.offix.persistence.Mutation.
  */
 fun getPersistenceMutation(mutation: Mutation<Operation.Data, Any, Operation.Variables>): org.aerogear.offixoffline.persistence.Mutation {
 
@@ -72,8 +72,8 @@ fun getPersistenceMutation(mutation: Mutation<Operation.Data, Any, Operation.Var
     val jsonObject = JSONObject(valMap)
     val responseClassName = mutation.javaClass.name
 
-    /* Make an object of Mutation persistence class
-       */
+    /* Make an object of com.aerogear.offix.persistence.Mutation
+     */
     val mutationDbObj = org.aerogear.offixoffline.persistence.Mutation(
         operationId,
         operationDoc,
