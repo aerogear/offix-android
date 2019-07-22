@@ -105,6 +105,7 @@ Add the following dependency in your **module's build.gradle**.
         Offix.enqueue(apolloClient, mutation, callback);
   ```
   
+  
  **Extend Background Offline Support of the library**
  
  - Create a class `Worker` that extends `OffixWorker` of the library.
@@ -198,6 +199,7 @@ Add the following dependency in your **module's build.gradle**.
      }
    ```  
    
+
 
 In the onStop() mehtod of your activity, call **`scheduleWorker(YourWorker::class.java)`** function of the library.
 
