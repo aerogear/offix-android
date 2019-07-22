@@ -112,8 +112,7 @@ Add the following dependency in your **module's build.gradle**.
  - Follow the below mentioned steps in the Worker's `doWork()` method.
  
    - Get the list of mutations by calling `getListOfMutations()` function of the parent class.
-   - Check the network status.
-   - If the network is connected, then run a loop on list of mutations.
+   - Run a loop on list of mutations.
    - On each mutation fetched from the list, create an object of Mutation<D,T,V> by passing the fetched mutation to the 
      `getMutation(mutation)` function of library.
    - You can use the above object while creating an instance of ApolloCall and make a call to the server.
@@ -123,16 +122,16 @@ Add the following dependency in your **module's build.gradle**.
  - **In Kotlin**
   
   ```kotlin
+  
+   class SampleWorker(context: Context, workParameters: WorkerParameters) : OffixWorker(context, workParameters) {
+   
+    override fun doWork(): Result {
         /*
          getListOfMutations() returns the list of mutations stored in database in the library.
          It's present in the parent class, i.e OffixWorker.
          */
         val listOfMutations = getListOfMutations()
-
-        /*
-         Check again if the network connection is there or not.
-         */
-        if (Offline.isNetwork()) {
+        
             //get the mutation one by one from list
             listOfMutations.forEach { storedmutation ->
             
@@ -158,8 +157,9 @@ Add the following dependency in your **module's build.gradle**.
                         deleteMutation(storedmutation)
                     }
                 })
-            }
         }
+        return Result.success()
+    }
 
 ```
 
@@ -167,13 +167,16 @@ Add the following dependency in your **module's build.gradle**.
 - **In Java**
 
   ```java
+  
+  class SampleWorker extends OffixWorker{
+  
+  public doWork(){
+  
      /* getListOfMutations() returns the list of mutations stored in database in the library.
          It's present in the parent class, i.e OffixWorker.
      */
      List<Mutation> listOfMutations=getListOfMutations();
-     
-     if(network is available){
-     
+   
       //get the mutation one by one from list.
       for(int i=0;i<listOfMutations.size();i++){
       
@@ -196,6 +199,7 @@ Add the following dependency in your **module's build.gradle**.
                         deleteMutation(storedmutation)
                     }
                 })
+         return Result.success();
      }
    ```  
    
@@ -223,7 +227,7 @@ In the onStop() mehtod of your activity, call **`scheduleWorker(YourWorker::clas
 ## Limitations
 
 1. No UI Bindings, you will have to update your UI manually.
-2. This library can only be used by integrating with Apollo Framework as of now.
+2. The library only supports apollo-android for the time being.
 
 ## Features in Development 
 
