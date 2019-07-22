@@ -40,6 +40,13 @@ class OfflineSyncService : IntentService("OfflineService") {
             */
             mutationList.clear()
             callbackList.clear()
+
+            /* Delete the mutations stored in the database as they have already been replicated to the server
+               via the array list method having mutations and callbacks because the app was still in foreground.
+               (This service starts when the app is in foreground, so no need to take the database approach here.)
+            */
+            Offline.getDb()?.mutationDao()?.deleteAllMutations()
+            Log.d(TAG, " Size of database list : ${Offline.getDb()?.mutationDao()?.getAllMutations()?.size}")
         }
     }
 }

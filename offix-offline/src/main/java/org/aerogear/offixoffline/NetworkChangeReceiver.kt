@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 
+
 /*
  BroadcastReceiver that listens for connectivity change while the app is in foreground (in-memory).
  In it's onReceive() method we check the network connection. If the user is connected to the net, then get access to the arraylist
@@ -16,9 +17,11 @@ class NetworkChangeReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context?, intent: Intent?) {
         /*
-        Offload the work to an IntentService that syncs the mutations with the server
+        Offload the work to an IntentService that syncs the mutations with the server only when list is not empty.
          */
-        if (intent?.action == "android.net.conn.CONNECTIVITY_CHANGE") {
+        if (intent?.action == "android.net.conn.CONNECTIVITY_CHANGE" &&
+            OfflineList.getInstance().offlineArrayList.isNotEmpty()
+        ) {
             val foregroundService = Intent(context, OfflineSyncService::class.java)
             context?.startService(foregroundService)
         }

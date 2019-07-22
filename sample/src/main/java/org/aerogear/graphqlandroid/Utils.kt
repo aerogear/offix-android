@@ -9,6 +9,7 @@ import android.widget.Toast
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.api.Operation
 import com.apollographql.apollo.api.ResponseField
+import com.apollographql.apollo.api.cache.http.HttpCachePolicy
 import com.apollographql.apollo.cache.normalized.CacheKey
 import com.apollographql.apollo.cache.normalized.CacheKeyResolver
 import com.apollographql.apollo.cache.normalized.lru.EvictionPolicy
@@ -27,7 +28,7 @@ import java.util.concurrent.Executor
 object Utils {
 
     //To run on emulator
-    const val BASE_URL = "http://192.168.0.102:4000/graphql"
+    const val BASE_URL = "http://192.168.0.104:4000/graphql"
     private const val SQL_CACHE_NAME = "tasks3Db"
 
     private var apClient: ApolloClient? = null
@@ -61,7 +62,7 @@ object Utils {
                     )
                 )
                 .serverUrl(BASE_URL)
-//              .defaultHttpCachePolicy(HttpCachePolicy.CACHE_FIRST)
+                .defaultHttpCachePolicy(HttpCachePolicy.CACHE_FIRST)
                 .build()
         }
 
@@ -130,7 +131,8 @@ object Utils {
 
                 //To see for conflict, "VoyagerConflict" which comes in the message is searched for.
                 if (responseBodyString.contains("VoyagerConflict")) {
-                    showToast(context)
+                    Log.d("Utils conflcit"," VoyagerConflict")
+                   // showToast(context)
                 }
 //                if (responseBodyString.contains("\"msg\":\"\"") &&
 //                    responseBodyString.contains("\"operationType\":\"mutation\"") &&
@@ -154,12 +156,12 @@ object Utils {
         return conflictInterceptor
     }
 
-    //Toast shown to the user displaying conflict detected.
-    private fun showToast(context: Context) {
-        (context as MainActivity).runOnUiThread {
-            Toast.makeText(context, "Conflict Detected", Toast.LENGTH_SHORT).show()
-        }
-    }
+//    //Toast shown to the user displaying conflict detected.
+//    private fun showToast(context: Context) {
+//        (context as MainActivity).runOnUiThread {
+//            Toast.makeText(context, "Conflict Detected", Toast.LENGTH_SHORT).show()
+//        }
+//    }
 
     //Toast shown to the user displaying conflict detected.
     private fun showToast2(context: Context) {
@@ -188,12 +190,6 @@ object Utils {
         }
 
 
-    }
-
-    fun isNetwork(context: Context): Boolean {
-        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val activeNetworkInfo = connectivityManager.activeNetworkInfo
-        return activeNetworkInfo != null && activeNetworkInfo.isConnected
     }
 }
 
