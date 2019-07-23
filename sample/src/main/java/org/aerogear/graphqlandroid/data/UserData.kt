@@ -2,17 +2,22 @@ package org.aerogear.graphqlandroid.data
 
 import android.content.Context
 import android.util.Log
+import android.widget.Toast
 import com.apollographql.apollo.ApolloCall
 import com.apollographql.apollo.ApolloCall.Callback
 import com.apollographql.apollo.ApolloQueryWatcher
+import com.apollographql.apollo.api.Mutation
 import com.apollographql.apollo.api.Operation
 import com.apollographql.apollo.api.Response
 import com.apollographql.apollo.cache.normalized.ApolloStore
 import com.apollographql.apollo.exception.ApolloException
 import com.apollographql.apollo.fetcher.ApolloResponseFetchers
 import org.aerogear.graphqlandroid.*
+import org.aerogear.graphqlandroid.activities.MainActivity
 import org.aerogear.graphqlandroid.model.Task
+import org.aerogear.offixoffline.OffixInterface
 import org.aerogear.offixoffline.enqueue
+import java.lang.Exception
 import java.util.concurrent.atomic.AtomicReference
 
 class UserData(val context: Context) {
@@ -82,24 +87,20 @@ class UserData(val context: Context) {
         Log.e(TAG, " updateTask 23: - ${client?.operation()?.variables()?.valueMap()}")
         Log.e(TAG, " updateTask 25: - ${client?.operation()?.name()}")
 
-        val callback = object : ApolloCall.Callback<UpdateCurrentTaskMutation.Data>() {
-            override fun onFailure(e: ApolloException) {
-                Log.e("onFailure" + "updateTask", e.toString())
+        val customCallback = object : OffixInterface {
+            override fun onSuccess(response: Response<Any>) {
+                Log.e("onSuccess() updateTask", "${response.data()}")
             }
 
-            override fun onResponse(response: Response<UpdateCurrentTaskMutation.Data>) {
-                val result = response.data()?.updateTask()
-                Log.e(TAG, "onResponse-UpdateTask")
-                Log.e(TAG, "${result?.id()}")
-                Log.e(TAG, "${result?.title()}")
-                Log.e(TAG, "${result?.description()}")
-                Log.e(TAG, "${result?.version()}")
+            override fun onSchedule(e: ApolloException, mutation: Mutation<Operation.Data, Any, Operation.Variables>) {
+                Log.e("onSchedule() updateTask", "${mutation.variables().valueMap()}")
+                e.printStackTrace()
             }
         }
 
         Utils.getApolloClient(context)?.enqueue(
             mutation as com.apollographql.apollo.api.Mutation<Operation.Data, Any, Operation.Variables>,
-            callback as ApolloCall.Callback<Any>
+            customCallback
         )
     }
 
@@ -108,24 +109,20 @@ class UserData(val context: Context) {
         Log.e(TAG, "inside create title")
         val mutation = CreateTaskMutation.builder().title(title).description(description).build()
 
-        val callback = object : ApolloCall.Callback<CreateTaskMutation.Data>() {
-            override fun onFailure(e: ApolloException) {
-                Log.e("onFailure" + "updateTask", e.toString())
+        val customCallback = object : OffixInterface {
+            override fun onSuccess(response: Response<Any>) {
+                Log.e("onSuccess() createTask", "${response.data()}")
             }
 
-            override fun onResponse(response: Response<CreateTaskMutation.Data>) {
-                val result = response.data()?.createTask()
-                Log.e(TAG, "onResponse-UpdateTask")
-                Log.e(TAG, "${result?.id()}")
-                Log.e(TAG, "${result?.title()}")
-                Log.e(TAG, "${result?.description()}")
-                Log.e(TAG, "${result?.version()}")
+            override fun onSchedule(e: ApolloException, mutation: Mutation<Operation.Data, Any, Operation.Variables>) {
+                e.printStackTrace()
+                Log.e("onSchedule() createTask", "${mutation.variables().valueMap()}")
             }
         }
 
         Utils.getApolloClient(context)?.enqueue(
             mutation as com.apollographql.apollo.api.Mutation<Operation.Data, Any, Operation.Variables>,
-            callback as ApolloCall.Callback<Any>
+            customCallback
         )
     }
 
@@ -144,9 +141,20 @@ class UserData(val context: Context) {
             }
         }
 
+        val customCallback = object : OffixInterface {
+            override fun onSuccess(response: Response<Any>) {
+                Log.e("onSuccess() deleteTask", "${response.data()}")
+            }
+
+            override fun onSchedule(e: ApolloException, mutation: Mutation<Operation.Data, Any, Operation.Variables>) {
+                e.printStackTrace()
+                Log.e("onSchedule() deleteTask", "${mutation.variables().valueMap()}")
+            }
+        }
+
         Utils.getApolloClient(context)?.enqueue(
             mutation as com.apollographql.apollo.api.Mutation<Operation.Data, Any, Operation.Variables>,
-            callback as ApolloCall.Callback<Any>
+            customCallback
         )
     }
 

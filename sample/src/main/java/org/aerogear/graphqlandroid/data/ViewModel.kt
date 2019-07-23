@@ -21,8 +21,6 @@ import kotlin.collections.ArrayList
 class ViewModel(application: Application) :
     AndroidViewModel(application) {
     val apcontext = application
-    lateinit var apolloQueryWatcher: ApolloQueryWatcher<AllTasksQuery.Data>
-    lateinit var tasksList: LiveData<List<Task>>
 
     val TAG = javaClass.simpleName
 
