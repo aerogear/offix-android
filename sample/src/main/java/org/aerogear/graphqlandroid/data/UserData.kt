@@ -13,8 +13,8 @@ import com.apollographql.apollo.exception.ApolloException
 import com.apollographql.apollo.fetcher.ApolloResponseFetchers
 import org.aerogear.graphqlandroid.*
 import org.aerogear.graphqlandroid.model.Task
-import org.aerogear.offixoffline.ResponseCallback
-import org.aerogear.offixoffline.enqueue
+import org.aerogear.offix.ResponseCallback
+import org.aerogear.offix.enqueue
 import java.util.concurrent.atomic.AtomicReference
 
 class UserData(val context: Context) {

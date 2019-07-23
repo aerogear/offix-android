@@ -32,7 +32,7 @@ import org.aerogear.graphqlandroid.*
 import org.aerogear.graphqlandroid.adapter.TaskAdapter
 import org.aerogear.graphqlandroid.data.ViewModel
 import org.aerogear.graphqlandroid.model.Task
-import org.aerogear.offixoffline.scheduleWorker
+import org.aerogear.offix.scheduleWorker
 import java.util.concurrent.atomic.AtomicReference
 
 class MainActivity : AppCompatActivity() {

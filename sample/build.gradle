@@ -64,5 +64,5 @@ dependencies {
     /*
     Including the library offix-offline.
    */
-    implementation project(":offix-offline")
+    implementation project(':offix')
 }
