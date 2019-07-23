@@ -16,11 +16,11 @@ import org.json.JSONObject
 /* Extension function on ApolloClient which will be used by the user while making a call request.
    @receiver parameter is ApolloClient on which the call will be made by the user.
    @param mutation which will be stored in the list if network connection is not there.
-   @param offixInterface which is of type OffixInterface.
+   @param responseCallback which is of type ResponseCallback.
  */
 fun ApolloClient.enqueue(
     mutation: Mutation<Operation.Data, Any, Operation.Variables>,
-    offixInterface: OffixInterface
+    responseCallback: ResponseCallback
 ) {
     /* Set apollo client given by the user.
      */
@@ -61,9 +61,9 @@ fun ApolloClient.enqueue(
             Log.d("Extension", " size of db list after inserting mutations: ${libDao?.getAllMutations()?.size}")
 
             /*
-             Set the exception that caused onFailure() and the mutation object in the onSchedule() of offixInterface.
+             Set the exception that caused onFailure() and the mutation object in the onSchedule() of responseCallback.
              */
-            offixInterface.onSchedule(e, mutation)
+            responseCallback.onSchedule(e, mutation)
         }
 
         override fun onResponse(response: Response<Any>) {
@@ -71,9 +71,9 @@ fun ApolloClient.enqueue(
             Log.d("Extension Callback * ", result)
 
             /*
-             Set the response received from the server in the onSucceess() of offixInterface.
+             Set the response received from the server in the onSucceess() of responseCallback.
              */
-            offixInterface.onSuccess(response)
+            responseCallback.onSuccess(response)
         }
     }
 

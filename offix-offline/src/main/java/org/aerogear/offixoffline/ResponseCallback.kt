@@ -6,9 +6,9 @@ import com.apollographql.apollo.api.Response
 import com.apollographql.apollo.exception.ApolloException
 
 /**
- OffixInterface is used by the users in making a callback object which is passed to the Offix enqueue() function.
+ ResponseCallback is used by the users in making a callback object which is passed to the Offix enqueue() function.
  */
-interface OffixInterface {
+interface ResponseCallback {
     /**
      * Called when the request is successfully executed and we get the response from the server.
      */

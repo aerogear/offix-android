@@ -2,7 +2,6 @@ package org.aerogear.graphqlandroid.data
 
 import android.content.Context
 import android.util.Log
-import android.widget.Toast
 import com.apollographql.apollo.ApolloCall
 import com.apollographql.apollo.ApolloCall.Callback
 import com.apollographql.apollo.ApolloQueryWatcher
@@ -13,11 +12,9 @@ import com.apollographql.apollo.cache.normalized.ApolloStore
 import com.apollographql.apollo.exception.ApolloException
 import com.apollographql.apollo.fetcher.ApolloResponseFetchers
 import org.aerogear.graphqlandroid.*
-import org.aerogear.graphqlandroid.activities.MainActivity
 import org.aerogear.graphqlandroid.model.Task
-import org.aerogear.offixoffline.OffixInterface
+import org.aerogear.offixoffline.ResponseCallback
 import org.aerogear.offixoffline.enqueue
-import java.lang.Exception
 import java.util.concurrent.atomic.AtomicReference
 
 class UserData(val context: Context) {
@@ -87,7 +84,7 @@ class UserData(val context: Context) {
         Log.e(TAG, " updateTask 23: - ${client?.operation()?.variables()?.valueMap()}")
         Log.e(TAG, " updateTask 25: - ${client?.operation()?.name()}")
 
-        val customCallback = object : OffixInterface {
+        val customCallback = object : ResponseCallback {
             override fun onSuccess(response: Response<Any>) {
                 Log.e("onSuccess() updateTask", "${response.data()}")
             }
@@ -109,7 +106,7 @@ class UserData(val context: Context) {
         Log.e(TAG, "inside create title")
         val mutation = CreateTaskMutation.builder().title(title).description(description).build()
 
-        val customCallback = object : OffixInterface {
+        val customCallback = object : ResponseCallback {
             override fun onSuccess(response: Response<Any>) {
                 Log.e("onSuccess() createTask", "${response.data()}")
             }
@@ -141,7 +138,7 @@ class UserData(val context: Context) {
             }
         }
 
-        val customCallback = object : OffixInterface {
+        val customCallback = object : ResponseCallback {
             override fun onSuccess(response: Response<Any>) {
                 Log.e("onSuccess() deleteTask", "${response.data()}")
             }
