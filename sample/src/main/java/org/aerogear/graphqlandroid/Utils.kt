@@ -2,7 +2,6 @@
 package org.aerogear.graphqlandroid
 
 import android.content.Context
-import android.net.ConnectivityManager
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.widget.Toast
@@ -21,14 +20,13 @@ import com.apollographql.apollo.interceptor.ApolloInterceptorChain
 import com.apollographql.apollo.subscription.WebSocketSubscriptionTransport
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
-import org.aerogear.graphqlandroid.activities.MainActivity
 import java.nio.charset.Charset
 import java.util.concurrent.Executor
 
 object Utils {
 
     //To run on emulator
-    const val BASE_URL = "http://192.168.0.104:4000/graphql"
+    const val BASE_URL = "http://192.168.0.101:4000/graphql"
     private const val SQL_CACHE_NAME = "tasks3Db"
 
     private var apClient: ApolloClient? = null

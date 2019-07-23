@@ -9,56 +9,80 @@ import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.api.Input
 import com.apollographql.apollo.api.Mutation
 import com.apollographql.apollo.api.Operation
+import com.apollographql.apollo.api.Response
+import com.apollographql.apollo.exception.ApolloException
 import org.json.JSONObject
-import java.util.concurrent.TimeUnit
 
 /* Extension function on ApolloClient which will be used by the user while making a call request.
    @receiver parameter is ApolloClient on which the call will be made by the user.
    @param mutation which will be stored in the list if network connection is not there.
-   @param callback which will be stored in the list if network connection is not there.
+   @param responseCallback which is of type ResponseCallback.
  */
 fun ApolloClient.enqueue(
     mutation: Mutation<Operation.Data, Any, Operation.Variables>,
-    callback: ApolloCall.Callback<Any>
+    responseCallback: ResponseCallback
 ) {
     /* Set apollo client given by the user.
      */
     OfflineList.apClient = this
 
-    /* Check is the network is available or not.
-     */
-    if (Offline.isNetwork()) {
-        Log.d("Extension", " Network connected")
-        this.mutate(mutation).enqueue(callback)
-    } else {
-        Log.d("Extension", "Network not connected")
+    /*
+     Create an object of ApolloCall.Callback
+    */
+    val apolloCallback = object : ApolloCall.Callback<Any>() {
 
-        /* If the user is offline:
-           (For Case 1: When the app is in foreground, i.e. in-memory)
-           1. Store the mutation object and callback in an array-list.
+        /**
+         * Called when the request could not be executed due to cancellation, a connectivity problem or
+         * timeout.
          */
-        Log.d("Extension", " mutation : ${mutation.variables().valueMap()}")
-        OfflineList.getInstance().offlineArrayList.add(mutation)
-        OfflineList.getInstance().callbacksList.add(callback)
+        override fun onFailure(e: ApolloException) {
+            Log.d("Extension Callback - ", "$e")
 
-        /* If the user is offline:
-          (For Case 2: When the app is in background, we will scheduleWorker a worker to replicate the mutations stored in database to the server)
-           1. Make an object of mutation persistence class.
-           2.Store it in database
-         */
+            /* If the user is offline:
+             (For Case 1: When the app is in foreground, i.e. in-memory)
+             Store the mutation object in an array-list.
+            */
+            OfflineList.getInstance().offlineArrayList.add(mutation)
 
-        /* Get access to the dao of the database
-         */
-        val libDao = getDao()
+            /* If the user is offline:
+              (For Case 2: When the app is in background, we will scheduleWorker a worker to replicate the mutations stored in database to the server)
+               1. Make an object of mutation persistence class.
+               2. Store it in database
+             */
 
-        /* Insert mutation object in the database.
-        */
-        libDao?.insertMutation(getPersistenceMutation(mutation))
-        Log.d("Extension", " serial number: ${libDao?.getAllMutations()?.get(0)?.sNo}")
-        Log.d("Extension", " values of mutation: ${libDao?.getAllMutations()?.get(0)?.valueMap}")
-        Log.d("Extension", " size of db list after inserting mutations: ${libDao?.getAllMutations()?.size}")
+            /* Get access to the dao of the database
+             */
+            val libDao = getDao()
+
+            /* Insert mutation object in the database.
+            */
+            libDao?.insertMutation(getPersistenceMutation(mutation))
+            Log.d("Extension", " serial number: ${libDao?.getAllMutations()?.get(0)?.sNo}")
+            Log.d("Extension", " size of db list after inserting mutations: ${libDao?.getAllMutations()?.size}")
+
+            /*
+             Set the exception that caused onFailure() and the mutation object in the onSchedule() of responseCallback.
+             */
+            responseCallback.onSchedule(e, mutation)
+        }
+
+        override fun onResponse(response: Response<Any>) {
+            val result = response.data().toString()
+            Log.d("Extension Callback * ", result)
+
+            /*
+             Set the response received from the server in the onSucceess() of responseCallback.
+             */
+            responseCallback.onSuccess(response)
+        }
     }
+
+    /*
+      Make a call with the mutation to the server.
+     */
+    this.mutate(mutation).enqueue(apolloCallback)
 }
+
 
 /*
  This function takes in an object of Mutation<D,T,V> and returns an object of com.aerogear.offix.persistence.Mutation.
