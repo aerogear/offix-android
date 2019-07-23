@@ -40,8 +40,7 @@ fun ApolloClient.enqueue(
 
             /* If the user is offline:
              (For Case 1: When the app is in foreground, i.e. in-memory)
-             Store the mutation object and callback in an array-list.
-             (Callback is stored after the object is made)
+             Store the mutation object in an array-list.
             */
             OfflineList.getInstance().offlineArrayList.add(mutation)
 
