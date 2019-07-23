@@ -7,9 +7,9 @@ import com.apollographql.apollo.ApolloCall
 import com.apollographql.apollo.api.Operation
 import com.apollographql.apollo.api.Response
 import com.apollographql.apollo.exception.ApolloException
-import org.aerogear.offixoffline.OffixWorker
-import org.aerogear.offixoffline.Offline
-import org.aerogear.offixoffline.getMutation
+import org.aerogear.offix.OffixWorker
+import org.aerogear.offix.Offline
+import org.aerogear.offix.getMutation
 
 /*
  This class extends the OffixWorker class of the Offix-Offline library.
