@@ -4,18 +4,10 @@ import com.apollographql.apollo.ApolloCall
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.api.Operation
 
-/* This class helps in creating an array list of mutations and callbacks associated with the apollo call.
+/* This class helps in getting access to the instance of apollo client provided by the user.
+   Also, in future the static objects can be placed here.
  */
 class OfflineList {
-
-    /* Array List to store mutation objects.
-        */
-    val offlineArrayList =
-        arrayListOf<com.apollographql.apollo.api.Mutation<Operation.Data, Any, Operation.Variables>>()
-
-    /* Array List to store callbacks objects.
-     */
-    val callbacksList = arrayListOf<ApolloCall.Callback<Any>>()
 
     companion object {
         var apClient: ApolloClient? = null
