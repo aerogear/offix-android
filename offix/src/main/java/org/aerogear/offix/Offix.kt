@@ -24,7 +24,7 @@ fun ApolloClient.enqueue(
 ) {
     /* Set apollo client given by the user.
      */
-    OfflineList.apClient = this
+    Offline.apClient = this
 
     /*
      Create an object of ApolloCall.Callback

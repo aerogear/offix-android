@@ -23,7 +23,7 @@ class OfflineSyncWorker(context: Context, workerParameters: WorkerParameters) : 
         /* Get access to the list of mutations stored in the database.
         */
         val mutationList = mutationDao?.getAllMutations()
-        val apolloClient = OfflineList.apClient
+        val apolloClient = Offline.apClient
 
         /*
          Create an object of ApolloCall.Callback
@@ -60,6 +60,10 @@ class OfflineSyncWorker(context: Context, workerParameters: WorkerParameters) : 
                 mutationDao?.deleteMutation(storedmutation)
             }
         }
-        return Result.success()
+        return if (mutationDao?.getAllMutations()?.isEmpty()!!) {
+            Result.success()
+        } else {
+            Result.retry()
+        }
     }
 }
