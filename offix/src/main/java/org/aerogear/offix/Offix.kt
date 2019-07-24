@@ -24,7 +24,7 @@ fun ApolloClient.enqueue(
 ) {
     /* Set apollo client given by the user.
      */
-    OfflineList.apClient = this
+    Offline.apClient = this
 
     /*
      Create an object of ApolloCall.Callback
@@ -39,14 +39,7 @@ fun ApolloClient.enqueue(
             Log.d("Extension Callback - ", "$e")
 
             /* If the user is offline:
-             (For Case 1: When the app is in foreground, i.e. in-memory)
-             Store the mutation object in an array-list.
-            */
-            OfflineList.getInstance().offlineArrayList.add(mutation)
-
-            /* If the user is offline:
-              (For Case 2: When the app is in background, we will scheduleWorker a worker to replicate the mutations stored in database to the server)
-               1. Make an object of mutation persistence class.
+               1. Make an object of (org.aerogear.offix.persistence)Mutation.
                2. Store it in database
              */
 

@@ -8,6 +8,7 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.os.Bundle
 import android.util.Log
+import com.apollographql.apollo.ApolloClient
 
 class Offline private constructor(context: Context) {
 
@@ -91,6 +92,7 @@ class Offline private constructor(context: Context) {
     companion object {
 
         private var offline: Offline? = null
+        var apClient: ApolloClient? = null
 
         /**
          * Returns an existing instance with the Offline class if it exists, else returns a new instance
