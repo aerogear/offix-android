@@ -1,0 +1,5 @@
+* [Home](/)
+* [Getting Started](gettingstarted.md)
+* [Demo app](demo.md)
+* [Test Offline Capabilities ](test_offline.md)
+* [Background Sync](worker_app.md)
