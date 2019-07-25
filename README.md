@@ -18,7 +18,6 @@ Link to be added.
 ## Example application
 
 See `sample` for example application.<br/>
-Backened used:  [ionic-showcase](https://github.com/aerogear/ionic-showcase)
 
 ## Limitations
 
