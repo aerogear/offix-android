@@ -2,7 +2,7 @@
 
 ### 1. Setup of Backened Server
 
-- Clone the [ionic showcase](https://github.com/aerogear/ionic-showcase.git) repository.
+- Clone the [ionic showcase](https://github.com/aerogear/ionic-showcase.git) repository which serves as a backened server for now.
 - Run the following commands **to start the server:**
   - cd ./server
   - docker-compose up
