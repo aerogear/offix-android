@@ -12,10 +12,6 @@ It will leverage Apollo GraphQL cache do deliver seamless experience for queryin
 
 For more information about the Apollo and GraphQL please go to https://www.apollographql.com/
 
-## Offix in Action
-
-<iframe width="560" height="560" src="https://www.youtube.com/embed/CrYinCtTHds" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-
 ## Features
 
 - Offline support. Mutations are persisted when Offline.
