@@ -1,7 +1,7 @@
 apply plugin: 'maven-publish'
 apply plugin: 'com.jfrog.bintray'
 
-version '1.0.0'
+version '1.0.2'
 group 'org.aerogear.offix'
 
 Properties properties = new Properties()
@@ -12,7 +12,7 @@ def apiKey = properties.getProperty('bintray.apikey')
 publishing {
     publications {
         Production(MavenPublication) {
-            artifact("$buildDir/outputs/aar/library-release.aar")
+            artifact("$buildDir/outputs/aar/offix-release.aar")
             groupId
             artifactId 'library'
             version this.version
@@ -35,11 +35,10 @@ publishing {
 }
 
 
-
 bintray {
     user = bintrayUser
     key = apiKey
-    publications = ['Development']
+    publications = ['Production']
     configurations = ['archives']
     override = true
     pkg {

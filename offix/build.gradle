@@ -82,7 +82,7 @@ ext {
     siteUrl = 'https://github.com/aerogear/offix-android'
     gitUrl = 'https://github.com/aerogear/offix-android.git'
 
-    libraryVersion = '1.0.0'
+    libraryVersion = '1.0.2'
 
     developerId = 'Lavanyagaur22'
     developerName = 'Lavanya Gaur'
@@ -92,8 +92,5 @@ ext {
     licenseUrl = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
     allLicenses = ["Apache-2.0"]
 }
-
-//apply from: 'https://raw.githubusercontent.com/numetriclabz/jcenter/master/installv.gradle'
-//apply from: 'https://raw.githubusercontent.com/numetriclabz/jcenter/master/bintrayv.gradle'
 
 apply from: 'publish.gradle'
