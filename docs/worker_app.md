@@ -1,4 +1,4 @@
-## Extend Background Offline Support of the library
+# Extend Background Offline Support of the library
  
  - Create a class `Worker` that extends `OffixWorker` of the library.
  - Follow the below mentioned steps in the Worker's `doWork()` method.
@@ -11,10 +11,12 @@
    - Make sure to delete the fetched mutation from the list in the onResponse() of your callback by calling              
    `deleteMutation(mutation)`.
    
- ### In Kotlin
+   
+ 
+ 
+ ## In Kotlin
   
   ```kotlin
-  
    class SampleWorker(context: Context, workParameters: WorkerParameters) : OffixWorker(context, workParameters) {
    
     override fun doWork(): Result {
@@ -52,14 +54,14 @@
   }
   return Result.success()
 }
-
 ```
 
 
-### In Java
+
+
+## In Java
 
   ```java
-  
   class SampleWorker extends OffixWorker{
   
   public doWork(){
@@ -93,8 +95,7 @@
      })
   return Result.success();
 }
-   ```  
+```  
    
-
 
 In the onStop() mehtod of your activity, call **`scheduleWorker(YourWorker::class.java)`** function of the library.
