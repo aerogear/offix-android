@@ -2,7 +2,7 @@
   <img width="400" src="https://github.com/aerogear/offix/raw/master/resources/logo.png">
   <br/>
   Offix extends the capabilities of Apollo GraphQL providing a
-  fully featured Offline Workflow and Conflict Resolution.
+  fully featured Offline Workflow and Conflict Resolution for Android Platform.
 </p>
 
 ## Introduction
@@ -12,12 +12,26 @@ It will leverage Apollo GraphQL cache do deliver seamless experience for queryin
 
 For more information about the Apollo and GraphQL please go to https://www.apollographql.com/
 
-## Features
+## Features 
 
-- Offline support. Mutations are persisted when Offline.
-- Offline Listeners and workflows for seamless UI.
-- Flexible, out of the box Conflict Resolution implementations
-- Subscriptions and Binary Upload that works offline.
-- Multi platform support.
-    - Works with Web, Cordova, Capacitor and React Native.
-- Framework agnostic (works with React, Angular and Vue)
+### Offline support
+- Mutations are persisted when Offline and replicated back to server when online.
+- Offline Listeners for performing UI Bindings according to the requirements.
+
+## Example application
+
+See [sample](https://github.com/aerogear/offix-android) for example application.<br/>
+
+## Limitations
+
+1. No UI Bindings, you will have to update your UI manually.
+2. The library only supports apollo-android for the time being.
+
+## Features in Development 
+
+1. Adding Conflict Resolution mechanism to the library.
+2. Leveraging Offline Support to nested schema structure.
+
+## Contributing 
+
+See [contribution guidelines](./CONTRIBUTING.md) file for more information
