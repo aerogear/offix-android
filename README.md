@@ -29,7 +29,7 @@ See [offix website](https://android.offix.dev) for usage and more details.
   
 - **Maven**:<br/>
 
- ```xml
+```xml
   <dependency>
 	<groupId>org.aerogear.offix</groupId>
 	<artifactId>offix</artifactId>
