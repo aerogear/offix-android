@@ -19,7 +19,7 @@ and replicated back to server when online.
 
 ## Documentation
 
-See [offix](https://android.offix.dev) for usage and more details.
+See [offix website](https://android.offix.dev) for usage and more details.
 
 ## Releases
 
