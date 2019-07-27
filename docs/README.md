@@ -1,26 +1,46 @@
 <p align="center">
   <img width="400" src="https://github.com/aerogear/offix/raw/master/resources/logo.png">
   <br/>
-  Offix extends the capabilities of Apollo GraphQL providing a
-  fully featured Offline Workflow and Conflict Resolution for Android Platform.
+  Offix extends capabilities of Apollo GraphQL providing</br>
+  fully featured Offline Workflow and Conflict Resolution for Android Platform
 </p>
+
 
 ## Introduction
 
-Offix enables working with localy cached GraphQL compilant data without access to server.
-It will leverage Apollo GraphQL cache do deliver seamless experience for querying data even when server side data is not reachable.
+Offix extends capabilities of Apollo GraphQL providing fully featured Offline Workflow and Conflict Resolution for Android Platform. User can perform queries and mutations when offline and these would be automatically synced to the server when they come online. It also enables working with localy cached GraphQL compilant data without access to server. It will leverage capabilities of Apollo GraphQL cache do deliver seamless experience for querying data even when server side data is not reachable.
 
 For more information about the Apollo and GraphQL please go to https://www.apollographql.com/
-
 ## Features 
 
-### Offline support
-- Mutations are persisted when Offline and replicated back to server when online.
-- Offline Listeners for performing UI Bindings according to the requirements.
+#### Offline support
+Mutations are persisted when Offline
+and replicated back to server when online.
+
+## Documentation
+
+See [offix website](https://android.offix.dev) for usage and more details.
+
+## Releases
+
+- **Gradle**: </br>
+
+  `implementation 'org.aerogear.offix:offix:0.1.0'`
+  
+- **Maven**: 
+  ```xml
+  <dependency>
+	<groupId>org.aerogear.offix</groupId>
+	<artifactId>offix</artifactId>
+	<version>0.1.0</version>
+	<type>pom</type>
+</dependency>
+
+
 
 ## Example application
 
-See [sample](https://github.com/aerogear/offix-android) for example application.<br/>
+See [sample](https://github.com/aerogear/offix-android/tree/master/sample) for example application.<br/>
 
 ## Limitations
 
@@ -35,3 +55,4 @@ See [sample](https://github.com/aerogear/offix-android) for example application.
 ## Contributing 
 
 See [contribution guidelines](./CONTRIBUTING.md) file for more information
+
