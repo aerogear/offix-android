@@ -8,8 +8,7 @@
 
 ## Introduction
 
-Offix enables working with localy cached GraphQL compilant data without access to server.
-It will leverage capabilities of Apollo GraphQL cache do deliver seamless experience for querying data even when server side data is not reachable.
+Offix extends capabilities of Apollo GraphQL providing fully featured Offline Workflow and Conflict Resolution for Android Platform. User can perform queries and mutations when offline and these would be automatically synced to the server when they come online. It also enables working with localy cached GraphQL compilant data without access to server. It will leverage capabilities of Apollo GraphQL cache do deliver seamless experience for querying data even when server side data is not reachable.
 
 For more information about the Apollo and GraphQL please go to https://www.apollographql.com/
 ## Features 
@@ -26,14 +25,14 @@ See [offix](https://android.offix.dev) for usage and more details.
 
 - **Gradle**: </br>
 
-  `implementation 'org.aerogear.offix:offix:1.0.0-alpha01'`
+  `implementation 'org.aerogear.offix:offix:0.1.0'`
   
 - **Maven**: 
   ```xml
   <dependency>
 	<groupId>org.aerogear.offix</groupId>
 	<artifactId>offix</artifactId>
-	<version>1.0.0-alpha01</version>
+	<version>0.1.0</version>
 	<type>pom</type>
 </dependency>
 
