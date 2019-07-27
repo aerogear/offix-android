@@ -35,7 +35,7 @@ See [offix website](https://android.offix.dev) for usage and more details.
 	<version>0.1.0</version>
 	<type>pom</type>
 </dependency>
-
+  ```
 
 
 ## Example application
