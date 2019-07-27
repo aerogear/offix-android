@@ -50,6 +50,7 @@ See `sample` for example application.<br/>
 ## Features in Development 
 
 1. Adding Conflict Resolution mechanism to the library.
+2. Provide Support for nested schema structure.
 
 ## Contributing 
 
