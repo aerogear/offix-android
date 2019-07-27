@@ -15,7 +15,7 @@ buildscript {
 }
 
 task cleanBuildPublish(type: GradleBuild) {
-    tasks = ['clean', 'build', 'bintrayUpload']
+    tasks = ['clean', 'build', 'bintrayUpload' , 'sourcesJar' ,'javadocJar' , 'javadoc']
 }
 
 android {
@@ -82,7 +82,7 @@ ext {
     siteUrl = 'https://github.com/aerogear/offix-android'
     gitUrl = 'https://github.com/aerogear/offix-android.git'
 
-    libraryVersion = '1.0.2'
+    libraryVersion = '1.0.4'
 
     developerId = 'Lavanyagaur22'
     developerName = 'Lavanya Gaur'
