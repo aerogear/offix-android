@@ -24,7 +24,7 @@ Add the following dependency in your **module's build.gradle**:
   
   ```  implementation 'org.aerogear.offix:offix:0.1.0' ```
 
-For **maven**, add the following dependency: 
+For **maven**, add the following dependency: <br/> 
 
 ```xml
 <dependency>
