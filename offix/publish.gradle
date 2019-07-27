@@ -4,10 +4,13 @@ apply plugin: 'com.jfrog.bintray'
 version '1.0.2'
 group 'org.aerogear.offix'
 
-Properties properties = new Properties()
-properties.load(project.rootProject.file('local.properties').newDataInputStream())
-def bintrayUser = properties.getProperty('bintray.user')
-def apiKey = properties.getProperty('bintray.apikey')
+//Properties properties = new Properties()
+//properties.load(project.rootProject.file('local.properties').newDataInputStream())
+//def bintrayUser = properties.getProperty('bintray.user')
+//def apiKey = properties.getProperty('bintray.apikey')
+
+def bintrayUser = YOUR_USERNAME
+def apiKey = YOUR_API_KEY
 
 publishing {
     publications {
