@@ -9,8 +9,8 @@ group 'org.aerogear.offix'
 //def bintrayUser = properties.getProperty('bintray.user')
 //def apiKey = properties.getProperty('bintray.apikey')
 
-def bintrayUser = YOUR_USERNAME
-def apiKey = YOUR_API_KEY
+def bintrayUser = "YOUR_USERNAME"
+def apiKey = "YOUR_API_KEY"
 
 publishing {
     publications {
