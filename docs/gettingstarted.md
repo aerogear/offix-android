@@ -26,7 +26,7 @@ Add the following dependency in your **module's build.gradle**:
 
 For **maven**, add the following dependency: <br/> 
 
-```xml
+```kotlin
 <dependency>
 	<groupId>org.aerogear.offix</groupId>
 	<artifactId>offix</artifactId>
