@@ -1,7 +1,7 @@
 apply plugin: 'maven-publish'
 apply plugin: 'com.jfrog.bintray'
 
-version '1.0.2'
+version '1.0.4'
 group 'org.aerogear.offix'
 
 //Properties properties = new Properties()
@@ -9,6 +9,7 @@ group 'org.aerogear.offix'
 //def bintrayUser = properties.getProperty('bintray.user')
 //def apiKey = properties.getProperty('bintray.apikey')
 
+//Added to avoid CircleCI error
 def bintrayUser = "YOUR_USERNAME"
 def apiKey = "YOUR_API_KEY"
 
@@ -17,7 +18,7 @@ publishing {
         Production(MavenPublication) {
             artifact("$buildDir/outputs/aar/offix-release.aar")
             groupId
-            artifactId 'library'
+            artifactId 'offix'
             version this.version
             pom.withXml {
                 def dependenciesNode = asNode().appendNode('dependencies')
@@ -36,7 +37,6 @@ publishing {
         }
     }
 }
-
 
 bintray {
     user = bintrayUser
