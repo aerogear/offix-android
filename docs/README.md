@@ -28,13 +28,17 @@ See [offix website](https://android.offix.dev) for usage and more details.
   `implementation 'org.aerogear.offix:offix:0.1.0'`
   
 - **Maven**: 
-  ```xml
+
+ ```xml
   <dependency>
 	<groupId>org.aerogear.offix</groupId>
 	<artifactId>offix</artifactId>
 	<version>0.1.0</version>
 	<type>pom</type>
-</dependency>
+  </dependency>
+```
+
+
 
 
 
