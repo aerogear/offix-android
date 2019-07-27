@@ -40,7 +40,7 @@ See [offix website](https://android.offix.dev) for usage and more details.
 
 ## Example application
 
-See `sample` for example application.<br/>
+See [sample]() for example application.<br/>
 
 ## Limitations
 
