@@ -1,4 +1,7 @@
 version: 2
+      checkout:
+        post:
+      - cp local.properties.ci local.properties
 jobs:
   build:
     working_directory: ~/code
@@ -8,7 +11,6 @@ jobs:
       JVM_OPTS: -Xmx3200m
     steps:
       - checkout   
-      - cp local.properties.ci local.properties
       - restore_cache:
           key: jars-{{ checksum "build.gradle" }}
       - run:
