@@ -23,13 +23,13 @@ See [offix website](https://android.offix.dev) for usage and more details.
 
 ## Releases
 
-- **Gradle**: </br>
+- **Gradle**:<br/>
 
   `implementation 'org.aerogear.offix:offix:0.1.0'`
   
-- **Maven**: 
+- **Maven**:<br/> 
 
- ```xml
+```xml
   <dependency>
 	<groupId>org.aerogear.offix</groupId>
 	<artifactId>offix</artifactId>
