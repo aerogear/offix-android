@@ -23,11 +23,11 @@ See [offix website](https://android.offix.dev) for usage and more details.
 
 ## Releases
 
-- **Gradle**: </br>
+- **Gradle**:<br/>
 
   `implementation 'org.aerogear.offix:offix:0.1.0'`
   
-- **Maven**: 
+- **Maven**:<br/>
 
  ```xml
   <dependency>
@@ -42,7 +42,7 @@ See [offix website](https://android.offix.dev) for usage and more details.
 
 ## Example application
 
-See `sample` for example application.<br/>
+See [sample](https://github.com/aerogear/offix-android/tree/master/sample) for example application.<br/>
 
 ## Limitations
 
