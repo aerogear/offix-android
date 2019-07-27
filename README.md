@@ -15,6 +15,23 @@ and replicated back to server when online.
 
 See [offix](https://android.offix.dev) for usage and more details.
 
+## Releases
+
+- **Gradle**: </br>
+
+  `implementation 'org.aerogear.offix:offix:1.0.4'`
+  
+- **Maven**: 
+  ```xml
+  <dependency>
+	<groupId>org.aerogear.offix</groupId>
+	<artifactId>offix</artifactId>
+	<version>1.0.4</version>
+	<type>pom</type>
+</dependency>
+
+
+
 ## Example application
 
 See `sample` for example application.<br/>
