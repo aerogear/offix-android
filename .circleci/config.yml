@@ -8,7 +8,8 @@ jobs:
       JVM_OPTS: -Xmx3200m
     steps:
       - checkout   
-      -  post: cp local.properties.ci local.properties
+        post: cp local.properties.ci local.properties
+      - checkout 
       - restore_cache:
           key: jars-{{ checksum "build.gradle" }}
       - run:
