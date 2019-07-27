@@ -1,0 +1,83 @@
+apply plugin: 'maven-publish'
+apply plugin: 'com.jfrog.bintray'
+
+version '1.0.2'
+group 'org.aerogear.offix'
+
+//Properties properties = new Properties()
+//properties.load(project.rootProject.file('local.properties').newDataInputStream())
+//def bintrayUser = properties.getProperty('bintray.user')
+//def apiKey = properties.getProperty('bintray.apikey')
+
+def bintrayUser = "YOUR_USERNAME"
+def apiKey = "YOUR_API_KEY"
+
+publishing {
+    publications {
+        Production(MavenPublication) {
+            artifact("$buildDir/outputs/aar/offix-release.aar")
+            groupId
+            artifactId 'library'
+            version this.version
+            pom.withXml {
+                def dependenciesNode = asNode().appendNode('dependencies')
+
+                // Iterate over the implementation dependencies (we don't want the test ones), adding a <dependency> node for each
+                configurations.implementation.allDependencies.each {
+                    // Ensure dependencies such as fileTree are not included in the pom.
+                    if (it.name != 'unspecified') {
+                        def dependencyNode = dependenciesNode.appendNode('dependency')
+                        dependencyNode.appendNode('groupId', it.group)
+                        dependencyNode.appendNode('artifactId', it.name)
+                        dependencyNode.appendNode('version', it.version)
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+bintray {
+    user = bintrayUser
+    key = apiKey
+    publications = ['Production']
+    configurations = ['archives']
+    override = true
+    pkg {
+        repo = 'Offix'
+        name = 'Offix'
+        description = 'Offix extends capabilities of Apollo GraphQL providing\n' +
+                'fully featured Offline Workflow and Conflict Resolution for Android Platform.'
+        publish = true
+        licenses = ['Apache-2.0']
+        vcsUrl = 'https://github.com/aerogear/offix-android.git'
+        websiteUrl = 'https://github.com/aerogear/offix-android'
+        version {
+            name = this.version
+            released = new Date()
+            vcsTag = this.version
+        }
+    }
+}
+
+task javadoc(type: Javadoc) {
+    excludes = ['**/*.kt']
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+}
+
+task sourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier = 'sources'
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives javadocJar
+    archives sourcesJar
+}

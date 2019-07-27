@@ -1,12 +1,22 @@
 apply plugin: 'com.android.library'
-
 apply plugin: 'com.apollographql.android'
-
 apply plugin: 'kotlin-android'
-
 apply plugin: 'kotlin-kapt'
-
 apply plugin: 'kotlin-android-extensions'
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.github.dcendents:android-maven-gradle-plugin:2.0'
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4'
+    }
+}
+
+task cleanBuildPublish(type: GradleBuild) {
+    tasks = ['clean', 'build', 'bintrayUpload']
+}
 
 android {
     compileSdkVersion 28
@@ -57,3 +67,30 @@ dependencies {
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
 }
+
+ext {
+    bintrayRepo = 'Offix'
+    bintrayName = 'Offix'
+
+    publishedGroupId = 'org.aerogear.offix'
+    libraryName = 'Offix'
+    artifact = 'Offix'
+
+    libraryDescription = 'Offix extends capabilities of Apollo GraphQL providing\n' +
+            'fully featured Offline Workflow and Conflict Resolution for Android Platform'
+
+    siteUrl = 'https://github.com/aerogear/offix-android'
+    gitUrl = 'https://github.com/aerogear/offix-android.git'
+
+    libraryVersion = '1.0.2'
+
+    developerId = 'Lavanyagaur22'
+    developerName = 'Lavanya Gaur'
+    developerEmail = 'lavanyagaur22@gmail.com'
+
+    licenseName = 'The Apache Software License, Version 2.0'
+    licenseUrl = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+    allLicenses = ["Apache-2.0"]
+}
+
+apply from: 'publish.gradle'
