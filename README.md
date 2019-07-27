@@ -13,7 +13,7 @@ and replicated back to server when online.
 
 ## Documentation
 
-Link to be added.
+See [offix](https://android.offix.dev) for usage and more details.
 
 ## Example application
 
