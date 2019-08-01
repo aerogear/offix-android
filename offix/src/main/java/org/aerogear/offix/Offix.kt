@@ -11,7 +11,21 @@ import com.apollographql.apollo.api.Mutation
 import com.apollographql.apollo.api.Operation
 import com.apollographql.apollo.api.Response
 import com.apollographql.apollo.exception.ApolloException
+import com.google.gson.Gson
+import okhttp3.Interceptor
 import org.json.JSONObject
+import java.nio.charset.Charset
+
+/*
+Global variable which will keep track of whether the conflict is detected or not.
+In case any conflicts come, the error string would be stored in this variable.
+ */
+lateinit var conflcitDetected: String
+
+/*
+Initialised gson variable.
+ */
+val gson = Gson()
 
 /* Extension function on ApolloClient which will be used by the user while making a call request.
    @receiver parameter is ApolloClient on which the call will be made by the user.
@@ -64,8 +78,16 @@ fun ApolloClient.enqueue(
             Log.d("Extension Callback * ", result)
 
             /*
-             Set the response received from the server in the onSucceess() of responseCallback.
+            Check if the response data is null or not. If it's null that means the conflict has happened.
              */
+            if (response.data() == null) {
+                retryConflictedMutation(mutation)
+            }
+
+            /*
+            Set the response received from the server in the onSuccess() of responseCallback.
+            In case of conflicts null is returned from the server as response.
+            */
             responseCallback.onSuccess(response)
         }
     }
@@ -74,6 +96,39 @@ fun ApolloClient.enqueue(
       Make a call with the mutation to the server.
      */
     this.mutate(mutation).enqueue(apolloCallback)
+}
+
+/*
+ This function is called whenever we get a conflict.
+ Here the mutation with the correct data is retried again.
+ @param mutation: Mutation<Operation.Data, Any, Operation.Variables>
+
+ */
+fun retryConflictedMutation(mutation: Mutation<Operation.Data, Any, Operation.Variables>) {
+
+    /*
+      1. Map the json response String to the Conflict pojo class.
+      2. Extract the correct version from the server data.
+      3. Set the client version to the correct one. (server+1)
+      4. Again make a call with the mutation to the server.
+    */
+    var parsedObject = gson.fromJson(conflcitDetected, ConflictPojo::class.java)
+    var versionUpdated = parsedObject.errors[0].extensions.exception.conflictInfo.serverState.version + 1
+    Log.d("Offix makePojoOfRes", " ${parsedObject.errors[0].extensions.exception.conflictInfo.serverState}")
+
+    //TODO
+    var hashMap: HashMap<String, Any> = HashMap()
+
+    mutation.variables().valueMap()
+        .forEach {
+            if (it.key.equals("version")) {
+                hashMap.put(it.key, versionUpdated)
+            } else {
+                hashMap.put(it.key, it.value)
+            }
+        }
+
+    val jsonObj = JSONObject(hashMap).toString()
 }
 
 
@@ -181,6 +236,37 @@ fun getDao() = Offline.getDb()?.mutationDao()
    To check if the string provided in the function matches apollo Input class or not.
  */
 fun inputTypeChecker(string: String) = string.equals("com.apollographql.apollo.api.Input")
+
+/*
+ This interceptor should be used by the user while making an instance of apollo client
+ which will help in detecting conflicts.
+ */
+fun getResponseInterceptor(): Interceptor? {
+
+    val conflictInterceptor = Interceptor {
+        val request = it.request()
+
+        val response = it.proceed(request)
+
+        //https://stackoverflow.com/a/33862068/10189663
+        val responseBody = response.body()
+        val bufferedSource = responseBody?.source()
+        bufferedSource?.request(Long.MAX_VALUE)
+        val buffer = bufferedSource?.buffer()
+        val responseBodyString = buffer?.clone()?.readString(Charset.forName("UTF-8")) ?: ""
+
+        Log.d("OffixClass", " Interceptor ** : $responseBodyString")
+
+        //To see for conflict, "VoyagerConflict" which comes in the message is searched for.
+        if (responseBodyString.contains("VoyagerConflict")) {
+            conflcitDetected = responseBodyString
+            Log.d("Offix conflcit", " VoyagerConflict")
+            Log.d("Offix conflcit **", conflcitDetected)
+        }
+        return@Interceptor response
+    }
+    return conflictInterceptor
+}
 
 /*  Extension function for ApolloClient Builder
     @receiver param: ApolloClient.Buidler, which can be used by the user for creating a custom client.

@@ -87,6 +87,12 @@ class UserData(val context: Context) {
         val customCallback = object : ResponseCallback {
             override fun onSuccess(response: Response<Any>) {
                 Log.e("onSuccess() updateTask", "${response.data()}")
+                val result = response.data()
+
+                //In case of conflicts data returned from the server id null.
+                result?.let {
+                    Log.e(TAG, "onResponse-UpdateTask- $it")
+                }
             }
 
             override fun onSchedule(e: ApolloException, mutation: Mutation<Operation.Data, Any, Operation.Variables>) {

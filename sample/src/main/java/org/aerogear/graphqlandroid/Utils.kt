@@ -1,4 +1,3 @@
-
 package org.aerogear.graphqlandroid
 
 import android.content.Context
@@ -26,8 +25,8 @@ import java.util.concurrent.Executor
 object Utils {
 
     //To run on emulator
-    const val BASE_URL = "http://192.168.0.101:4000/graphql"
-    private const val SQL_CACHE_NAME = "tasks3Db"
+    const val BASE_URL = "http://192.168.0.105:4000/graphql"
+    private const val SQL_CACHE_NAME = "tasks4Db"
 
     private var apClient: ApolloClient? = null
     private var httpClient: OkHttpClient? = null
@@ -75,7 +74,10 @@ object Utils {
         } ?: kotlin.run {
             httpClient = OkHttpClient.Builder()
                 .addInterceptor(LoggingInterceptor())
-                .addInterceptor(getResponseInterceptor(context)!!)
+//                .addInterceptor(getResponseInterceptor(context)!!)
+                //While making an instance of apollo client, user will have to add the interceptor provided
+                //by the library.
+                .addInterceptor(org.aerogear.offix.getResponseInterceptor()!!)
                 .build()
         }
         return httpClient
@@ -129,24 +131,9 @@ object Utils {
 
                 //To see for conflict, "VoyagerConflict" which comes in the message is searched for.
                 if (responseBodyString.contains("VoyagerConflict")) {
-                    Log.d("Utils conflcit"," VoyagerConflict")
-                   // showToast(context)
+                    Log.d("Utils conflcit", " VoyagerConflict")
+                    // showToast(context)
                 }
-//                if (responseBodyString.contains("\"msg\":\"\"") &&
-//                    responseBodyString.contains("\"operationType\":\"mutation\"") &&
-//                    responseBodyString.contains("\"success\":true")
-//                ) {
-//                    Log.e("UtilsClass", "mutation operation successfully performed")
-//                    (context as MainActivity).onSuccess()
-//                }
-
-//                if (responseBodyString.contains("\"msg\":\"\",\"operationType\":\"query\"") &&
-//                    responseBodyString.contains("\"success\":true")
-//                ) {
-//                    Log.e("UtilsClass", "query operation successfully performed")
-//                    showToast2(context)
-//                }
-
                 return@Interceptor response
             }
 
@@ -186,8 +173,6 @@ object Utils {
                 return CacheKey.NO_KEY
             }
         }
-
-
     }
 }
 
