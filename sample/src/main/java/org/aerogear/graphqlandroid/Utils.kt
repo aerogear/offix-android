@@ -19,6 +19,7 @@ import com.apollographql.apollo.interceptor.ApolloInterceptorChain
 import com.apollographql.apollo.subscription.WebSocketSubscriptionTransport
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
+import org.aerogear.offix.interceptor.ConflictInterceptor
 import java.nio.charset.Charset
 import java.util.concurrent.Executor
 
@@ -77,7 +78,7 @@ object Utils {
 //                .addInterceptor(getResponseInterceptor(context)!!)
                 //While making an instance of apollo client, user will have to add the interceptor provided
                 //by the library.
-                .addInterceptor(org.aerogear.offix.getResponseInterceptor()!!)
+                .addInterceptor(ConflictInterceptor())
                 .build()
         }
         return httpClient

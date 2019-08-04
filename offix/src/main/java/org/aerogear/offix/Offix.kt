@@ -20,7 +20,7 @@ import java.nio.charset.Charset
 Global variable which will keep track of whether the conflict is detected or not.
 In case any conflicts come, the error string would be stored in this variable.
  */
-lateinit var detectedConflict: String
+var detectedConflict = ""
 
 /*
 Initialised gson variable.
@@ -85,22 +85,11 @@ fun ApolloClient.enqueue(
              5. The user resolves conflicts and send the mutation back to the library.
              6. Make a recursive call to the enqueue() function and retry mutation again.
              */
-            if (response.data() == null) {
-                val json = JSONObject(detectedConflict)
-
-                Log.d("Offix-Responsecallback1", " $detectedConflict")
-
-                val errorArray = json.optJSONArray("errors")
-                val errorObj1 = errorArray.optJSONObject(0)
-                val extensions = errorObj1.optJSONObject("extensions")
-                val exception = extensions.optJSONObject("conflictInfo")
-                val serverStateKey = exception.optJSONObject("serverState")
-                val clientStateKey = exception.optJSONObject("clientState")
-
-                Log.d("Offix-Responsecallback2", " $serverStateKey /n $clientStateKey")
+            if (response.data() == null && detectedConflict.isNotEmpty()) {
+                val serverClientData = getServerClientData(detectedConflict)
 
                 val retryMutation =
-                    responseCallback.onConflictDetected(serverStateKey.toString(), clientStateKey.toString())
+                    responseCallback.onConflictDetected(serverClientData.serverData, serverClientData.clientData)
 
                 /* Make a recursive call to the enqueue method to retry the mutation
                  */
@@ -119,6 +108,25 @@ fun ApolloClient.enqueue(
       Make a call with the mutation to the server.
      */
     this.mutate(mutation).enqueue(apolloCallback)
+}
+
+/*
+
+ */
+fun getServerClientData(serverError: String): ServerClientData {
+    val json = JSONObject(serverError)
+    Log.d("Offix-Responsecallback1", " $detectedConflict")
+
+    val errorArray = json.optJSONArray("errors")
+    val errorObj1 = errorArray.optJSONObject(0)
+    val extensions = errorObj1.optJSONObject("extensions")
+    val exception = extensions.optJSONObject("conflictInfo")
+    val serverStateKey = exception.optJSONObject("serverState")
+    val clientStateKey = exception.optJSONObject("clientState")
+
+    val serverClientData = ServerClientData(serverStateKey.toString(), clientStateKey.toString())
+    Log.d("Offix-Responsecallback2", " $serverStateKey /n $clientStateKey")
+    return serverClientData
 }
 
 /*
@@ -226,40 +234,8 @@ fun getDao() = Offline.getDb()?.mutationDao()
  */
 fun inputTypeChecker(string: String) = string.equals("com.apollographql.apollo.api.Input")
 
-/*
- This interceptor should be used by the user while making an instance of apollo client
- which will help in detecting conflicts.
- */
-fun getResponseInterceptor(): Interceptor? {
-
-    val conflictInterceptor = Interceptor {
-        val request = it.request()
-
-        val response = it.proceed(request)
-
-        //https://stackoverflow.com/a/33862068/10189663
-        val responseBody = response.body()
-        val bufferedSource = responseBody?.source()
-        bufferedSource?.request(Long.MAX_VALUE)
-        val buffer = bufferedSource?.buffer()
-        val responseBodyString = buffer?.clone()?.readString(Charset.forName("UTF-8")) ?: ""
-
-        Log.d("OffixClass", " Interceptor ** : $responseBodyString")
-
-        if (responseBodyString.contains("conflictInfo")) {
-            detectedConflict = responseBodyString
-            Log.d("Offix conflcit", " ******")
-            Log.d("Offix conflcit **", detectedConflict)
-        }
-        return@Interceptor response
-    }
-    return conflictInterceptor
-}
-
 /*  Extension function for ApolloClient Builder
     @receiver param: ApolloClient.Buidler, which can be used by the user for creating a custom client.
     @return ApolloClient.Buidler
  */
 fun ApolloClient.Builder.OfflineClientBuilder(): ApolloClient.Builder = this
-
-
