@@ -93,7 +93,9 @@ fun ApolloClient.enqueue(
 
                 /* Make a recursive call to the enqueue method to retry the mutation
                  */
-                Offline.apClient?.mutate(retryMutation)?.enqueue(this)
+                retryMutation?.let {
+                    Offline.apClient?.mutate(it)?.enqueue(this)
+                }
             }
 
             /*
@@ -117,6 +119,7 @@ fun getServerClientData(serverError: String): ServerClientData {
     val json = JSONObject(serverError)
     Log.d("Offix-Responsecallback1", " $detectedConflict")
 
+    //TODO If we get more than 1 elements in the array of errors
     val errorArray = json.optJSONArray("errors")
     val errorObj1 = errorArray.optJSONObject(0)
     val extensions = errorObj1.optJSONObject("extensions")

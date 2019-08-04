@@ -137,11 +137,8 @@ class UserData(val context: Context) {
             override fun onConflictDetected(
                 serverState: String,
                 clientState: String
-            ): Mutation<Operation.Data, Any, Operation.Variables> {
-                /*
-                 This would never be called as createTasks never causes conflicts
-                 */
-                return mutation as com.apollographql.apollo.api.Mutation<Operation.Data, Any, Operation.Variables>
+            ): Mutation<Operation.Data, Any, Operation.Variables>? {
+                return null
             }
 
             override fun onSuccess(response: Response<Any>) {
@@ -179,8 +176,8 @@ class UserData(val context: Context) {
             override fun onConflictDetected(
                 serverState: String,
                 clientState: String
-            ): Mutation<Operation.Data, Any, Operation.Variables> {
-               return mutation as com.apollographql.apollo.api.Mutation<Operation.Data, Any, Operation.Variables>
+            ): Mutation<Operation.Data, Any, Operation.Variables>? {
+                return null
             }
 
             override fun onSuccess(response: Response<Any>) {
