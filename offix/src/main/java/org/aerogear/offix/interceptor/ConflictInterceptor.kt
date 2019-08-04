@@ -16,7 +16,6 @@ class ConflictInterceptor  : Interceptor{
         val request = chain.request()
         val response = chain.proceed(request)
 
-        //https://stackoverflow.com/a/33862068/10189663
         val responseBody = response.body()
         val bufferedSource = responseBody?.source()
         bufferedSource?.request(Long.MAX_VALUE)

@@ -75,9 +75,9 @@ object Utils {
         } ?: kotlin.run {
             httpClient = OkHttpClient.Builder()
                 .addInterceptor(LoggingInterceptor())
-//                .addInterceptor(getResponseInterceptor(context)!!)
-                //While making an instance of apollo client, user will have to add the interceptor provided
-                //by the library.
+                /*While making an instance of apollo client, user will have to add the interceptor provided
+                by the library.
+                */
                 .addInterceptor(ConflictInterceptor())
                 .build()
         }

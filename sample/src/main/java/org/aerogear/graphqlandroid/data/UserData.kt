@@ -138,6 +138,9 @@ class UserData(val context: Context) {
                 serverState: String,
                 clientState: String
             ): Mutation<Operation.Data, Any, Operation.Variables>? {
+                /*
+                 Users can return null from this function in case they don't want to handle conflicts
+                 */
                 return null
             }
 
@@ -177,6 +180,9 @@ class UserData(val context: Context) {
                 serverState: String,
                 clientState: String
             ): Mutation<Operation.Data, Any, Operation.Variables>? {
+               /*
+               Users can return null from this function in case they don't want to handle conflicts
+               */
                 return null
             }
 
