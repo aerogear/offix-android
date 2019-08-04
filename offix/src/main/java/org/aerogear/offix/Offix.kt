@@ -20,7 +20,7 @@ import java.nio.charset.Charset
 Global variable which will keep track of whether the conflict is detected or not.
 In case any conflicts come, the error string would be stored in this variable.
  */
-lateinit var conflcitDetected: String
+lateinit var detectedConflict: String
 
 /*
 Initialised gson variable.
@@ -78,10 +78,33 @@ fun ApolloClient.enqueue(
             Log.d("Extension Callback * ", result)
 
             /*
-            Check if the response data is null or not. If it's null that means the conflict has happened.
+             1. Check if the response data is null or not. If it's null that means the conflict has happened.
+             2. Parse the json error response from the server.
+             3. Get the serverstate and the clientstate keys from the error response.
+             4. Set them in responseCallback's onConflictDetected() method.
+             5. The user resolves conflicts and send the mutation back to the library.
+             6. Make a recursive call to the enqueue() function and retry mutation again.
              */
             if (response.data() == null) {
-                retryConflictedMutation(mutation)
+                val json = JSONObject(detectedConflict)
+
+                Log.d("Offix-Responsecallback1", " $detectedConflict")
+
+                val errorArray = json.optJSONArray("errors")
+                val errorObj1 = errorArray.optJSONObject(0)
+                val extensions = errorObj1.optJSONObject("extensions")
+                val exception = extensions.optJSONObject("conflictInfo")
+                val serverStateKey = exception.optJSONObject("serverState")
+                val clientStateKey = exception.optJSONObject("clientState")
+
+                Log.d("Offix-Responsecallback2", " $serverStateKey /n $clientStateKey")
+
+                val retryMutation =
+                    responseCallback.onConflictDetected(serverStateKey.toString(), clientStateKey.toString())
+
+                /* Make a recursive call to the enqueue method to retry the mutation
+                 */
+                Offline.apClient?.mutate(retryMutation)?.enqueue(this)
             }
 
             /*
@@ -97,40 +120,6 @@ fun ApolloClient.enqueue(
      */
     this.mutate(mutation).enqueue(apolloCallback)
 }
-
-/*
- This function is called whenever we get a conflict.
- Here the mutation with the correct data is retried again.
- @param mutation: Mutation<Operation.Data, Any, Operation.Variables>
-
- */
-fun retryConflictedMutation(mutation: Mutation<Operation.Data, Any, Operation.Variables>) {
-
-    /*
-      1. Map the json response String to the Conflict pojo class.
-      2. Extract the correct version from the server data.
-      3. Set the client version to the correct one. (server+1)
-      4. Again make a call with the mutation to the server.
-    */
-    var parsedObject = gson.fromJson(conflcitDetected, ConflictPojo::class.java)
-    var versionUpdated = parsedObject.errors[0].extensions.exception.conflictInfo.serverState.version + 1
-    Log.d("Offix makePojoOfRes", " ${parsedObject.errors[0].extensions.exception.conflictInfo.serverState}")
-
-    //TODO
-    var hashMap: HashMap<String, Any> = HashMap()
-
-    mutation.variables().valueMap()
-        .forEach {
-            if (it.key.equals("version")) {
-                hashMap.put(it.key, versionUpdated)
-            } else {
-                hashMap.put(it.key, it.value)
-            }
-        }
-
-    val jsonObj = JSONObject(hashMap).toString()
-}
-
 
 /*
  This function takes in an object of Mutation<D,T,V> and returns an object of com.aerogear.offix.persistence.Mutation.
@@ -257,11 +246,10 @@ fun getResponseInterceptor(): Interceptor? {
 
         Log.d("OffixClass", " Interceptor ** : $responseBodyString")
 
-        //To see for conflict, "VoyagerConflict" which comes in the message is searched for.
-        if (responseBodyString.contains("VoyagerConflict")) {
-            conflcitDetected = responseBodyString
-            Log.d("Offix conflcit", " VoyagerConflict")
-            Log.d("Offix conflcit **", conflcitDetected)
+        if (responseBodyString.contains("conflictInfo")) {
+            detectedConflict = responseBodyString
+            Log.d("Offix conflcit", " ******")
+            Log.d("Offix conflcit **", detectedConflict)
         }
         return@Interceptor response
     }

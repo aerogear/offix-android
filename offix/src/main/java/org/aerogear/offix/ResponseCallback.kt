@@ -6,7 +6,7 @@ import com.apollographql.apollo.api.Response
 import com.apollographql.apollo.exception.ApolloException
 
 /**
- ResponseCallback is used by the users in making a callback object which is passed to the Offix enqueue() function.
+ResponseCallback is used by the users in making a callback object which is passed to the Offix enqueue() function.
  */
 interface ResponseCallback {
     /**
@@ -19,4 +19,12 @@ interface ResponseCallback {
      * timeout.
      */
     fun onSchedule(e: ApolloException, mutation: Mutation<Operation.Data, Any, Operation.Variables>)
+
+    /*
+     Called when the library detects error from the server upon Conflict detection.
+     @param serverState: String
+     @param clientState: String
+     @return type:  Mutation<Operation.Data, Any, Operation.Variables>
+     */
+    fun onConflictDetected(serverState: String, clientState: String): Mutation<Operation.Data, Any, Operation.Variables>
 }
