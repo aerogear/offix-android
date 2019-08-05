@@ -20,7 +20,7 @@ import java.nio.charset.Charset
 Global variable which will keep track of whether the conflict is detected or not.
 In case any conflicts come, the error string would be stored in this variable.
  */
-var detectedConflict = ""
+var responseWithConflicts = ""
 
 /*
 Initialised gson variable.
@@ -64,7 +64,6 @@ fun ApolloClient.enqueue(
             /* Insert mutation object in the database.
             */
             libDao?.insertMutation(getPersistenceMutation(mutation))
-            Log.d("Extension", " serial number: ${libDao?.getAllMutations()?.get(0)?.sNo}")
             Log.d("Extension", " size of db list after inserting mutations: ${libDao?.getAllMutations()?.size}")
 
             /*
@@ -85,11 +84,11 @@ fun ApolloClient.enqueue(
              5. The user resolves conflicts and send the mutation back to the library.
              6. Make a recursive call to the enqueue() function and retry mutation again.
              */
-            if (response.data() == null && detectedConflict.isNotEmpty()) {
-                val serverClientData = getServerClientData(detectedConflict)
+            if (response.data() == null && responseWithConflicts.isNotEmpty()) {
+                val serverClientData = getServerClientData(responseWithConflicts)
 
                 val retryMutation =
-                    responseCallback.onConflictDetected(serverClientData.serverData, serverClientData.clientData)
+                    responseCallback.onConflictDetected(serverClientData)
 
                 /* Make a recursive call to the enqueue method to retry the mutation
                  */
@@ -113,23 +112,26 @@ fun ApolloClient.enqueue(
 }
 
 /*
-
+    Parse the response that contains conflicts to retrieve an ArrayList of server-client states
  */
-fun getServerClientData(serverError: String): ServerClientData {
+fun getServerClientData(serverError: String): ArrayList<ServerClientData> {
     val json = JSONObject(serverError)
-    Log.d("Offix-Responsecallback1", " $detectedConflict")
-
-    //TODO If we get more than 1 elements in the array of errors
+    val serverClientStates = arrayListOf<ServerClientData>()
+    Log.d("Offix-Responsecallback", " $responseWithConflicts")
     val errorArray = json.optJSONArray("errors")
-    val errorObj1 = errorArray.optJSONObject(0)
-    val extensions = errorObj1.optJSONObject("extensions")
-    val exception = extensions.optJSONObject("conflictInfo")
-    val serverStateKey = exception.optJSONObject("serverState")
-    val clientStateKey = exception.optJSONObject("clientState")
 
-    val serverClientData = ServerClientData(serverStateKey.toString(), clientStateKey.toString())
-    Log.d("Offix-Responsecallback2", " $serverStateKey /n $clientStateKey")
-    return serverClientData
+    for (i in 0..errorArray.length()) {
+        val errorObject = errorArray.optJSONObject(i)
+        val extensions = errorObject.optJSONObject("extensions")
+        val exception = extensions.optJSONObject("conflictInfo")
+        val serverState = exception.optJSONObject("serverState")
+        val clientState = exception.optJSONObject("clientState")
+        Log.d("Offix-Responsecallback", " ServerState : $serverState /n ClientState : $clientState")
+
+        serverClientStates.add(ServerClientData(serverState.toString(), clientState.toString()))
+    }
+
+    return serverClientStates
 }
 
 /*

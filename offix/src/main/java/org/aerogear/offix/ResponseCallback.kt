@@ -26,5 +26,5 @@ interface ResponseCallback {
      @param clientState: String
      @return type:  Mutation<Operation.Data, Any, Operation.Variables>
      */
-    fun onConflictDetected(serverState: String, clientState: String): Mutation<Operation.Data, Any, Operation.Variables>?
+    fun onConflictDetected(serverClientStates: ArrayList<ServerClientData>): Mutation<Operation.Data, Any, Operation.Variables>?
 }
