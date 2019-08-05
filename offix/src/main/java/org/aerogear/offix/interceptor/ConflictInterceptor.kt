@@ -3,7 +3,6 @@ package org.aerogear.offix.interceptor
 import android.util.Log
 import okhttp3.Interceptor
 import okhttp3.Response
-import org.aerogear.offix.detectedConflict
 import org.aerogear.offix.responseWithConflicts
 import java.nio.charset.Charset
 
