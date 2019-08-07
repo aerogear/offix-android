@@ -1,4 +1,3 @@
-
 package org.aerogear.graphqlandroid
 
 import android.content.Context
@@ -20,14 +19,15 @@ import com.apollographql.apollo.interceptor.ApolloInterceptorChain
 import com.apollographql.apollo.subscription.WebSocketSubscriptionTransport
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
+import org.aerogear.offix.interceptor.ConflictInterceptor
 import java.nio.charset.Charset
 import java.util.concurrent.Executor
 
 object Utils {
 
-    //To run on emulator
-    const val BASE_URL = "http://192.168.0.101:4000/graphql"
-    private const val SQL_CACHE_NAME = "tasks3Db"
+    //To run on emulator use http://10.0.2.2.100:4000/graphql
+    const val BASE_URL = "http://192.168.0.100:4000/graphql"
+    private const val SQL_CACHE_NAME = "tasks4Db"
 
     private var apClient: ApolloClient? = null
     private var httpClient: OkHttpClient? = null
@@ -75,7 +75,10 @@ object Utils {
         } ?: kotlin.run {
             httpClient = OkHttpClient.Builder()
                 .addInterceptor(LoggingInterceptor())
-                .addInterceptor(getResponseInterceptor(context)!!)
+                /*While making an instance of apollo client, user will have to add the interceptor provided
+                by the library.
+                */
+                .addInterceptor(ConflictInterceptor())
                 .build()
         }
         return httpClient
@@ -129,24 +132,9 @@ object Utils {
 
                 //To see for conflict, "VoyagerConflict" which comes in the message is searched for.
                 if (responseBodyString.contains("VoyagerConflict")) {
-                    Log.d("Utils conflcit"," VoyagerConflict")
-                   // showToast(context)
+                    Log.d("Utils conflcit", " VoyagerConflict")
+                    // showToast(context)
                 }
-//                if (responseBodyString.contains("\"msg\":\"\"") &&
-//                    responseBodyString.contains("\"operationType\":\"mutation\"") &&
-//                    responseBodyString.contains("\"success\":true")
-//                ) {
-//                    Log.e("UtilsClass", "mutation operation successfully performed")
-//                    (context as MainActivity).onSuccess()
-//                }
-
-//                if (responseBodyString.contains("\"msg\":\"\",\"operationType\":\"query\"") &&
-//                    responseBodyString.contains("\"success\":true")
-//                ) {
-//                    Log.e("UtilsClass", "query operation successfully performed")
-//                    showToast2(context)
-//                }
-
                 return@Interceptor response
             }
 
@@ -160,13 +148,6 @@ object Utils {
 //            Toast.makeText(context, "Conflict Detected", Toast.LENGTH_SHORT).show()
 //        }
 //    }
-
-    //Toast shown to the user displaying conflict detected.
-    private fun showToast2(context: Context) {
-        (context as AppCompatActivity).runOnUiThread {
-            Toast.makeText(context, "Query run successfully", Toast.LENGTH_SHORT).show()
-        }
-    }
 
     private fun cacheResolver(): CacheKeyResolver {
         return object : CacheKeyResolver() {
@@ -186,8 +167,6 @@ object Utils {
                 return CacheKey.NO_KEY
             }
         }
-
-
     }
 }
 

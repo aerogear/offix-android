@@ -11,10 +11,10 @@ import com.apollographql.apollo.api.Response
 import com.apollographql.apollo.cache.normalized.ApolloStore
 import com.apollographql.apollo.exception.ApolloException
 import com.apollographql.apollo.fetcher.ApolloResponseFetchers
+import com.google.gson.Gson
 import org.aerogear.graphqlandroid.*
 import org.aerogear.graphqlandroid.model.Task
-import org.aerogear.offix.ResponseCallback
-import org.aerogear.offix.enqueue
+import org.aerogear.offix.*
 import java.util.concurrent.atomic.AtomicReference
 
 class UserData(val context: Context) {
@@ -24,6 +24,8 @@ class UserData(val context: Context) {
     val watchResponse = AtomicReference<Response<AllTasksQuery.Data>>()
     val TAG = javaClass.simpleName
     lateinit var apolloStore: ApolloStore
+    val gson = Gson()
+
     fun getTasks(): ArrayList<Task> {
 
         noteslist.clear()
@@ -66,7 +68,7 @@ class UserData(val context: Context) {
 
     fun updateTask(id: String, title: String, version: Int) {
         Log.e(TAG, "inside update title")
-        val mutation = UpdateCurrentTaskMutation.builder().id(id).title(title).version(version).build()
+        var mutation = UpdateCurrentTaskMutation.builder().id(id).title(title).version(version).build()
         Log.e(TAG, " updateTask ********: - $mutation")
 
         val client = Utils.getApolloClient(context)?.mutate(
@@ -75,6 +77,7 @@ class UserData(val context: Context) {
 
         val s: String = com.apollographql.apollo.internal.json.Utils.toJsonString(client.toString())
 
+        Log.e(TAG, " updateTask class name: - ${mutation.javaClass.simpleName}")
         Log.e(TAG, " updateTask 1: - $s")
         Log.e(
             TAG,
@@ -85,13 +88,38 @@ class UserData(val context: Context) {
         Log.e(TAG, " updateTask 25: - ${client?.operation()?.name()}")
 
         val customCallback = object : ResponseCallback {
+
             override fun onSuccess(response: Response<Any>) {
                 Log.e("onSuccess() updateTask", "${response.data()}")
+                val result = response.data()
+
+                //In case of conflicts data returned from the server id null.
+                result?.let {
+                    Log.e(TAG, "onResponse-UpdateTask- $it")
+                }
             }
 
             override fun onSchedule(e: ApolloException, mutation: Mutation<Operation.Data, Any, Operation.Variables>) {
                 Log.e("onSchedule() updateTask", "${mutation.variables().valueMap()}")
                 e.printStackTrace()
+            }
+
+
+            override fun onConflictDetected(serverClientStates: ArrayList<ServerClientData>): Mutation<Operation.Data, Any, Operation.Variables>? {
+                /*
+                    1. Loop through the server-client states
+                    2. Resolve Conflicts.
+                    3. Make a mutation object after resolving conflicts
+                 */
+
+                serverClientStates.forEach {
+                    var parsedObject = gson.fromJson(it.serverData, ServerstateClass::class.java)
+                    val versionAfterConflict = parsedObject.version + 1
+
+                    mutation =
+                        UpdateCurrentTaskMutation.builder().id(id).title(title).version(versionAfterConflict).build()
+                }
+                return mutation as com.apollographql.apollo.api.Mutation<Operation.Data, Any, Operation.Variables>
             }
         }
 
@@ -107,6 +135,14 @@ class UserData(val context: Context) {
         val mutation = CreateTaskMutation.builder().title(title).description(description).build()
 
         val customCallback = object : ResponseCallback {
+
+            override fun onConflictDetected(serverClientStates: ArrayList<ServerClientData>): Mutation<Operation.Data, Any, Operation.Variables>? {
+                /*
+                 return null from this function if you don't want to handle conflicts
+                 */
+                return null
+            }
+
             override fun onSuccess(response: Response<Any>) {
                 Log.e("onSuccess() createTask", "${response.data()}")
             }
@@ -139,6 +175,10 @@ class UserData(val context: Context) {
         }
 
         val customCallback = object : ResponseCallback {
+            override fun onConflictDetected(serverClientStates: ArrayList<ServerClientData>): Mutation<Operation.Data, Any, Operation.Variables>? {
+                return null
+            }
+
             override fun onSuccess(response: Response<Any>) {
                 Log.e("onSuccess() deleteTask", "${response.data()}")
             }

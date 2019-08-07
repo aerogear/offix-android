@@ -11,7 +11,21 @@ import com.apollographql.apollo.api.Mutation
 import com.apollographql.apollo.api.Operation
 import com.apollographql.apollo.api.Response
 import com.apollographql.apollo.exception.ApolloException
+import com.google.gson.Gson
+import okhttp3.Interceptor
 import org.json.JSONObject
+import java.nio.charset.Charset
+
+/*
+Global variable which will keep track of whether the conflict is detected or not.
+In case any conflicts come, the error string would be stored in this variable.
+ */
+var responseWithConflicts = ""
+
+/*
+Initialised gson variable.
+ */
+val gson = Gson()
 
 /* Extension function on ApolloClient which will be used by the user while making a call request.
    @receiver parameter is ApolloClient on which the call will be made by the user.
@@ -50,7 +64,6 @@ fun ApolloClient.enqueue(
             /* Insert mutation object in the database.
             */
             libDao?.insertMutation(getPersistenceMutation(mutation))
-            Log.d("Extension", " serial number: ${libDao?.getAllMutations()?.get(0)?.sNo}")
             Log.d("Extension", " size of db list after inserting mutations: ${libDao?.getAllMutations()?.size}")
 
             /*
@@ -64,8 +77,30 @@ fun ApolloClient.enqueue(
             Log.d("Extension Callback * ", result)
 
             /*
-             Set the response received from the server in the onSucceess() of responseCallback.
+             1. Check if the response data is null or not. If it's null that means the conflict has happened.
+             2. Parse the json error response from the server.
+             3. Get the serverstate and the clientstate keys from the error response.
+             4. Set them in responseCallback's onConflictDetected() method.
+             5. The user resolves conflicts and send the mutation back to the library.
+             6. Make a recursive call to the enqueue() function and retry mutation again.
              */
+            if (response.data() == null && responseWithConflicts.isNotEmpty()) {
+                val serverClientData = getServerClientData(responseWithConflicts)
+
+                val retryMutation =
+                    responseCallback.onConflictDetected(serverClientData)
+
+                /* Make a recursive call to the enqueue method to retry the mutation
+                 */
+                retryMutation?.let {
+                    Offline.apClient?.mutate(it)?.enqueue(this)
+                }
+            }
+
+            /*
+            Set the response received from the server in the onSuccess() of responseCallback.
+            In case of conflicts null is returned from the server as response.
+            */
             responseCallback.onSuccess(response)
         }
     }
@@ -76,6 +111,28 @@ fun ApolloClient.enqueue(
     this.mutate(mutation).enqueue(apolloCallback)
 }
 
+/*
+    Parse the response that contains conflicts to retrieve an ArrayList of server-client states
+ */
+fun getServerClientData(serverError: String): ArrayList<ServerClientData> {
+    val json = JSONObject(serverError)
+    val serverClientStates = arrayListOf<ServerClientData>()
+    Log.d("Offix-Responsecallback", " $responseWithConflicts")
+    val errorArray = json.optJSONArray("errors")
+
+    for (i in 0..errorArray.length()) {
+        val errorObject = errorArray.optJSONObject(i)
+        val extensions = errorObject.optJSONObject("extensions")
+        val exception = extensions.optJSONObject("conflictInfo")
+        val serverState = exception.optJSONObject("serverState")
+        val clientState = exception.optJSONObject("clientState")
+        Log.d("Offix-Responsecallback", " ServerState : $serverState /n ClientState : $clientState")
+
+        serverClientStates.add(ServerClientData(serverState.toString(), clientState.toString()))
+    }
+
+    return serverClientStates
+}
 
 /*
  This function takes in an object of Mutation<D,T,V> and returns an object of com.aerogear.offix.persistence.Mutation.
@@ -187,5 +244,3 @@ fun inputTypeChecker(string: String) = string.equals("com.apollographql.apollo.a
     @return ApolloClient.Buidler
  */
 fun ApolloClient.Builder.OfflineClientBuilder(): ApolloClient.Builder = this
-
-
