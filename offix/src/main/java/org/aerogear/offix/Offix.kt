@@ -12,15 +12,15 @@ import com.apollographql.apollo.api.Operation
 import com.apollographql.apollo.api.Response
 import com.apollographql.apollo.exception.ApolloException
 import com.google.gson.Gson
-import okhttp3.Interceptor
 import org.json.JSONObject
-import java.nio.charset.Charset
 
 /*
 Global variable which will keep track of whether the conflict is detected or not.
 In case any conflicts come, the error string would be stored in this variable.
  */
 var responseWithConflicts = ""
+
+var list = arrayListOf<ServerClientData>()
 
 /*
 Initialised gson variable.
@@ -84,11 +84,14 @@ fun ApolloClient.enqueue(
              5. The user resolves conflicts and send the mutation back to the library.
              6. Make a recursive call to the enqueue() function and retry mutation again.
              */
-            if (response.data() == null && responseWithConflicts.isNotEmpty()) {
-                val serverClientData = getServerClientData(responseWithConflicts)
+
+            Log.d("Extension list Size: ", " size of  list  ${list.size}")
+
+            if (response.data() == null && responseWithConflicts.isNotEmpty() && list.isNotEmpty()) {
+//                val serverClientData = getServerClientData(responseWithConflicts)
 
                 val retryMutation =
-                    responseCallback.onConflictDetected(serverClientData)
+                    responseCallback.onConflictDetected(list)
 
                 /* Make a recursive call to the enqueue method to retry the mutation
                  */

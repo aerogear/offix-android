@@ -1,9 +1,7 @@
 package org.aerogear.graphqlandroid
 
 import android.content.Context
-import android.support.v7.app.AppCompatActivity
 import android.util.Log
-import android.widget.Toast
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.api.Operation
 import com.apollographql.apollo.api.ResponseField
@@ -19,14 +17,14 @@ import com.apollographql.apollo.interceptor.ApolloInterceptorChain
 import com.apollographql.apollo.subscription.WebSocketSubscriptionTransport
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
-import org.aerogear.offix.interceptor.ConflictInterceptor
+import org.aerogear.offix.interceptor.OffixInterceptor
 import java.nio.charset.Charset
 import java.util.concurrent.Executor
 
 object Utils {
 
     //To run on emulator use http://10.0.2.2.100:4000/graphql
-    const val BASE_URL = "http://192.168.0.100:4000/graphql"
+    const val BASE_URL = "http://192.168.0.107:4000/graphql"
     private const val SQL_CACHE_NAME = "tasks4Db"
 
     private var apClient: ApolloClient? = null
@@ -52,6 +50,7 @@ object Utils {
             apClient = ApolloClient.builder()
                 .okHttpClient(getOkhttpClient(context)!!)
                 .normalizedCache(cacheFactory, cacheResolver())
+                .addApplicationInterceptor(OffixInterceptor())
 //              .addApplicationInterceptor(getApolloInterceptor())
                 .subscriptionTransportFactory(
                     WebSocketSubscriptionTransport.Factory(
@@ -78,7 +77,7 @@ object Utils {
                 /*While making an instance of apollo client, user will have to add the interceptor provided
                 by the library.
                 */
-                .addInterceptor(ConflictInterceptor())
+               // .addInterceptor(ConflictInterceptor())
                 .build()
         }
         return httpClient
