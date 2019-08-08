@@ -13,24 +13,21 @@ import com.apollographql.apollo.cache.normalized.lru.LruNormalizedCacheFactory
 import com.apollographql.apollo.cache.normalized.sql.ApolloSqlHelper
 import com.apollographql.apollo.cache.normalized.sql.SqlNormalizedCacheFactory
 import com.apollographql.apollo.interceptor.ApolloInterceptor
-import com.apollographql.apollo.interceptor.ApolloInterceptorChain
 import com.apollographql.apollo.subscription.WebSocketSubscriptionTransport
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
-import org.aerogear.offix.interceptor.OffixInterceptor
+import org.aerogear.offix.interceptor.ConflictInterceptor
 import java.nio.charset.Charset
-import java.util.concurrent.Executor
 
 object Utils {
 
     //To run on emulator use http://10.0.2.2.100:4000/graphql
-    const val BASE_URL = "http://192.168.0.107:4000/graphql"
+    const val BASE_URL = "http://192.168.0.105:4000/graphql"
     private const val SQL_CACHE_NAME = "tasks4Db"
 
     private var apClient: ApolloClient? = null
     private var httpClient: OkHttpClient? = null
     private var conflictInterceptor: Interceptor? = null
-    private lateinit var apolloInterceptor: ApolloInterceptor
 
     @JvmStatic
     fun getApolloClient(context: Context): ApolloClient? {
@@ -50,7 +47,7 @@ object Utils {
             apClient = ApolloClient.builder()
                 .okHttpClient(getOkhttpClient(context)!!)
                 .normalizedCache(cacheFactory, cacheResolver())
-                .addApplicationInterceptor(OffixInterceptor())
+                .addApplicationInterceptor(ConflictInterceptor())
                 .subscriptionTransportFactory(
                     WebSocketSubscriptionTransport.Factory(
                         BASE_URL,

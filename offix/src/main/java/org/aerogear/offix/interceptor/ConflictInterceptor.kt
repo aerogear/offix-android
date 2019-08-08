@@ -6,7 +6,7 @@ import com.apollographql.apollo.interceptor.ApolloInterceptor
 import com.apollographql.apollo.interceptor.ApolloInterceptorChain
 import java.util.concurrent.Executor
 
-class OffixInterceptor : ApolloInterceptor {
+class ConflictInterceptor : ApolloInterceptor {
 
     private val TAG = javaClass.simpleName
 

@@ -105,25 +105,27 @@ class UserData(val context: Context) {
             }
 
 
-            override fun onConflictDetected(serverClientStates: ArrayList<ServerClientData>): ArrayList<Mutation<Operation.Data, Any, Operation.Variables>>? {
+            override fun onConflictDetected(serverClientStates: ArrayList<ServerClientData>): Mutation<Operation.Data, Any, Operation.Variables>? {
                 /*
                     1. Loop through the server-client states
                     2. Resolve Conflicts.
                     3. Make a mutation object after resolving conflicts
                  */
-
-                var list = arrayListOf<Mutation<Operation.Data, Any, Operation.Variables>>()
                 serverClientStates.forEach {
                     Log.e("onConflictDetected ---", "${it.serverData}")
-                    var parsedObject = gson.fromJson(it.serverData, ServerstateClass::class.java)
-                    val versionAfterConflict = parsedObject.version + 1
-                    Log.e("onConflictDetected ---", "$versionAfterConflict")
+                    val serverMap = it.serverData
 
-                    mutation =
-                        UpdateCurrentTaskMutation.builder().id(id).title(title).version(versionAfterConflict).build()
-                    list.add(mutation as com.apollographql.apollo.api.Mutation<Operation.Data, Any, Operation.Variables>)
+                    val containsVersion = serverMap.containsKey("version")
+
+                    if (containsVersion) {
+
+                        var versionAfterConflict = serverMap.get("version") as Int + 1
+                        mutation =
+                            UpdateCurrentTaskMutation.builder().id(id).title(title).version(versionAfterConflict)
+                                .build()
+                    }
                 }
-                return list
+                return mutation as com.apollographql.apollo.api.Mutation<Operation.Data, Any, Operation.Variables>
             }
         }
 
@@ -140,7 +142,7 @@ class UserData(val context: Context) {
 
         val customCallback = object : ResponseCallback {
 
-            override fun onConflictDetected(serverClientStates: ArrayList<ServerClientData>): ArrayList<Mutation<Operation.Data, Any, Operation.Variables>>? {
+            override fun onConflictDetected(serverClientStates: ArrayList<ServerClientData>): Mutation<Operation.Data, Any, Operation.Variables>? {
                 /*
                  return null from this function if you don't want to handle conflicts
                  */
@@ -179,7 +181,7 @@ class UserData(val context: Context) {
         }
 
         val customCallback = object : ResponseCallback {
-            override fun onConflictDetected(serverClientStates: ArrayList<ServerClientData>): ArrayList<Mutation<Operation.Data, Any, Operation.Variables>>? {
+            override fun onConflictDetected(serverClientStates: ArrayList<ServerClientData>): Mutation<Operation.Data, Any, Operation.Variables>? {
                 return null
             }
 

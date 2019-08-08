@@ -14,7 +14,7 @@ import com.apollographql.apollo.exception.ApolloException
 import com.google.gson.Gson
 import org.json.JSONObject
 
-var list = arrayListOf<ServerClientData>()
+lateinit var scData: ServerClientData
 
 /* Extension function on ApolloClient which will be used by the user while making a call request.
    @receiver parameter is ApolloClient on which the call will be made by the user.
@@ -74,16 +74,17 @@ fun ApolloClient.enqueue(
              6. Make a recursive call to the enqueue() function and retry mutation again.
              */
 
-            Log.d("Extension list Size: ", " size of  list  ${list.size}")
             Log.d("Response DATA: ", " ${response.data()}")
 
-            if (list.isNotEmpty()) {
+            if (scData.serverData.isNotEmpty()) {
 
-                val retryMutationList = responseCallback.onConflictDetected(list)
+                val list = arrayListOf<ServerClientData>()
+                list.add(scData)
+                val retryMutation = responseCallback.onConflictDetected(list)
 
                 /* Make a recursive call to the enqueue method to retry the mutation
                  */
-                retryMutationList?.forEach {
+                retryMutation?.let {
                     Offline.apClient?.mutate(it)?.enqueue(this)
                 }
             }
