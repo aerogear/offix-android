@@ -1,0 +1,16 @@
+{
+  "dbConfig": {
+    "filename": "./db.sqlite"
+  },
+  "generation": {
+    "create": true,
+    "update": true,
+    "findAll": true,
+    "find": true,
+    "delete": false,
+    "subCreate": false,
+    "subUpdate": false,
+    "subDelete": false
+  },
+  "database": "sqlite3"
+}
