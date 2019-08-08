@@ -51,7 +51,6 @@ object Utils {
                 .okHttpClient(getOkhttpClient(context)!!)
                 .normalizedCache(cacheFactory, cacheResolver())
                 .addApplicationInterceptor(OffixInterceptor())
-//              .addApplicationInterceptor(getApolloInterceptor())
                 .subscriptionTransportFactory(
                     WebSocketSubscriptionTransport.Factory(
                         BASE_URL,
@@ -81,30 +80,6 @@ object Utils {
                 .build()
         }
         return httpClient
-    }
-
-    private fun getApolloInterceptor(): ApolloInterceptor {
-        val apolloInterceptor = object : ApolloInterceptor {
-            override fun interceptAsync(
-                request: ApolloInterceptor.InterceptorRequest,
-                chain: ApolloInterceptorChain,
-                dispatcher: Executor,
-                callBack: ApolloInterceptor.CallBack
-            ) {
-                Log.e("ApolloInterceptor----", "$request")
-                Log.e("ApolloInterceptor----", "${request.operation.queryDocument()}")
-                Log.e("ApolloInterceptor----", "${request.operation.variables().valueMap()}")
-                Log.e("ApolloInterceptor----", "${request.operation.operationId()}")
-                Log.e("ApolloInterceptor----", "${request.requestHeaders}")
-//                Log.e("ApolloInterceptor----", "${chain.}")
-            }
-
-            override fun dispose() {
-                Log.e("UtilsClass", " *** ondispose")
-            }
-        }
-
-        return apolloInterceptor
     }
 
     //function to get the response after query/mutation is performed, can get conflict messages and so on.

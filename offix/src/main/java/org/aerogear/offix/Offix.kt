@@ -14,18 +14,7 @@ import com.apollographql.apollo.exception.ApolloException
 import com.google.gson.Gson
 import org.json.JSONObject
 
-/*
-Global variable which will keep track of whether the conflict is detected or not.
-In case any conflicts come, the error string would be stored in this variable.
- */
-var responseWithConflicts = ""
-
 var list = arrayListOf<ServerClientData>()
-
-/*
-Initialised gson variable.
- */
-val gson = Gson()
 
 /* Extension function on ApolloClient which will be used by the user while making a call request.
    @receiver parameter is ApolloClient on which the call will be made by the user.
@@ -86,16 +75,15 @@ fun ApolloClient.enqueue(
              */
 
             Log.d("Extension list Size: ", " size of  list  ${list.size}")
+            Log.d("Response DATA: ", " ${response.data()}")
 
-            if (response.data() == null && responseWithConflicts.isNotEmpty() && list.isNotEmpty()) {
-//                val serverClientData = getServerClientData(responseWithConflicts)
+            if (list.isNotEmpty()) {
 
-                val retryMutation =
-                    responseCallback.onConflictDetected(list)
+                val retryMutationList = responseCallback.onConflictDetected(list)
 
                 /* Make a recursive call to the enqueue method to retry the mutation
                  */
-                retryMutation?.let {
+                retryMutationList?.forEach {
                     Offline.apClient?.mutate(it)?.enqueue(this)
                 }
             }
@@ -112,29 +100,6 @@ fun ApolloClient.enqueue(
       Make a call with the mutation to the server.
      */
     this.mutate(mutation).enqueue(apolloCallback)
-}
-
-/*
-    Parse the response that contains conflicts to retrieve an ArrayList of server-client states
- */
-fun getServerClientData(serverError: String): ArrayList<ServerClientData> {
-    val json = JSONObject(serverError)
-    val serverClientStates = arrayListOf<ServerClientData>()
-    Log.d("Offix-Responsecallback", " $responseWithConflicts")
-    val errorArray = json.optJSONArray("errors")
-
-    for (i in 0..errorArray.length()) {
-        val errorObject = errorArray.optJSONObject(i)
-        val extensions = errorObject.optJSONObject("extensions")
-        val exception = extensions.optJSONObject("conflictInfo")
-        val serverState = exception.optJSONObject("serverState")
-        val clientState = exception.optJSONObject("clientState")
-        Log.d("Offix-Responsecallback", " ServerState : $serverState /n ClientState : $clientState")
-
-        serverClientStates.add(ServerClientData(serverState.toString(), clientState.toString()))
-    }
-
-    return serverClientStates
 }
 
 /*

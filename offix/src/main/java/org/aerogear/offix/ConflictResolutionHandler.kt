@@ -6,6 +6,9 @@ import com.apollographql.apollo.api.internal.Optional
 import org.json.JSONException
 import org.json.JSONObject
 
+/*
+ConflictResolutionHandler class helps in detecting the conflicts present in the server response.
+ */
 class ConflictResolutionHandler {
 
     private val TAG = javaClass.simpleName
@@ -22,7 +25,6 @@ class ConflictResolutionHandler {
             }
             if (responseString.contains("conflictInfo")) {
                 Log.d("ConflictInterceptor", " ******")
-                Log.d("ConflictInterceptor **", responseWithConflicts)
                 return true
             }
         } catch (e: JSONException) {
