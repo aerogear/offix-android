@@ -5,11 +5,12 @@ import com.apollographql.apollo.api.Error
 import com.apollographql.apollo.exception.ApolloException
 import com.apollographql.apollo.interceptor.ApolloInterceptor
 import org.aerogear.offix.*
+import org.aerogear.offix.interfaces.ConfliceResolutionInterface
 
 /*
 OffixConflictCallback
  */
-class OffixConflictCallback : ApolloInterceptor.CallBack {
+class OffixConflictCallback(val conflictResolutionImpl: ConfliceResolutionInterface) : ApolloInterceptor.CallBack {
     private val TAG = javaClass.simpleName
 
     override fun onResponse(response: ApolloInterceptor.InterceptorResponse) {
@@ -24,11 +25,10 @@ class OffixConflictCallback : ApolloInterceptor.CallBack {
             val conflictInfo =
                 (((response.parsedResponse.get().errors()[0] as Error).customAttributes()["extensions"] as Map<*, *>)["exception"] as Map<*, *>)["conflictInfo"] as Map<*, *>
 
-            val serverStateMap = conflictInfo["serverState"] as Map<*, *>
-            val clientStateMap = conflictInfo["clientState"] as Map<*, *>
+            val serverStateMap = conflictInfo["serverState"] as Map<String, Any>
+            val clientStateMap = conflictInfo["clientState"] as Map<String, Any>
 
-            val serverClientData = ServerClientData(serverStateMap, clientStateMap)
-            scData = serverClientData
+            conflictResolutionImpl.resolveConflict(serverStateMap, clientStateMap, conflictedMutationClass)
         }
     }
 

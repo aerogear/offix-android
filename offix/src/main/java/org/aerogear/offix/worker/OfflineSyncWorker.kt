@@ -1,4 +1,4 @@
-package org.aerogear.offix
+package org.aerogear.offix.worker
 
 import android.content.Context
 import android.util.Log
@@ -8,6 +8,8 @@ import com.apollographql.apollo.ApolloCall
 import com.apollographql.apollo.api.Operation
 import com.apollographql.apollo.api.Response
 import com.apollographql.apollo.exception.ApolloException
+import org.aerogear.offix.Offline
+import org.aerogear.offix.getMutation
 
 /* Start a worker from broadcast receiver which hits mutation to the server when in foreground.
  */

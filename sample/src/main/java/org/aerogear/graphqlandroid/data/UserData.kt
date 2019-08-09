@@ -11,10 +11,10 @@ import com.apollographql.apollo.api.Response
 import com.apollographql.apollo.cache.normalized.ApolloStore
 import com.apollographql.apollo.exception.ApolloException
 import com.apollographql.apollo.fetcher.ApolloResponseFetchers
-import com.google.gson.Gson
 import org.aerogear.graphqlandroid.*
 import org.aerogear.graphqlandroid.model.Task
 import org.aerogear.offix.*
+import org.aerogear.offix.interfaces.ResponseCallback
 import java.util.concurrent.atomic.AtomicReference
 
 class UserData(val context: Context) {
@@ -24,7 +24,6 @@ class UserData(val context: Context) {
     val watchResponse = AtomicReference<Response<AllTasksQuery.Data>>()
     val TAG = javaClass.simpleName
     lateinit var apolloStore: ApolloStore
-    val gson = Gson()
 
     fun getTasks(): ArrayList<Task> {
 
@@ -103,30 +102,6 @@ class UserData(val context: Context) {
                 Log.e("onSchedule() updateTask", "${mutation.variables().valueMap()}")
                 e.printStackTrace()
             }
-
-
-            override fun onConflictDetected(serverClientStates: ArrayList<ServerClientData>): Mutation<Operation.Data, Any, Operation.Variables>? {
-                /*
-                    1. Loop through the server-client states
-                    2. Resolve Conflicts.
-                    3. Make a mutation object after resolving conflicts
-                 */
-                serverClientStates.forEach {
-                    Log.e("onConflictDetected ---", "${it.serverData}")
-                    val serverMap = it.serverData
-
-                    val containsVersion = serverMap.containsKey("version")
-
-                    if (containsVersion) {
-
-                        var versionAfterConflict = serverMap.get("version") as Int + 1
-                        mutation =
-                            UpdateCurrentTaskMutation.builder().id(id).title(title).version(versionAfterConflict)
-                                .build()
-                    }
-                }
-                return mutation as com.apollographql.apollo.api.Mutation<Operation.Data, Any, Operation.Variables>
-            }
         }
 
         Utils.getApolloClient(context)?.enqueue(
@@ -141,13 +116,6 @@ class UserData(val context: Context) {
         val mutation = CreateTaskMutation.builder().title(title).description(description).build()
 
         val customCallback = object : ResponseCallback {
-
-            override fun onConflictDetected(serverClientStates: ArrayList<ServerClientData>): Mutation<Operation.Data, Any, Operation.Variables>? {
-                /*
-                 return null from this function if you don't want to handle conflicts
-                 */
-                return null
-            }
 
             override fun onSuccess(response: Response<Any>) {
                 Log.e("onSuccess() createTask", "${response.data()}")
@@ -181,10 +149,6 @@ class UserData(val context: Context) {
         }
 
         val customCallback = object : ResponseCallback {
-            override fun onConflictDetected(serverClientStates: ArrayList<ServerClientData>): Mutation<Operation.Data, Any, Operation.Variables>? {
-                return null
-            }
-
             override fun onSuccess(response: Response<Any>) {
                 Log.e("onSuccess() deleteTask", "${response.data()}")
             }

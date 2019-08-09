@@ -1,4 +1,4 @@
-package org.aerogear.offix
+package org.aerogear.offix.worker
 
 import android.arch.persistence.room.Room
 import android.content.Context

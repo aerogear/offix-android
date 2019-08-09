@@ -11,10 +11,12 @@ import com.apollographql.apollo.api.Mutation
 import com.apollographql.apollo.api.Operation
 import com.apollographql.apollo.api.Response
 import com.apollographql.apollo.exception.ApolloException
-import com.google.gson.Gson
+import org.aerogear.offix.interfaces.ResponseCallback
 import org.json.JSONObject
-
-lateinit var scData: ServerClientData
+/*
+conflictedMutationClass variable stores the name of the mutation class in which conflict has occurred.
+ */
+lateinit var conflictedMutationClass: String
 
 /* Extension function on ApolloClient which will be used by the user while making a call request.
    @receiver parameter is ApolloClient on which the call will be made by the user.
@@ -67,26 +69,13 @@ fun ApolloClient.enqueue(
 
             /*
              1. Check if the response data is null or not. If it's null that means the conflict has happened.
-             2. Parse the json error response from the server.
-             3. Get the serverstate and the clientstate keys from the error response.
-             4. Set them in responseCallback's onConflictDetected() method.
-             5. The user resolves conflicts and send the mutation back to the library.
-             6. Make a recursive call to the enqueue() function and retry mutation again.
+             2. Store the mutation class name in which conflict has occurred in the conflictedMutationClass variable.
              */
 
             Log.d("Response DATA: ", " ${response.data()}")
 
-            if (scData.serverData.isNotEmpty()) {
-
-                val list = arrayListOf<ServerClientData>()
-                list.add(scData)
-                val retryMutation = responseCallback.onConflictDetected(list)
-
-                /* Make a recursive call to the enqueue method to retry the mutation
-                 */
-                retryMutation?.let {
-                    Offline.apClient?.mutate(it)?.enqueue(this)
-                }
+            if (response.data()==null) {
+                conflictedMutationClass = mutation.javaClass.simpleName
             }
 
             /*

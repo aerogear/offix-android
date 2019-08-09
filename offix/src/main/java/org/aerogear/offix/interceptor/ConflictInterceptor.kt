@@ -4,9 +4,10 @@ import android.util.Log
 import com.apollographql.apollo.api.Mutation
 import com.apollographql.apollo.interceptor.ApolloInterceptor
 import com.apollographql.apollo.interceptor.ApolloInterceptorChain
+import org.aerogear.offix.interfaces.ConfliceResolutionInterface
 import java.util.concurrent.Executor
 
-class ConflictInterceptor : ApolloInterceptor {
+class ConflictInterceptor(val conflictResolutionImpl: ConfliceResolutionInterface) : ApolloInterceptor {
 
     private val TAG = javaClass.simpleName
 
@@ -22,10 +23,8 @@ class ConflictInterceptor : ApolloInterceptor {
             chain.proceedAsync(request, dispatcher, callBack)
             return
         }
-
         Log.d("$TAG 1", request.requestHeaders.headers().toString())
-
-        chain.proceedAsync(request, dispatcher, OffixConflictCallback())
+        chain.proceedAsync(request, dispatcher, OffixConflictCallback(conflictResolutionImpl))
     }
 
     override fun dispose() {

@@ -7,6 +7,7 @@ import androidx.work.Constraints
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequest
 import androidx.work.WorkManager
+import org.aerogear.offix.worker.OfflineSyncWorker
 
 /*
  BroadcastReceiver that listens for connectivity change while the app is in foreground (in-memory).
