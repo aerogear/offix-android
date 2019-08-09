@@ -11,7 +11,7 @@ import com.apollographql.apollo.api.Mutation
 import com.apollographql.apollo.api.Operation
 import com.apollographql.apollo.api.Response
 import com.apollographql.apollo.exception.ApolloException
-import com.google.gson.Gson
+import org.aerogear.offix.interfaces.ResponseCallback
 import org.json.JSONObject
 /*
 conflictedMutationClass variable stores the name of the mutation class in which conflict has occurred.

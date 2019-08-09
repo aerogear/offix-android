@@ -1,4 +1,4 @@
-package org.aerogear.offix
+package org.aerogear.offix.interfaces
 
 import com.apollographql.apollo.api.Mutation
 import com.apollographql.apollo.api.Operation

@@ -5,6 +5,7 @@ import com.apollographql.apollo.api.Error
 import com.apollographql.apollo.exception.ApolloException
 import com.apollographql.apollo.interceptor.ApolloInterceptor
 import org.aerogear.offix.*
+import org.aerogear.offix.interfaces.ConflictResolutionImpl
 
 /*
 OffixConflictCallback

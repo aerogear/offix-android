@@ -6,8 +6,8 @@ import com.apollographql.apollo.api.Mutation
 import com.apollographql.apollo.api.Operation
 import com.apollographql.apollo.api.Response
 import com.apollographql.apollo.exception.ApolloException
-import org.aerogear.offix.ConflictResolutionImpl
-import org.aerogear.offix.ResponseCallback
+import org.aerogear.offix.interfaces.ConflictResolutionImpl
+import org.aerogear.offix.interfaces.ResponseCallback
 import org.aerogear.offix.enqueue
 
 /*

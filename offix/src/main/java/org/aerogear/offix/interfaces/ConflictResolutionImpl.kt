@@ -1,4 +1,4 @@
-package org.aerogear.offix
+package org.aerogear.offix.interfaces
 
 /*
  Users can implement ConflictResolutionImpl interface in their app and provide a custom conflict resolution implementation.

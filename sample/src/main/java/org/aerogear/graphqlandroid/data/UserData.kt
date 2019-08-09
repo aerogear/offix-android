@@ -11,10 +11,10 @@ import com.apollographql.apollo.api.Response
 import com.apollographql.apollo.cache.normalized.ApolloStore
 import com.apollographql.apollo.exception.ApolloException
 import com.apollographql.apollo.fetcher.ApolloResponseFetchers
-import com.google.gson.Gson
 import org.aerogear.graphqlandroid.*
 import org.aerogear.graphqlandroid.model.Task
 import org.aerogear.offix.*
+import org.aerogear.offix.interfaces.ResponseCallback
 import java.util.concurrent.atomic.AtomicReference
 
 class UserData(val context: Context) {

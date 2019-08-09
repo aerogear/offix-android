@@ -4,7 +4,7 @@ import android.util.Log
 import com.apollographql.apollo.api.Mutation
 import com.apollographql.apollo.interceptor.ApolloInterceptor
 import com.apollographql.apollo.interceptor.ApolloInterceptorChain
-import org.aerogear.offix.ConflictResolutionImpl
+import org.aerogear.offix.interfaces.ConflictResolutionImpl
 import java.util.concurrent.Executor
 
 class ConflictInterceptor(conflictResolutionImpl: ConflictResolutionImpl) : ApolloInterceptor {
