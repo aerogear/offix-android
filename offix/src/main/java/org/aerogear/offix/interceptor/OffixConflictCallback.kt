@@ -10,9 +10,8 @@ import org.aerogear.offix.interfaces.ConflictResolutionImpl
 /*
 OffixConflictCallback
  */
-class OffixConflictCallback(conflictResolutionImpl: ConflictResolutionImpl) : ApolloInterceptor.CallBack {
+class OffixConflictCallback(val conflictResolutionImpl: ConflictResolutionImpl) : ApolloInterceptor.CallBack {
     private val TAG = javaClass.simpleName
-    var conflictResolutionImpl = conflictResolutionImpl
 
     override fun onResponse(response: ApolloInterceptor.InterceptorResponse) {
 

@@ -14,8 +14,7 @@ import org.aerogear.offix.enqueue
 UserConflictResolutionHandler extends ConflictResolutionImpl.
 Here the user provides the custom implementation of resolving conflicts.
  */
-class UserConflictResolutionHandler(context: Context) : ConflictResolutionImpl {
-    val context = context
+class UserConflictResolutionHandler(val context: Context) : ConflictResolutionImpl {
     val TAG = javaClass.simpleName
 
     /*

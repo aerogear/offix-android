@@ -7,10 +7,9 @@ import com.apollographql.apollo.interceptor.ApolloInterceptorChain
 import org.aerogear.offix.interfaces.ConflictResolutionImpl
 import java.util.concurrent.Executor
 
-class ConflictInterceptor(conflictResolutionImpl: ConflictResolutionImpl) : ApolloInterceptor {
+class ConflictInterceptor(val conflictResolutionImpl: ConflictResolutionImpl) : ApolloInterceptor {
 
     private val TAG = javaClass.simpleName
-    val conflictResolutionImpl = conflictResolutionImpl
 
     override fun interceptAsync(
         request: ApolloInterceptor.InterceptorRequest,
