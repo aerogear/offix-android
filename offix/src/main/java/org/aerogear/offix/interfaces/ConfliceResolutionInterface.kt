@@ -1,9 +1,9 @@
 package org.aerogear.offix.interfaces
 
 /*
- Users can implement ConflictResolutionImpl interface in their app and provide a custom conflict resolution implementation.
+ Users can implement ConfliceResolutionInterface interface in their app and provide a custom conflict resolution implementation.
  */
-interface ConflictResolutionImpl {
+interface ConfliceResolutionInterface {
     fun resolveConflict(
         serverState: Map<String, Any>,
         clientState: Map<String, Any>,

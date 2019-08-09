@@ -6,15 +6,15 @@ import com.apollographql.apollo.api.Mutation
 import com.apollographql.apollo.api.Operation
 import com.apollographql.apollo.api.Response
 import com.apollographql.apollo.exception.ApolloException
-import org.aerogear.offix.interfaces.ConflictResolutionImpl
+import org.aerogear.offix.interfaces.ConfliceResolutionInterface
 import org.aerogear.offix.interfaces.ResponseCallback
 import org.aerogear.offix.enqueue
 
 /*
-UserConflictResolutionHandler extends ConflictResolutionImpl.
+UserConflictResolutionHandler extends ConfliceResolutionInterface.
 Here the user provides the custom implementation of resolving conflicts.
  */
-class UserConflictResolutionHandler(val context: Context) : ConflictResolutionImpl {
+class UserConflictResolutionHandler(val context: Context) : ConfliceResolutionInterface {
     val TAG = javaClass.simpleName
 
     /*

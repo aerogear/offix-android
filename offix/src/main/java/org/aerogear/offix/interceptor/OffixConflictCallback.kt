@@ -5,12 +5,12 @@ import com.apollographql.apollo.api.Error
 import com.apollographql.apollo.exception.ApolloException
 import com.apollographql.apollo.interceptor.ApolloInterceptor
 import org.aerogear.offix.*
-import org.aerogear.offix.interfaces.ConflictResolutionImpl
+import org.aerogear.offix.interfaces.ConfliceResolutionInterface
 
 /*
 OffixConflictCallback
  */
-class OffixConflictCallback(val conflictResolutionImpl: ConflictResolutionImpl) : ApolloInterceptor.CallBack {
+class OffixConflictCallback(val conflictResolutionImpl: ConfliceResolutionInterface) : ApolloInterceptor.CallBack {
     private val TAG = javaClass.simpleName
 
     override fun onResponse(response: ApolloInterceptor.InterceptorResponse) {

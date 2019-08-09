@@ -4,10 +4,10 @@ import android.util.Log
 import com.apollographql.apollo.api.Mutation
 import com.apollographql.apollo.interceptor.ApolloInterceptor
 import com.apollographql.apollo.interceptor.ApolloInterceptorChain
-import org.aerogear.offix.interfaces.ConflictResolutionImpl
+import org.aerogear.offix.interfaces.ConfliceResolutionInterface
 import java.util.concurrent.Executor
 
-class ConflictInterceptor(val conflictResolutionImpl: ConflictResolutionImpl) : ApolloInterceptor {
+class ConflictInterceptor(val conflictResolutionImpl: ConfliceResolutionInterface) : ApolloInterceptor {
 
     private val TAG = javaClass.simpleName
 
