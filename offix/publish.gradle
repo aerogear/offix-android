@@ -1,7 +1,7 @@
 apply plugin: 'maven-publish'
 apply plugin: 'com.jfrog.bintray'
 
-version '0.1.0'
+version '0.2.0'
 group 'org.aerogear.offix'
 
 //Properties properties = new Properties()
