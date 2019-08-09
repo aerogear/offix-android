@@ -9,8 +9,9 @@ import org.aerogear.offix.*
 /*
 OffixConflictCallback
  */
-class OffixConflictCallback : ApolloInterceptor.CallBack {
+class OffixConflictCallback(conflictResolutionImpl: ConflictResolutionImpl) : ApolloInterceptor.CallBack {
     private val TAG = javaClass.simpleName
+    var conflictResolutionImpl = conflictResolutionImpl
 
     override fun onResponse(response: ApolloInterceptor.InterceptorResponse) {
 
@@ -24,11 +25,10 @@ class OffixConflictCallback : ApolloInterceptor.CallBack {
             val conflictInfo =
                 (((response.parsedResponse.get().errors()[0] as Error).customAttributes()["extensions"] as Map<*, *>)["exception"] as Map<*, *>)["conflictInfo"] as Map<*, *>
 
-            val serverStateMap = conflictInfo["serverState"] as Map<*, *>
-            val clientStateMap = conflictInfo["clientState"] as Map<*, *>
+            val serverStateMap = conflictInfo["serverState"] as Map<String, Any>
+            val clientStateMap = conflictInfo["clientState"] as Map<String, Any>
 
-            val serverClientData = ServerClientData(serverStateMap, clientStateMap)
-            scData = serverClientData
+            conflictResolutionImpl.resolveConflict(serverStateMap, clientStateMap, conflictedMutationClass)
         }
     }
 
