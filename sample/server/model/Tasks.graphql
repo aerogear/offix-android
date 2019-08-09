@@ -1,0 +1,26 @@
+type Task {
+  id: ID!
+  version: Int
+  title: String!
+  description: String!
+  status: String!
+  creationMetadata: CreationMetadata
+  assignedTo: User
+}
+
+type CreationMetadata {
+   createdDate: String
+   createdBy: User
+ }
+
+type User {
+  id: ID!
+  firstName: String!
+  lastName: String!
+  title: String!
+  email: String!
+}
+
+type Mutation {
+  checkAndUpdateTask(id: ID!, title: String, description: String, version: Int!, status: String!): Task
+}
