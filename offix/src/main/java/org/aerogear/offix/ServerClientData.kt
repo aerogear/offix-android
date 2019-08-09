@@ -1,6 +1,6 @@
 package org.aerogear.offix
 
 class ServerClientData(
-    var serverData: HashMap<*,*>,
-    var clientData: HashMap<*,*>
+    var serverData: Map<*,*>,
+    var clientData: Map<*,*>
 )
