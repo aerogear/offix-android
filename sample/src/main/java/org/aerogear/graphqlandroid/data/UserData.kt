@@ -111,13 +111,19 @@ class UserData(val context: Context) {
                     2. Resolve Conflicts.
                     3. Make a mutation object after resolving conflicts
                  */
-
                 serverClientStates.forEach {
-                    var parsedObject = gson.fromJson(it.serverData, ServerstateClass::class.java)
-                    val versionAfterConflict = parsedObject.version + 1
+                    Log.e("onConflictDetected ---", "${it.serverData}")
+                    val serverMap = it.serverData
 
-                    mutation =
-                        UpdateCurrentTaskMutation.builder().id(id).title(title).version(versionAfterConflict).build()
+                    val containsVersion = serverMap.containsKey("version")
+
+                    if (containsVersion) {
+
+                        var versionAfterConflict = serverMap.get("version") as Int + 1
+                        mutation =
+                            UpdateCurrentTaskMutation.builder().id(id).title(title).version(versionAfterConflict)
+                                .build()
+                    }
                 }
                 return mutation as com.apollographql.apollo.api.Mutation<Operation.Data, Any, Operation.Variables>
             }

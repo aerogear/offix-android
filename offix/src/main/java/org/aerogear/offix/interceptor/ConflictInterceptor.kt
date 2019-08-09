@@ -1,34 +1,34 @@
 package org.aerogear.offix.interceptor
 
 import android.util.Log
-import okhttp3.Interceptor
-import okhttp3.Response
-import org.aerogear.offix.responseWithConflicts
-import java.nio.charset.Charset
+import com.apollographql.apollo.api.Mutation
+import com.apollographql.apollo.interceptor.ApolloInterceptor
+import com.apollographql.apollo.interceptor.ApolloInterceptorChain
+import java.util.concurrent.Executor
 
-/*
- ConflictInterceptor should be used by the user while making an instance of apollo client
- which will help in detecting conflicts.
- */
-class ConflictInterceptor : Interceptor {
+class ConflictInterceptor : ApolloInterceptor {
 
-    override fun intercept(chain: Interceptor.Chain): Response {
-        val request = chain.request()
-        val response = chain.proceed(request)
+    private val TAG = javaClass.simpleName
 
-        val responseBody = response.body()
-        val bufferedSource = responseBody?.source()
-        bufferedSource?.request(Long.MAX_VALUE)
-        val buffer = bufferedSource?.buffer()
-        val responseBodyString = buffer?.clone()?.readString(Charset.forName("UTF-8")) ?: ""
-
-        Log.d("OffixClass", " Interceptor ** : $responseBodyString")
-
-        if (responseBodyString.contains("conflictInfo")) {
-            responseWithConflicts = responseBodyString
-            Log.d("ConflictInterceptor", " ******")
-            Log.d("ConflictInterceptor **", responseWithConflicts)
+    override fun interceptAsync(
+        request: ApolloInterceptor.InterceptorRequest,
+        chain: ApolloInterceptorChain,
+        dispatcher: Executor,
+        callBack: ApolloInterceptor.CallBack
+    ) {
+        //Check if this is a mutation request.
+        if (request.operation !is Mutation) {
+            //Not a mutation. Nothing to do here - move on to the next link in the chain.
+            chain.proceedAsync(request, dispatcher, callBack)
+            return
         }
-        return response
+
+        Log.d("$TAG 1", request.requestHeaders.headers().toString())
+
+        chain.proceedAsync(request, dispatcher, OffixConflictCallback())
+    }
+
+    override fun dispose() {
+        Log.v(TAG, "Dispose called")
     }
 }

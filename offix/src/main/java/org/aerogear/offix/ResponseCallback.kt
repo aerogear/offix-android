@@ -24,7 +24,7 @@ interface ResponseCallback {
      Called when the library detects error from the server upon Conflict detection.
      @param serverState: String
      @param clientState: String
-     @return type:  Mutation<Operation.Data, Any, Operation.Variables>
+     @return type: Mutation<Operation.Data,Any,Operation.Variables>?
      */
-    fun onConflictDetected(serverClientStates: ArrayList<ServerClientData>): Mutation<Operation.Data, Any, Operation.Variables>?
+    fun onConflictDetected(serverClientStates: ArrayList<ServerClientData>): Mutation<Operation.Data,Any,Operation.Variables>?
 }

@@ -12,20 +12,9 @@ import com.apollographql.apollo.api.Operation
 import com.apollographql.apollo.api.Response
 import com.apollographql.apollo.exception.ApolloException
 import com.google.gson.Gson
-import okhttp3.Interceptor
 import org.json.JSONObject
-import java.nio.charset.Charset
 
-/*
-Global variable which will keep track of whether the conflict is detected or not.
-In case any conflicts come, the error string would be stored in this variable.
- */
-var responseWithConflicts = ""
-
-/*
-Initialised gson variable.
- */
-val gson = Gson()
+lateinit var scData: ServerClientData
 
 /* Extension function on ApolloClient which will be used by the user while making a call request.
    @receiver parameter is ApolloClient on which the call will be made by the user.
@@ -84,11 +73,14 @@ fun ApolloClient.enqueue(
              5. The user resolves conflicts and send the mutation back to the library.
              6. Make a recursive call to the enqueue() function and retry mutation again.
              */
-            if (response.data() == null && responseWithConflicts.isNotEmpty()) {
-                val serverClientData = getServerClientData(responseWithConflicts)
 
-                val retryMutation =
-                    responseCallback.onConflictDetected(serverClientData)
+            Log.d("Response DATA: ", " ${response.data()}")
+
+            if (scData.serverData.isNotEmpty()) {
+
+                val list = arrayListOf<ServerClientData>()
+                list.add(scData)
+                val retryMutation = responseCallback.onConflictDetected(list)
 
                 /* Make a recursive call to the enqueue method to retry the mutation
                  */
@@ -109,29 +101,6 @@ fun ApolloClient.enqueue(
       Make a call with the mutation to the server.
      */
     this.mutate(mutation).enqueue(apolloCallback)
-}
-
-/*
-    Parse the response that contains conflicts to retrieve an ArrayList of server-client states
- */
-fun getServerClientData(serverError: String): ArrayList<ServerClientData> {
-    val json = JSONObject(serverError)
-    val serverClientStates = arrayListOf<ServerClientData>()
-    Log.d("Offix-Responsecallback", " $responseWithConflicts")
-    val errorArray = json.optJSONArray("errors")
-
-    for (i in 0..errorArray.length()) {
-        val errorObject = errorArray.optJSONObject(i)
-        val extensions = errorObject.optJSONObject("extensions")
-        val exception = extensions.optJSONObject("conflictInfo")
-        val serverState = exception.optJSONObject("serverState")
-        val clientState = exception.optJSONObject("clientState")
-        Log.d("Offix-Responsecallback", " ServerState : $serverState /n ClientState : $clientState")
-
-        serverClientStates.add(ServerClientData(serverState.toString(), clientState.toString()))
-    }
-
-    return serverClientStates
 }
 
 /*

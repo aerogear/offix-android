@@ -1,9 +1,7 @@
 package org.aerogear.graphqlandroid
 
 import android.content.Context
-import android.support.v7.app.AppCompatActivity
 import android.util.Log
-import android.widget.Toast
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.api.Operation
 import com.apollographql.apollo.api.ResponseField
@@ -15,24 +13,21 @@ import com.apollographql.apollo.cache.normalized.lru.LruNormalizedCacheFactory
 import com.apollographql.apollo.cache.normalized.sql.ApolloSqlHelper
 import com.apollographql.apollo.cache.normalized.sql.SqlNormalizedCacheFactory
 import com.apollographql.apollo.interceptor.ApolloInterceptor
-import com.apollographql.apollo.interceptor.ApolloInterceptorChain
 import com.apollographql.apollo.subscription.WebSocketSubscriptionTransport
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import org.aerogear.offix.interceptor.ConflictInterceptor
 import java.nio.charset.Charset
-import java.util.concurrent.Executor
 
 object Utils {
 
     //To run on emulator use http://10.0.2.2.100:4000/graphql
-    const val BASE_URL = "http://192.168.0.100:4000/graphql"
+    const val BASE_URL = "http://192.168.0.105:4000/graphql"
     private const val SQL_CACHE_NAME = "tasks4Db"
 
     private var apClient: ApolloClient? = null
     private var httpClient: OkHttpClient? = null
     private var conflictInterceptor: Interceptor? = null
-    private lateinit var apolloInterceptor: ApolloInterceptor
 
     @JvmStatic
     fun getApolloClient(context: Context): ApolloClient? {
@@ -52,7 +47,7 @@ object Utils {
             apClient = ApolloClient.builder()
                 .okHttpClient(getOkhttpClient(context)!!)
                 .normalizedCache(cacheFactory, cacheResolver())
-//              .addApplicationInterceptor(getApolloInterceptor())
+                .addApplicationInterceptor(ConflictInterceptor())
                 .subscriptionTransportFactory(
                     WebSocketSubscriptionTransport.Factory(
                         BASE_URL,
@@ -78,34 +73,10 @@ object Utils {
                 /*While making an instance of apollo client, user will have to add the interceptor provided
                 by the library.
                 */
-                .addInterceptor(ConflictInterceptor())
+               // .addInterceptor(ConflictInterceptor())
                 .build()
         }
         return httpClient
-    }
-
-    private fun getApolloInterceptor(): ApolloInterceptor {
-        val apolloInterceptor = object : ApolloInterceptor {
-            override fun interceptAsync(
-                request: ApolloInterceptor.InterceptorRequest,
-                chain: ApolloInterceptorChain,
-                dispatcher: Executor,
-                callBack: ApolloInterceptor.CallBack
-            ) {
-                Log.e("ApolloInterceptor----", "$request")
-                Log.e("ApolloInterceptor----", "${request.operation.queryDocument()}")
-                Log.e("ApolloInterceptor----", "${request.operation.variables().valueMap()}")
-                Log.e("ApolloInterceptor----", "${request.operation.operationId()}")
-                Log.e("ApolloInterceptor----", "${request.requestHeaders}")
-//                Log.e("ApolloInterceptor----", "${chain.}")
-            }
-
-            override fun dispose() {
-                Log.e("UtilsClass", " *** ondispose")
-            }
-        }
-
-        return apolloInterceptor
     }
 
     //function to get the response after query/mutation is performed, can get conflict messages and so on.
