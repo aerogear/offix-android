@@ -25,7 +25,7 @@ See [offix website](https://android.offix.dev) for usage and more details.
 
 - **Gradle**:<br/>
 
-  `implementation 'org.aerogear.offix:offix:0.1.0'`
+  `implementation 'org.aerogear.offix:offix:0.2.0'`
   
 - **Maven**:<br/> 
 
@@ -33,7 +33,7 @@ See [offix website](https://android.offix.dev) for usage and more details.
   <dependency>
 	<groupId>org.aerogear.offix</groupId>
 	<artifactId>offix</artifactId>
-	<version>0.1.0</version>
+	<version>0.2.0</version>
 	<type>pom</type>
   </dependency>
 ```

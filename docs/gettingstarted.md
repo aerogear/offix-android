@@ -22,7 +22,7 @@
 
 Add the following dependency in your **module's build.gradle**:
   
-  ```  implementation 'org.aerogear.offix:offix:0.1.0' ```
+  ```  implementation 'org.aerogear.offix:offix:0.2.0' ```
 
 For **maven**, add the following dependency: <br/> 
 
@@ -30,7 +30,7 @@ For **maven**, add the following dependency: <br/>
 <dependency>
 	<groupId>org.aerogear.offix</groupId>
 	<artifactId>offix</artifactId>
-	<version>0.1.0</version>
+	<version>0.2.0</version>
 	<type>pom</type>
 </dependency>
 ```

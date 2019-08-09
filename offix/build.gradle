@@ -81,7 +81,7 @@ ext {
 
     siteUrl = 'https://github.com/aerogear/offix-android'
     gitUrl = 'https://github.com/aerogear/offix-android.git'
-    libraryVersion = '0.1.0'
+    libraryVersion = '0.2.0'
     developerId = 'Lavanyagaur22'
     developerName = 'Lavanya Gaur'
     developerEmail = 'lavanyagaur22@gmail.com'
