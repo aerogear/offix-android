@@ -8,6 +8,9 @@ import okhttp3.Response
 import okio.Buffer
 import java.io.IOException
 
+/*
+This interceptor is just for logging and debugging purpose to see the outgoing requests and incoming responses.
+ */
 class LoggingInterceptor : Interceptor {
 
     val TAG = javaClass.simpleName + "Sample"

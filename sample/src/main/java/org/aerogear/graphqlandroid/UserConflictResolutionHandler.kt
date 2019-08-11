@@ -34,6 +34,9 @@ class UserConflictResolutionHandler(val context: Context) : ConfliceResolutionIn
         if (containsVersion) {
             var versionAfterConflict = serverMap.get("version") as Int + 1
 
+            /* You can run a switch case on the operation type to detect which type of mutation is it in which conflict occured
+                and accordingly create an object of that mutation, resolve conflict and make a server call with it.
+            */
             when (operationType) {
                 /*
                 According to the schema structure, used a version based approach of resolving conflicts.

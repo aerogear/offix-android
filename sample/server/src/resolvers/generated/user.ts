@@ -12,8 +12,7 @@ export const userResolvers = {
 
   Mutation: {
     createUser: async (_: any, args: any, context: GraphQLContext) => {
-      const [ id ] = await context.db('user').insert(args.input).returning('id')
-      const result = await context.db.select().from('user').where('id', '=', id)
+      const result = await context.db('user').insert(args.input).returning('*')
       return result[0]
     },
     updateUser: (_: any, args: any, context: GraphQLContext) => {

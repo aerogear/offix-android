@@ -19,8 +19,7 @@ export const creationmetadataResolvers = {
 
   Mutation: {
     createCreationMetadata: async (_: any, args: any, context: GraphQLContext) => {
-      const [ id ] = await context.db('creationmetadata').insert(args.input).returning('id')
-      const result = await context.db.select().from('creationmetadata').where('id', '=', id)
+      const result = await context.db('creationmetadata').insert(args.input).returning('*')
       return result[0]
     },
     updateCreationMetadata: (_: any, args: any, context: GraphQLContext) => {

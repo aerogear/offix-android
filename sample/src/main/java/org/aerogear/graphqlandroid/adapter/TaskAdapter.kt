@@ -18,8 +18,6 @@ class TaskAdapter(private val notes: List<Task>, private val context: Context) :
     inner class TaskHolder(view: View) : RecyclerView.ViewHolder(view)
 
     override fun onCreateViewHolder(container: ViewGroup, p1: Int): TaskHolder {
-
-
         return TaskHolder(
             LayoutInflater.from(container.context).inflate(
                 R.layout.item_row_tasks,

@@ -1,8 +1,5 @@
 package org.aerogear.graphqlandroid.activities
 
-import android.arch.lifecycle.ViewModelProviders
-import android.content.Context
-import android.net.ConnectivityManager
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
@@ -13,10 +10,10 @@ import androidx.work.Constraints
 import androidx.work.NetworkType
 import com.apollographql.apollo.ApolloCall
 import com.apollographql.apollo.ApolloQueryWatcher
-import com.apollographql.apollo.api.Input
 import com.apollographql.apollo.api.Mutation
 import com.apollographql.apollo.api.Operation
 import com.apollographql.apollo.api.Response
+import com.apollographql.apollo.cache.normalized.ApolloStore
 import com.apollographql.apollo.exception.ApolloException
 import com.apollographql.apollo.fetcher.ApolloResponseFetchers
 import com.apollographql.apollo.rx2.Rx2Apollo
@@ -24,14 +21,14 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subscribers.DisposableSubscriber
-import kotlinx.android.synthetic.main.activity_main.pull_to_refresh
-import kotlinx.android.synthetic.main.activity_main.recycler_view
-import kotlinx.android.synthetic.main.activity_main2.*
+import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.alertdialog_task.view.*
 import org.aerogear.graphqlandroid.*
 import org.aerogear.graphqlandroid.adapter.TaskAdapter
-import org.aerogear.graphqlandroid.data.ViewModel
 import org.aerogear.graphqlandroid.model.Task
+import org.aerogear.graphqlandroid.worker.SampleWorker
+import org.aerogear.offix.enqueue
+import org.aerogear.offix.interfaces.ResponseCallback
 import org.aerogear.offix.scheduleWorker
 import java.util.concurrent.atomic.AtomicReference
 
@@ -42,130 +39,32 @@ class MainActivity : AppCompatActivity() {
     val taskAdapter by lazy {
         TaskAdapter(noteslist, this)
     }
-
     val constraints by lazy {
         Constraints.Builder()
             .setRequiredNetworkType(NetworkType.CONNECTED)
             .setRequiresBatteryNotLow(true)
             .build()
     }
-    val dbDao = MyApplciation.database.mutationDao()
     private val disposables = CompositeDisposable()
     val watchResponse = AtomicReference<Response<AllTasksQuery.Data>>()
-    val connectivityManager by lazy {
-        getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-    }
-    val myModel: ViewModel by lazy {
-        ViewModelProviders.of(this).get(ViewModel::class.java)
-    }
     var apolloQueryWatcher: ApolloQueryWatcher<AllTasksQuery.Data>? = null
+    lateinit var apolloStore: ApolloStore
+    val context = this
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main2)
-
-        val activeNetwork = connectivityManager.activeNetworkInfo
-        if (activeNetwork != null && activeNetwork.isConnected) {
-            Log.e(TAG, " User is online ")
-
-            getTasks()
-
-            subscribeUpdatedTaskAdded()
-            subscribeNewTaskAdded()
-        } else {
-
-            getTasks()
-            Toast.makeText(
-                this@MainActivity,
-                "Swipe down to refersh. No network there, so items fethced from db.",
-                Toast.LENGTH_SHORT
-            ).show()
-        }
-
-        pull_to_refresh.setOnRefreshListener {
-            doYourUpdate()
-            pull_to_refresh.isRefreshing = false
-        }
+        setContentView(R.layout.activity_main)
 
         recycler_view.layoutManager = LinearLayoutManager(this)
         recycler_view.adapter = taskAdapter
 
-        //Used for persistent mutations
-        persistence.setOnClickListener {
+        getTasks()
+        subscribeUpdatedTaskAdded()
+        subscribeNewTaskAdded()
 
-            Toast.makeText(this, "FromDB button clicked", Toast.LENGTH_SHORT).show()
-
-
-            Log.e(TAG, "in persistence")
-            val listOfMutations = dbDao.getAllMutations()
-            Log.e(TAG, "in persistence size of list : ${listOfMutations.size}")
-
-            listOfMutations.forEach { storedmutation ->
-
-                //Get the class name of the mutation to which it has to be mapped
-                val responseClassName = storedmutation.responseClassName
-
-                val classReflected: Class<*> = Class.forName(responseClassName)
-
-                //Get the constructor of the class, and as apollo generated classes have only one constructor, so take the first one.
-                val constructor = classReflected.constructors.first()
-
-                //Get the parameterTypes
-                val parameters = constructor.parameterTypes
-
-                val jsonValues = arrayListOf<Any>()
-
-                //Get the json object i.e the variables map given as input by the user
-                val jsonObj = storedmutation.valuemap
-
-                //Put all the json values into a list
-                val iter = jsonObj.keys()
-                iter.forEach { key ->
-                    jsonValues.add(jsonObj.get(key))
-                }
-
-                Log.e("jsonValuesList ", " ${jsonValues.size}")
-
-                jsonValues.forEach {
-                    Log.e("jsonValuesList : ", " $it")
-                }
-
-                //Check if the input parameter is of type Input<*>, if yes typecast it to be of the type Input<*>
-                parameters.forEachIndexed { index, clazz ->
-                    //                println(clazz.name)
-                    Log.e("parameters : ", " ${clazz.name}")
-                    if (clazz.name.equals("com.apollographql.apollo.api.Input")) {
-                        jsonValues[index] = Input.optional(jsonValues[index])
-                        Log.e("parameters **: ", " ${jsonValues[index].javaClass.name}")
-
-                    }
-                }
-
-                //Make an object of mutation (done by reflection)
-                val obj = constructor.newInstance(*jsonValues.toArray())
-
-                //Make an apollo client which takes in mutation object and makes a call to server.
-                val client = Utils.getApolloClient(this)?.mutate(
-                    obj as Mutation<Operation.Data, Operation.Data, Operation.Variables>
-                )?.refetchQueries(apolloQueryWatcher?.operation()?.name())
-
-                client?.enqueue(object : ApolloCall.Callback<Operation.Data>() {
-                    override fun onFailure(e: ApolloException) {
-                        e.printStackTrace()
-                    }
-
-                    override fun onResponse(response: Response<Operation.Data>) {
-                        Log.e(TAG, response.hasErrors().toString())
-                        Log.e(TAG, response.data().toString())
-                        Log.e(TAG, response.errors().toString())
-
-                        dbDao.deleteCurrentMutation(storedmutation.SNo)
-                    }
-
-                })
-            }
-
-
+        pull_to_refresh.setOnRefreshListener {
+            doYourUpdate()
+            pull_to_refresh.isRefreshing = false
         }
 
         //Used for creating a new task
@@ -253,24 +152,133 @@ class MainActivity : AppCompatActivity() {
 
     fun getTasks() {
         Log.e(TAG, " ----- getTasks")
-        noteslist = myModel.getAll()
-        taskAdapter.notifyDataSetChanged()
+
+        noteslist.clear()
+        Log.e(TAG, "inside getTasks")
+
+        apolloStore = Utils.getApolloClient(context)?.apolloStore()!!
+        Log.e(TAG, " apolloStore : ${Utils.getApolloClient(context)?.apolloStore()}")
+
+        AllTasksQuery.builder()?.build()?.let {
+            Utils.getApolloClient(context)?.query(it)
+                ?.responseFetcher(ApolloResponseFetchers.CACHE_FIRST)
+                ?.enqueue(object : ApolloCall.Callback<AllTasksQuery.Data>() {
+
+                    override fun onFailure(e: ApolloException) {
+                        e.printStackTrace()
+                        Log.e(TAG, "----$e ")
+                    }
+
+                    override fun onResponse(response: Response<AllTasksQuery.Data>) {
+                        Log.e(TAG, "on Response : response.data ${response.data()}")
+                        val result = response.data()?.allTasks()
+//                        Log.e(
+//                            TAG,
+//                            "onResponse-getTasks : ${result?.get(result.size - 1)?.title()} ${result?.get(result.size - 1)?.version()}"
+//                        )
+                        result?.forEach {
+                            val title = it.title()
+                            val desc = it.description()
+                            val id = it.id()
+                            val version: Int? = it.version()
+                            val task = Task(title, desc, id.toInt(), version!!)
+                            noteslist.add(task)
+                        }
+                        runOnUiThread {
+                            taskAdapter.notifyDataSetChanged()
+                        }
+                    }
+                })
+        }
     }
 
     fun updateTask(id: String, title: String, version: Int) {
         Log.e(TAG, "inside update title in MainActivity")
-        myModel.update(id, title, version)
+        var mutation = UpdateCurrentTaskMutation.builder().id(id).title(title).version(version).build()
+        Log.e(TAG, " updateTask ********: - $mutation")
+
+        val client = Utils.getApolloClient(context)?.mutate(
+            mutation
+        )?.refetchQueries(apolloQueryWatcher?.operation()?.name())
+
+        Log.e(TAG, " updateTask class name: - ${mutation.javaClass.simpleName}")
+        Log.e(
+            TAG,
+            " updateTask 20: - ${client?.requestHeaders(com.apollographql.apollo.request.RequestHeaders.builder().build())}"
+        )
+        Log.e(TAG, " updateTask 21: - ${client?.operation()?.queryDocument()}")
+        Log.e(TAG, " updateTask 22: - ${client?.operation()?.variables()?.valueMap()}")
+        Log.e(TAG, " updateTask 23: - ${client?.operation()?.name()}")
+
+        val customCallback = object : ResponseCallback {
+
+            override fun onSuccess(response: Response<Any>) {
+                Log.e("onSuccess() updateTask", "${response.data()}")
+                val result = response.data()
+
+                //In case of conflicts data returned from the server id null.
+                result?.let {
+                    Log.e(TAG, "onResponse-UpdateTask- $it")
+                }
+            }
+
+            override fun onSchedule(e: ApolloException, mutation: Mutation<Operation.Data, Any, Operation.Variables>) {
+                Log.e("onSchedule() updateTask", "${mutation.variables().valueMap()}")
+                e.printStackTrace()
+            }
+        }
+
+        Utils.getApolloClient(context)?.enqueue(
+            mutation as com.apollographql.apollo.api.Mutation<Operation.Data, Any, Operation.Variables>,
+            customCallback
+        )
     }
 
     fun createtask(title: String, description: String) {
-        Toast.makeText(this, "Mutation with title $title created", Toast.LENGTH_SHORT).show()
         Log.e(TAG, "inside create title")
-        myModel.create(title, description)
+
+        val mutation = CreateTaskMutation.builder().title(title).description(description).build()
+
+        val customCallback = object : ResponseCallback {
+
+            override fun onSuccess(response: Response<Any>) {
+                Log.e("onSuccess() createTask", "${response.data()}")
+            }
+
+            override fun onSchedule(e: ApolloException, mutation: Mutation<Operation.Data, Any, Operation.Variables>) {
+                e.printStackTrace()
+                Log.e("onSchedule() createTask", "${mutation.variables().valueMap()}")
+            }
+        }
+
+        Utils.getApolloClient(context)?.enqueue(
+            mutation as com.apollographql.apollo.api.Mutation<Operation.Data, Any, Operation.Variables>,
+            customCallback
+        )
+
+        Toast.makeText(this, "Mutation with title $title created", Toast.LENGTH_SHORT).show()
     }
 
     fun deleteTask(id: String) {
         Log.e(TAG, "inside delete task")
-        myModel.delete(id)
+        Log.e(TAG, "inside delete title")
+        val mutation = DeleteTaskMutation.builder().id(id).build()
+
+        val customCallback = object : ResponseCallback {
+            override fun onSuccess(response: Response<Any>) {
+                Log.e("onSuccess() deleteTask", "${response.data()}")
+            }
+
+            override fun onSchedule(e: ApolloException, mutation: Mutation<Operation.Data, Any, Operation.Variables>) {
+                e.printStackTrace()
+                Log.e("onSchedule() deleteTask", "${mutation.variables().valueMap()}")
+            }
+        }
+
+        Utils.getApolloClient(context)?.enqueue(
+            mutation as com.apollographql.apollo.api.Mutation<Operation.Data, Any, Operation.Variables>,
+            customCallback
+        )
     }
 
     private fun subscribeUpdatedTaskAdded() {

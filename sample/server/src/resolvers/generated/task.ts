@@ -23,8 +23,7 @@ export const taskResolvers = {
 
   Mutation: {
     createTask: async (_: any, args: any, context: GraphQLContext) => {
-      const [ id ] = await context.db('task').insert(args.input).returning('id')
-      const result = await context.db.select().from('task').where('id', '=', id)
+      const result = await context.db('task').insert(args.input).returning('*')
       return result[0]
     },
     updateTask: (_: any, args: any, context: GraphQLContext) => {
