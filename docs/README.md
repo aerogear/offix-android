@@ -17,8 +17,8 @@ For more information about the Apollo and GraphQL please go to https://www.apoll
 Mutations are persisted when Offline
 and replicated back to server when online.
 
-### Conflict Resolution
-Provide custom conflict resolution strategies to solve conflicts among the mutations and replicate the mutations back to the server after resolving them.
+#### Conflict Resolution
+Provide custom conflict resolution strategies to solve conflicts among the mutations and replicate them back to the server after resolving conflicts.
 
 ## Documentation
 
