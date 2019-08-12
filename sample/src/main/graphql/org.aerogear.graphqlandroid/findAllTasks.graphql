@@ -1,5 +1,5 @@
-mutation updateTask($id: ID!, $input: TaskInput!){
-    updateTask(id: $id, input: $input){
+query findAllTasks{
+    findAllTasks{
         id
         version
         title

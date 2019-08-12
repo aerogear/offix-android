@@ -1,8 +1,0 @@
-query allTasksQuery{
-   allTasks{
-     id
-     title
-     description
-     version
-   }
- }

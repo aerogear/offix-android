@@ -33,7 +33,7 @@ class TaskAdapter(private val notes: List<Task>, private val context: Context) :
 
         val currentTask = notes[position]
         with(holder.itemView) {
-            task_tv.text = currentTask.title
+            title_tv.text = currentTask.title
             desc_tv.text = currentTask.desc
             id_tv.text = currentTask.id.toString()
             version_tv.text = currentTask.version.toString()
@@ -58,7 +58,8 @@ class TaskAdapter(private val notes: List<Task>, private val context: Context) :
                     if (context is MainActivity) this.context.updateTask(
                         currentTask.id.toString(),
                         titleEt,
-                        versionEt.toInt()
+                        versionEt.toInt(),
+                        "description"
                     )
                     dialog.dismiss()
                 }

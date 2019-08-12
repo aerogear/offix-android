@@ -1,8 +1,31 @@
-mutation createTask ($title:String!, $description :String!) {
-    createTask(title: $title, description: $description) {
+mutation createTask($input: TaskInput!){
+    createTask(input: $input){
         id
+        version
         title
         description
-        version
+        status
+        creationMetadata{
+            createdDate
+            taskId
+            createdBy{
+                id
+                firstName
+                lastName
+                title
+                email
+                taskId
+                creationmetadataId
+            }
+        }
+        assignedTo{
+            id
+            firstName
+            lastName
+            title
+            email
+            taskId
+            creationmetadataId
+        }
     }
 }

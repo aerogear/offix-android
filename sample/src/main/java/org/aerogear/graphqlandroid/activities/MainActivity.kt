@@ -16,16 +16,13 @@ import com.apollographql.apollo.api.Response
 import com.apollographql.apollo.cache.normalized.ApolloStore
 import com.apollographql.apollo.exception.ApolloException
 import com.apollographql.apollo.fetcher.ApolloResponseFetchers
-import com.apollographql.apollo.rx2.Rx2Apollo
-import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.schedulers.Schedulers
-import io.reactivex.subscribers.DisposableSubscriber
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.alertdialog_task.view.*
 import org.aerogear.graphqlandroid.*
 import org.aerogear.graphqlandroid.adapter.TaskAdapter
 import org.aerogear.graphqlandroid.model.Task
+import org.aerogear.graphqlandroid.type.TaskInput
 import org.aerogear.graphqlandroid.worker.SampleWorker
 import org.aerogear.offix.enqueue
 import org.aerogear.offix.interfaces.ResponseCallback
@@ -46,8 +43,8 @@ class MainActivity : AppCompatActivity() {
             .build()
     }
     private val disposables = CompositeDisposable()
-    val watchResponse = AtomicReference<Response<AllTasksQuery.Data>>()
-    var apolloQueryWatcher: ApolloQueryWatcher<AllTasksQuery.Data>? = null
+    val watchResponse = AtomicReference<Response<FindAllTasksQuery.Data>>()
+    var apolloQueryWatcher: ApolloQueryWatcher<FindAllTasksQuery.Data>? = null
     lateinit var apolloStore: ApolloStore
     val context = this
 
@@ -59,8 +56,6 @@ class MainActivity : AppCompatActivity() {
         recycler_view.adapter = taskAdapter
 
         getTasks()
-        subscribeUpdatedTaskAdded()
-        subscribeNewTaskAdded()
 
         pull_to_refresh.setOnRefreshListener {
             doYourUpdate()
@@ -85,24 +80,6 @@ class MainActivity : AppCompatActivity() {
                 .create()
             customAlert.show()
         }
-
-        //Used for deleting task
-        deletetask.setOnClickListener {
-            val inflated = LayoutInflater.from(this).inflate(R.layout.alertdelete, null, false)
-            val customAlert: android.support.v7.app.AlertDialog = android.support.v7.app.AlertDialog.Builder(this)
-                .setView(inflated)
-                .setTitle("Delete a  task")
-                .setNegativeButton("No") { dialog, which ->
-                    dialog.dismiss()
-                }
-                .setPositiveButton("Yes") { dialog, which ->
-                    val id = inflated.etId.text.toString()
-                    deleteTask(id)
-                    dialog.dismiss()
-                }
-                .create()
-            customAlert.show()
-        }
     }
 
     private fun doYourUpdate() {
@@ -111,27 +88,22 @@ class MainActivity : AppCompatActivity() {
         noteslist.clear()
 
         Utils.getApolloClient(this)?.query(
-            AllTasksQuery.builder().build()
+            FindAllTasksQuery.builder().build()
         )?.watcher()
             ?.refetchResponseFetcher(ApolloResponseFetchers.CACHE_FIRST)
-            ?.enqueueAndWatch(object : ApolloCall.Callback<AllTasksQuery.Data>() {
+            ?.enqueueAndWatch(object : ApolloCall.Callback<FindAllTasksQuery.Data>() {
                 override fun onFailure(e: ApolloException) {
                     e.printStackTrace()
                     Log.e(TAG, " doYourUpdate onFailure----$e ")
                 }
 
-                override fun onResponse(response: Response<AllTasksQuery.Data>) {
+                override fun onResponse(response: Response<FindAllTasksQuery.Data>) {
 
                     watchResponse.set(response)
 
                     Log.e(TAG, "on Response doYourUpdate: Watcher ${response.data()}")
 
-
-                    val result = watchResponse.get()?.data()?.allTasks()
-//                    Log.e(
-//                        TAG,
-//                        "onResponse-getTasks : ${result?.get(result.size - 1)?.title()} ${result?.get(result.size - 1)?.version()}"
-//              )
+                    val result = watchResponse.get()?.data()?.findAllTasks()
                     result?.forEach {
                         val title = it.title()
                         val desc = it.description()
@@ -142,7 +114,6 @@ class MainActivity : AppCompatActivity() {
                             noteslist.add(task)
                             taskAdapter.notifyDataSetChanged()
                         }
-
                     }
                 }
             })
@@ -154,28 +125,23 @@ class MainActivity : AppCompatActivity() {
         Log.e(TAG, " ----- getTasks")
 
         noteslist.clear()
-        Log.e(TAG, "inside getTasks")
 
         apolloStore = Utils.getApolloClient(context)?.apolloStore()!!
         Log.e(TAG, " apolloStore : ${Utils.getApolloClient(context)?.apolloStore()}")
 
-        AllTasksQuery.builder()?.build()?.let {
+        FindAllTasksQuery.builder()?.build()?.let {
             Utils.getApolloClient(context)?.query(it)
                 ?.responseFetcher(ApolloResponseFetchers.CACHE_FIRST)
-                ?.enqueue(object : ApolloCall.Callback<AllTasksQuery.Data>() {
+                ?.enqueue(object : ApolloCall.Callback<FindAllTasksQuery.Data>() {
 
                     override fun onFailure(e: ApolloException) {
                         e.printStackTrace()
                         Log.e(TAG, "----$e ")
                     }
 
-                    override fun onResponse(response: Response<AllTasksQuery.Data>) {
+                    override fun onResponse(response: Response<FindAllTasksQuery.Data>) {
                         Log.e(TAG, "on Response : response.data ${response.data()}")
-                        val result = response.data()?.allTasks()
-//                        Log.e(
-//                            TAG,
-//                            "onResponse-getTasks : ${result?.get(result.size - 1)?.title()} ${result?.get(result.size - 1)?.version()}"
-//                        )
+                        val result = response.data()?.findAllTasks()
                         result?.forEach {
                             val title = it.title()
                             val desc = it.description()
@@ -192,9 +158,16 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun updateTask(id: String, title: String, version: Int) {
+    fun updateTask(id: String, title: String, version: Int, description: String) {
         Log.e(TAG, "inside update title in MainActivity")
-        var mutation = UpdateCurrentTaskMutation.builder().id(id).title(title).version(version).build()
+
+        /*
+        As version is assumed to be auto incremented ( //TODO Have to make changes in sqlite db)
+        */
+        val input = TaskInput.builder().title(title).version(version).description(description).status("test").build()
+
+        var mutation = UpdateTaskMutation.builder().id(id).input(input).build()
+
         Log.e(TAG, " updateTask ********: - $mutation")
 
         val client = Utils.getApolloClient(context)?.mutate(
@@ -237,7 +210,12 @@ class MainActivity : AppCompatActivity() {
     fun createtask(title: String, description: String) {
         Log.e(TAG, "inside create title")
 
-        val mutation = CreateTaskMutation.builder().title(title).description(description).build()
+        /*
+         As version is assumed to be auto incremented ( //TODO Have to make changes in sqlite db)
+         */
+        val input = TaskInput.builder().title(title).description(description).status("test").build()
+
+        val mutation = CreateTaskMutation.builder().input(input).build()
 
         val customCallback = object : ResponseCallback {
 
@@ -259,127 +237,6 @@ class MainActivity : AppCompatActivity() {
         Toast.makeText(this, "Mutation with title $title created", Toast.LENGTH_SHORT).show()
     }
 
-    fun deleteTask(id: String) {
-        Log.e(TAG, "inside delete task")
-        Log.e(TAG, "inside delete title")
-        val mutation = DeleteTaskMutation.builder().id(id).build()
-
-        val customCallback = object : ResponseCallback {
-            override fun onSuccess(response: Response<Any>) {
-                Log.e("onSuccess() deleteTask", "${response.data()}")
-            }
-
-            override fun onSchedule(e: ApolloException, mutation: Mutation<Operation.Data, Any, Operation.Variables>) {
-                e.printStackTrace()
-                Log.e("onSchedule() deleteTask", "${mutation.variables().valueMap()}")
-            }
-        }
-
-        Utils.getApolloClient(context)?.enqueue(
-            mutation as com.apollographql.apollo.api.Mutation<Operation.Data, Any, Operation.Variables>,
-            customCallback
-        )
-    }
-
-    private fun subscribeUpdatedTaskAdded() {
-
-        val subscription = SubscribeTasksSubscription()
-        val subscriptionCall = Utils.getApolloClient(this)
-            ?.subscribe(subscription)
-
-        disposables.add(Rx2Apollo.from<SubscribeTasksSubscription.Data>(subscriptionCall!!)
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribeWith(
-                object : DisposableSubscriber<Response<SubscribeTasksSubscription.Data>>() {
-                    override fun onNext(response: Response<SubscribeTasksSubscription.Data>) {
-
-                        val res = response.data()?.taskUpdated()
-                        res?.let {
-
-                            Log.e(TAG, " inside subscription1 ${it.title()} mutated upon updating")
-                            Log.e(TAG, " inside subscription1 ${res.title()}")
-//
-//                            runOnUiThread {
-//                                Log.e(TAG, " inside subscription1  *** ${it.title()} mutated upon updating")
-//                                val tasktoberemoved =
-//                                Task(it.title(), it.description(), it.id().toInt(), it.version()!! - 1)
-//                                noteslist.remove(tasktoberemoved)
-//                                noteslist.add(Task(it.title(), it.description(), it.id().toInt(), it.version()!!))
-//                                taskAdapter.notifyDataSetChanged()
-//                            }
-                        }
-
-                        Toast.makeText(
-                            this@MainActivity,
-                            "Subscription1 response received",
-                            Toast.LENGTH_SHORT
-                        )
-                            .show()
-                    }
-
-                    override fun onError(e: Throwable) {
-                        Log.e(TAG, e.message, e)
-                        Toast.makeText(this@MainActivity, "Subscription1 failure", Toast.LENGTH_SHORT)
-                            .show()
-                    }
-
-                    override fun onComplete() {
-                        Log.d(TAG, "Subscription1 exhausted")
-                        Toast.makeText(this@MainActivity, "Subscription1 complete", Toast.LENGTH_SHORT)
-                            .show()
-                    }
-                }
-            )
-        )
-    }
-
-    private fun subscribeNewTaskAdded() {
-
-        val subscription = SubscribeAddTaskSubscription()
-        val subscriptionCall = Utils.getApolloClient(this)
-            ?.subscribe(subscription)
-
-        disposables.add(Rx2Apollo.from<SubscribeAddTaskSubscription.Data>(subscriptionCall!!)
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribeWith(
-                object : DisposableSubscriber<Response<SubscribeAddTaskSubscription.Data>>() {
-                    override fun onNext(response: Response<SubscribeAddTaskSubscription.Data>) {
-
-                        val res = response.data()?.taskAdded()
-                        res?.let {
-
-                            Log.e(TAG, " inside subscription2 ${it.title()} mutated upon new title")
-//
-//                            runOnUiThread {
-//                                noteslist.add(Task(it.title(), it.description(), it.id().toInt(), it.version()!!))
-//                                taskAdapter.notifyDataSetChanged()
-//                            }
-                        }
-                        Toast.makeText(
-                            this@MainActivity,
-                            "Subscription2 response received",
-                            Toast.LENGTH_SHORT
-                        )
-                            .show()
-                    }
-
-                    override fun onError(e: Throwable) {
-                        Log.e(TAG, e.message, e)
-                        Toast.makeText(this@MainActivity, "Subscription2 failure", Toast.LENGTH_SHORT)
-                            .show()
-                    }
-
-                    override fun onComplete() {
-                        Log.d(TAG, "Subscription2 exhausted")
-                        Toast.makeText(this@MainActivity, "Subscription2 complete", Toast.LENGTH_SHORT)
-                            .show()
-                    }
-                }
-            )
-        )
-    }
 
     /*
      In the activity's onStop(), schedule a worker that would try to replicate the mutations done when offline (stored in database )
