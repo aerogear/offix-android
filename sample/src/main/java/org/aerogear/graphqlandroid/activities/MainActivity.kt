@@ -142,11 +142,18 @@ class MainActivity : AppCompatActivity() {
                     override fun onResponse(response: Response<FindAllTasksQuery.Data>) {
                         Log.e(TAG, "on Response : response.data ${response.data()}")
                         val result = response.data()?.findAllTasks()
+
+
                         result?.forEach {
                             val title = it.title()
                             val desc = it.description()
                             val id = it.id()
                             val version: Int? = it.version()
+                            Log.e("${TAG}10", "$title")
+                            Log.e("${TAG}11", "$desc")
+                            Log.e("${TAG}12", "$id")
+                            Log.e("${TAG}13", "$version")
+//
                             val task = Task(title, desc, id.toInt(), version!!)
                             noteslist.add(task)
                         }
