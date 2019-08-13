@@ -49,7 +49,7 @@ class ConflictInterceptor(private val conflictResolutionImpl: ConfliceResolution
     inner class OffixConflictCallback(val conflictResolutionImpl: ConfliceResolutionInterface) :
         ApolloInterceptor.CallBack {
         private val TAG = javaClass.simpleName
-        private lateinit var userCallback: ApolloInterceptor.CallBack
+        val userCallback = queueCallback.removeFirst()
 
         override fun onResponse(response: ApolloInterceptor.InterceptorResponse) {
 
@@ -68,7 +68,6 @@ class ConflictInterceptor(private val conflictResolutionImpl: ConfliceResolution
 
                 conflictResolutionImpl.resolveConflict(serverStateMap, clientStateMap, conflictedMutationClass)
             } else {
-                userCallback=  queueCallback.removeFirst()
                 userCallback.onResponse(response)
             }
         }
