@@ -16,7 +16,6 @@ import java.util.concurrent.Executor
 class ConflictInterceptor(private val conflictResolutionImpl: ConfliceResolutionInterface) : ApolloInterceptor {
 
     private val TAG = javaClass.simpleName
-    private lateinit var userCallback: ApolloInterceptor.CallBack
 
     /* Implemented queue using a linked list to store user callbacks.
        This is done to ensure that there is no overlapping of subsequent callbacks and every callback is associated with
@@ -30,6 +29,7 @@ class ConflictInterceptor(private val conflictResolutionImpl: ConfliceResolution
         dispatcher: Executor,
         callBack: ApolloInterceptor.CallBack
     ) {
+
         queueCallback.addLast(callBack)
 
         //Check if this is a mutation request.
@@ -49,6 +49,7 @@ class ConflictInterceptor(private val conflictResolutionImpl: ConfliceResolution
     inner class OffixConflictCallback(val conflictResolutionImpl: ConfliceResolutionInterface) :
         ApolloInterceptor.CallBack {
         private val TAG = javaClass.simpleName
+        private lateinit var userCallback: ApolloInterceptor.CallBack
 
         override fun onResponse(response: ApolloInterceptor.InterceptorResponse) {
 
