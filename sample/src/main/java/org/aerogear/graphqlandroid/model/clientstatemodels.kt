@@ -1,4 +1,4 @@
-package org.aerogear.graphqlandroid
+package org.aerogear.graphqlandroid.model
 
 /*
 As a user this is my mutation class to which the serverstate is to be matched

@@ -1,5 +1,5 @@
-mutation updateTask($id: ID!, $input: TaskInput!){
-    updateTask(id: $id, input: $input){
+mutation checkAndUpdateTask($id: ID!, $title: String, $description: String, $version: Int!, $status: String!){
+    checkAndUpdateTask(id: $id, title: $title, description: $description, version: $version, status: $status){
         id
         version
         title
@@ -7,15 +7,12 @@ mutation updateTask($id: ID!, $input: TaskInput!){
         status
         creationMetadata{
             createdDate
-            taskId
             createdBy{
                 id
                 firstName
                 lastName
                 title
                 email
-                taskId
-                creationmetadataId
             }
         }
         assignedTo{
@@ -24,8 +21,6 @@ mutation updateTask($id: ID!, $input: TaskInput!){
             lastName
             title
             email
-            taskId
-            creationmetadataId
         }
     }
 }

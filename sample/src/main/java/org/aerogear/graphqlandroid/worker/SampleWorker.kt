@@ -1,4 +1,4 @@
-package org.aerogear.graphqlandroid
+package org.aerogear.graphqlandroid.worker
 
 import android.content.Context
 import android.util.Log
@@ -7,6 +7,7 @@ import com.apollographql.apollo.ApolloCall
 import com.apollographql.apollo.api.Operation
 import com.apollographql.apollo.api.Response
 import com.apollographql.apollo.exception.ApolloException
+import org.aerogear.graphqlandroid.Utils
 import org.aerogear.offix.worker.OffixWorker
 import org.aerogear.offix.Offline
 import org.aerogear.offix.getMutation

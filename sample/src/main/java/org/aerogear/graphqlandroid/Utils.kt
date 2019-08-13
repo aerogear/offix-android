@@ -23,10 +23,8 @@ object Utils {
     //To run on emulator use http://10.0.2.2.100:4000/graphql
     const val BASE_URL = "http://192.168.0.105:4000/graphql"
     private const val SQL_CACHE_NAME = "tasks4Db"
-
     private var apClient: ApolloClient? = null
     private var httpClient: OkHttpClient? = null
-    private var conflictInterceptor: Interceptor? = null
 
     @JvmStatic
     fun getApolloClient(context: Context): ApolloClient? {
@@ -46,6 +44,9 @@ object Utils {
             apClient = ApolloClient.builder()
                 .okHttpClient(getOkhttpClient(context)!!)
                 .normalizedCache(cacheFactory, cacheResolver())
+                /*While making an instance of apollo client, user will have to add the interceptor provided
+                  by the library.
+                */
                 .addApplicationInterceptor(ConflictInterceptor(UserConflictResolutionHandler(context)))
                 .subscriptionTransportFactory(
                     WebSocketSubscriptionTransport.Factory(
@@ -57,67 +58,20 @@ object Utils {
                 .defaultHttpCachePolicy(HttpCachePolicy.CACHE_FIRST)
                 .build()
         }
-
         return apClient
     }
 
     private fun getOkhttpClient(context: Context): OkHttpClient? {
-
-        //Adding HttpLoggingInterceptor() to see the response body and the results.
         httpClient?.let {
             return it
         } ?: kotlin.run {
             httpClient = OkHttpClient.Builder()
+                //Adding HttpLoggingInterceptor() to see the response body and the results.
                 .addInterceptor(LoggingInterceptor())
-                /*While making an instance of apollo client, user will have to add the interceptor provided
-                by the library.
-                */
-               // .addInterceptor(ConflictInterceptor())
                 .build()
         }
         return httpClient
     }
-
-    //function to get the response after query/mutation is performed, can get conflict messages and so on.
-    private fun getResponseInterceptor(context: Context): Interceptor? {
-
-        conflictInterceptor?.let {
-            return it
-        } ?: kotlin.run {
-            conflictInterceptor = Interceptor {
-                val request = it.request()
-
-                //all the HTTP work happens, producing a response to satisfy the request.
-                val response = it.proceed(request)
-
-                //https://stackoverflow.com/a/33862068/10189663
-
-                val responseBody = response.body()
-                val bufferedSource = responseBody?.source()
-                bufferedSource?.request(Long.MAX_VALUE)
-                val buffer = bufferedSource?.buffer()
-                val responseBodyString = buffer?.clone()?.readString(Charset.forName("UTF-8")) ?: ""
-
-                Log.e("UtillClass", " Interceptor : $responseBodyString")
-
-                //To see for conflict, "VoyagerConflict" which comes in the message is searched for.
-                if (responseBodyString.contains("VoyagerConflict")) {
-                    Log.d("Utils conflcit", " VoyagerConflict")
-                    // showToast(context)
-                }
-                return@Interceptor response
-            }
-
-        }
-        return conflictInterceptor
-    }
-
-//    //Toast shown to the user displaying conflict detected.
-//    private fun showToast(context: Context) {
-//        (context as MainActivity).runOnUiThread {
-//            Toast.makeText(context, "Conflict Detected", Toast.LENGTH_SHORT).show()
-//        }
-//    }
 
     private fun cacheResolver(): CacheKeyResolver {
         return object : CacheKeyResolver() {
