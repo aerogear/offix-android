@@ -7,8 +7,10 @@ import com.apollographql.apollo.exception.ApolloException
 import com.apollographql.apollo.interceptor.ApolloInterceptor
 import com.apollographql.apollo.interceptor.ApolloInterceptorChain
 import org.aerogear.offix.ConflictResolutionHandler
+import org.aerogear.offix.Offline
 import org.aerogear.offix.conflictedMutationClass
 import org.aerogear.offix.interfaces.ConfliceResolutionInterface
+import java.util.*
 import java.util.concurrent.Executor
 
 class ConflictInterceptor(private val conflictResolutionImpl: ConfliceResolutionInterface) : ApolloInterceptor {
@@ -16,13 +18,20 @@ class ConflictInterceptor(private val conflictResolutionImpl: ConfliceResolution
     private val TAG = javaClass.simpleName
     private lateinit var userCallback: ApolloInterceptor.CallBack
 
+    /* Implemented queue using a linked list to store user callbacks.
+       This is done to ensure that there is no overlapping of subsequent callbacks and every callback is associated with
+       it's correct response.
+     */
+    val queueCallback = LinkedList<ApolloInterceptor.CallBack>()
+
     override fun interceptAsync(
         request: ApolloInterceptor.InterceptorRequest,
         chain: ApolloInterceptorChain,
         dispatcher: Executor,
         callBack: ApolloInterceptor.CallBack
     ) {
-        userCallback = callBack
+        queueCallback.addLast(callBack)
+
         //Check if this is a mutation request.
         if (request.operation !is Mutation) {
             //Not a mutation. Nothing to do here - move on to the next link in the chain.
@@ -58,6 +67,7 @@ class ConflictInterceptor(private val conflictResolutionImpl: ConfliceResolution
 
                 conflictResolutionImpl.resolveConflict(serverStateMap, clientStateMap, conflictedMutationClass)
             } else {
+                userCallback=  queueCallback.removeFirst()
                 userCallback.onResponse(response)
             }
         }
