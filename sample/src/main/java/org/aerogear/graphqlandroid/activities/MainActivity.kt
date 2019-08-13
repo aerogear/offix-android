@@ -244,7 +244,6 @@ class MainActivity : AppCompatActivity() {
         Toast.makeText(this, "Mutation with title $title created", Toast.LENGTH_SHORT).show()
     }
 
-
     /*
      In the activity's onStop(), schedule a worker that would try to replicate the mutations done when offline (stored in database )
      to the server whenever network connection is regained.
