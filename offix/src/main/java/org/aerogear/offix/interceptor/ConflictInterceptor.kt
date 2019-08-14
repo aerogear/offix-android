@@ -33,6 +33,7 @@ class ConflictInterceptor(private val conflictResolutionImpl: ConfliceResolution
 
         queueCallback.addLast(callBack)
         Log.d("$TAG 1", "$request")
+        Log.d("$TAG 2", "${queueCallback.size}")
 
         /* Check is the network connection is there or not.
          */
@@ -43,6 +44,7 @@ class ConflictInterceptor(private val conflictResolutionImpl: ConfliceResolution
             if (request.operation is Mutation) {
                 Offline.requestList.add(request)
             }
+            Log.d(TAG, "SIZE OF LIST : ${Offline.requestList.size}")
         } else {
             //Check if this is a mutation request.
             if (request.operation !is Mutation) {
@@ -71,7 +73,7 @@ class ConflictInterceptor(private val conflictResolutionImpl: ConfliceResolution
                     chain.proceedAsync(it, dispatcher, OfflineCallback(it))
                 }
             } else {
-                Log.d("$TAG 1", request.requestHeaders.headers().toString())
+                Log.d("$TAG 200", "--------")
                 chain.proceedAsync(request, dispatcher, OffixConflictCallback(conflictResolutionImpl))
             }
         }
@@ -87,11 +89,13 @@ class ConflictInterceptor(private val conflictResolutionImpl: ConfliceResolution
         val userCallback = queueCallback.removeFirst()
 
         override fun onResponse(response: ApolloInterceptor.InterceptorResponse) {
+            Log.d("$TAG", "${queueCallback.size}")
 
             /* Check if the conflict is present in the response of not using the ConflictResolutionHandler class.
              */
             if (ConflictResolutionHandler().conflictPresent(response.parsedResponse)) {
 
+                Log.d("$TAG 100", "**********")
                 /* Parse the response from the server into a Map object and extract the serverState and clientState.
                    Make an object of ServerClientData and add to the list.
                 */

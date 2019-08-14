@@ -8,24 +8,6 @@ class OfflineCallback(val request: ApolloInterceptor.InterceptorRequest) : Apoll
     val TAG = javaClass.simpleName
     override fun onResponse(response: ApolloInterceptor.InterceptorResponse) {
         Log.d(TAG, "onResponse()")
-//
-//        /* Check if the conflict is present in the response of not using the ConflictResolutionHandler class.
-//         */
-//        if (ConflictResolutionHandler().conflictPresent(response.parsedResponse)) {
-//
-//            /* Parse the response from the server into a Map object and extract the serverState and clientState.
-//               Make an object of ServerClientData and add to the list.
-//            */
-//            val conflictInfo =
-//                (((response.parsedResponse.get().errors()[0] as Error).customAttributes()["extensions"] as Map<*, *>)["exception"] as Map<*, *>)["conflictInfo"] as Map<*, *>
-//
-//            val serverStateMap = conflictInfo["serverState"] as Map<String, Any>
-//            val clientStateMap = conflictInfo["clientState"] as Map<String, Any>
-//
-//            conflictResolutionImpl.resolveConflict(serverStateMap, clientStateMap, conflictedMutationClass)
-//        } else {
-//            userCallback.onResponse(response)
-//        }
     }
 
     override fun onFetch(sourceType: ApolloInterceptor.FetchSourceType?) {
