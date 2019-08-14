@@ -101,7 +101,6 @@ class Offline private constructor(context: Context) {
            (For implementing offline support when app is in foreground.)
          */
         val requestList = ArrayList<ApolloInterceptor.InterceptorRequest>()
-        val queueCallback = LinkedList<ApolloInterceptor.CallBack>()
 
         /**
          * Returns an existing instance with the Offline class if it exists, else returns a new instance
