@@ -8,6 +8,7 @@ import com.apollographql.apollo.interceptor.ApolloInterceptor
 import com.apollographql.apollo.interceptor.ApolloInterceptorChain
 import org.aerogear.offix.ConflictResolutionHandler
 import org.aerogear.offix.Offline
+import org.aerogear.offix.Offline.Companion.queueCallback
 import org.aerogear.offix.OfflineCallback
 import org.aerogear.offix.conflictedMutationClass
 import org.aerogear.offix.interfaces.ConfliceResolutionInterface
@@ -22,7 +23,7 @@ class ConflictInterceptor(private val conflictResolutionImpl: ConfliceResolution
        This is done to ensure that there is no overlapping of subsequent callbacks and every callback is associated with
        it's correct response.
      */
-    val queueCallback = LinkedList<ApolloInterceptor.CallBack>()
+//    val queueCallback = LinkedList<ApolloInterceptor.CallBack>()
 
     override fun interceptAsync(
         request: ApolloInterceptor.InterceptorRequest,
@@ -30,10 +31,11 @@ class ConflictInterceptor(private val conflictResolutionImpl: ConfliceResolution
         dispatcher: Executor,
         callBack: ApolloInterceptor.CallBack
     ) {
-
-        queueCallback.addLast(callBack)
+        if (request.operation is Mutation) {
+            Offline.queueCallback.addLast(callBack)
+        }
         Log.d("$TAG 1", "$request")
-        Log.d("$TAG 2", "${queueCallback.size}")
+        Log.d("$TAG 2", "${Offline.queueCallback.size}")
 
         /* Check is the network connection is there or not.
          */
@@ -72,6 +74,7 @@ class ConflictInterceptor(private val conflictResolutionImpl: ConfliceResolution
                 Offline.requestList.forEach {
                     chain.proceedAsync(it, dispatcher, OfflineCallback(it))
                 }
+                chain.proceedAsync(request, dispatcher, OffixConflictCallback(conflictResolutionImpl))
             } else {
                 Log.d("$TAG 200", "--------")
                 chain.proceedAsync(request, dispatcher, OffixConflictCallback(conflictResolutionImpl))
@@ -86,7 +89,7 @@ class ConflictInterceptor(private val conflictResolutionImpl: ConfliceResolution
     inner class OffixConflictCallback(val conflictResolutionImpl: ConfliceResolutionInterface) :
         ApolloInterceptor.CallBack {
         private val TAG = javaClass.simpleName
-        val userCallback = queueCallback.removeFirst()
+        val userCallback = Offline.queueCallback.removeFirst()
 
         override fun onResponse(response: ApolloInterceptor.InterceptorResponse) {
             Log.d("$TAG", "${queueCallback.size}")
@@ -107,7 +110,7 @@ class ConflictInterceptor(private val conflictResolutionImpl: ConfliceResolution
 
                 conflictResolutionImpl.resolveConflict(serverStateMap, clientStateMap, conflictedMutationClass)
             } else {
-                userCallback.onResponse(response)
+//                userCallback.onResponse(response)
             }
         }
 

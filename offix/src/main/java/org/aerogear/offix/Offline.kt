@@ -10,6 +10,8 @@ import android.os.Bundle
 import android.util.Log
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.interceptor.ApolloInterceptor
+import java.util.*
+import kotlin.collections.ArrayList
 
 class Offline private constructor(context: Context) {
 
@@ -99,6 +101,7 @@ class Offline private constructor(context: Context) {
            (For implementing offline support when app is in foreground.)
          */
         val requestList = ArrayList<ApolloInterceptor.InterceptorRequest>()
+        val queueCallback = LinkedList<ApolloInterceptor.CallBack>()
 
         /**
          * Returns an existing instance with the Offline class if it exists, else returns a new instance
