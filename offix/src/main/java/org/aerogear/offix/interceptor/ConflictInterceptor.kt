@@ -63,7 +63,7 @@ class ConflictInterceptor(private val conflictResolutionImpl: ConfliceResolution
              */
             if (Offline.requestList.isNotEmpty()) {
                 chain.proceedAsync(request, dispatcher, OffixConflictCallback(conflictResolutionImpl))
-                Offline.requestList.remove(request)
+//                Offline.requestList.remove(request)
                 Log.d("$TAG 100", "If list is not empty: ${Offline.requestList.size}")
                 /* When user comes from offline to online, we wait for the user to perform any mutation.
                    Now along with the mutation performed by the user, we fetch the mutation requests stored in the list and
@@ -111,21 +111,21 @@ class ConflictInterceptor(private val conflictResolutionImpl: ConfliceResolution
 
                 conflictResolutionImpl.resolveConflict(serverStateMap, clientStateMap, conflictedMutationClass)
             } else {
-//                userCallback.onResponse(response)
+                userCallback.onResponse(response)
             }
         }
 
         override fun onFetch(sourceType: ApolloInterceptor.FetchSourceType?) {
-            Log.d(TAG, "onFetch()")
+            Log.d(TAG, "onFetch()*******")
         }
 
         override fun onCompleted() {
-            Log.d(TAG, "onCompleted()")
+            Log.d(TAG, "onCompleted()*******")
         }
 
         override fun onFailure(e: ApolloException) {
             userCallback.onFailure(e)
-            Log.d(TAG, "onFailure()")
+            Log.d(TAG, "onFailure()*******")
         }
     }
 
@@ -141,15 +141,15 @@ class ConflictInterceptor(private val conflictResolutionImpl: ConfliceResolution
         }
 
         override fun onFetch(sourceType: ApolloInterceptor.FetchSourceType?) {
-            Log.d(TAG, "onFetch()")
+            Log.d(TAG, "onFetch()---------")
         }
 
         override fun onCompleted() {
-            Log.d(TAG, "onCompleted()")
+            Log.d(TAG, "onCompleted()--------")
         }
 
         override fun onFailure(e: ApolloException) {
-            Log.d(TAG, "onFailure()")
+            Log.d(TAG, "onFailure()----------")
             Log.d(TAG, "-- ${e.printStackTrace()}")
         }
     }
