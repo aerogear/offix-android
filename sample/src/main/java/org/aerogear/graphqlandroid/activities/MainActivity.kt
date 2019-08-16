@@ -18,11 +18,8 @@ import com.apollographql.apollo.exception.ApolloException
 import com.apollographql.apollo.fetcher.ApolloResponseFetchers
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.alertdialog_task.view.*
 import kotlinx.android.synthetic.main.alertdialog_task.view.etDesc
-import kotlinx.android.synthetic.main.alertdialog_task.view.etId
 import kotlinx.android.synthetic.main.alertdialog_task.view.etTitle
-import kotlinx.android.synthetic.main.alertdialog_task.view.etVersion
 import kotlinx.android.synthetic.main.alertfrag_create.view.*
 import org.aerogear.graphqlandroid.*
 import org.aerogear.graphqlandroid.adapter.TaskAdapter
@@ -79,7 +76,7 @@ class MainActivity : AppCompatActivity() {
                 .setPositiveButton("Yes") { dialog, which ->
                     val title = inflatedView.etTitle.text.toString()
                     val desc = inflatedView.etDesc.text.toString()
-                    val version=inflatedView.etVer.text.toString()
+                    val version = inflatedView.etVer.text.toString()
                     createtask(title, desc, version.toInt())
                     dialog.dismiss()
                 }
@@ -96,7 +93,7 @@ class MainActivity : AppCompatActivity() {
         Utils.getApolloClient(this)?.query(
             FindAllTasksQuery.builder().build()
         )?.watcher()
-            ?.refetchResponseFetcher(ApolloResponseFetchers.CACHE_FIRST)
+            ?.refetchResponseFetcher(ApolloResponseFetchers.CACHE_AND_NETWORK)
             ?.enqueueAndWatch(object : ApolloCall.Callback<FindAllTasksQuery.Data>() {
                 override fun onFailure(e: ApolloException) {
                     e.printStackTrace()
@@ -229,6 +226,12 @@ class MainActivity : AppCompatActivity() {
         val input = TaskInput.builder().title(title).description(description).version(version).status("test").build()
 
         val mutation = CreateTaskMutation.builder().input(input).build()
+
+        val client = Utils.getApolloClient(context)?.mutate(
+            mutation
+        )?.refetchQueries(apolloQueryWatcher?.operation()?.name())
+
+        Log.e(TAG, " updateTask 22: - ${client?.operation()?.variables()?.valueMap()}")
 
         val customCallback = object : ResponseCallback {
 

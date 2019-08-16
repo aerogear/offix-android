@@ -9,11 +9,15 @@ import com.apollographql.apollo.interceptor.ApolloInterceptorChain
 import org.aerogear.offix.ConflictResolutionHandler
 import org.aerogear.offix.Offline
 import org.aerogear.offix.conflictedMutationClass
-import org.aerogear.offix.interfaces.ConfliceResolutionInterface
+import org.aerogear.offix.interfaces.ConflictResolutionInterface
 import java.util.*
 import java.util.concurrent.Executor
 
-class ConflictInterceptor(private val conflictResolutionImpl: ConfliceResolutionInterface) : ApolloInterceptor {
+/*
+User adds ConflictInterceptor to the apolloClient while making it in the app.
+@param conflictResolutionImpl: ConflictResolutionInterface where the user can provide custom conflict resolution strategy.
+ */
+class ConflictInterceptor(private val conflictResolutionImpl: ConflictResolutionInterface) : ApolloInterceptor {
 
     private val TAG = javaClass.simpleName
 
@@ -87,7 +91,7 @@ class ConflictInterceptor(private val conflictResolutionImpl: ConfliceResolution
         Log.v(TAG, "Dispose called")
     }
 
-    inner class OffixConflictCallback(val conflictResolutionImpl: ConfliceResolutionInterface) :
+    inner class OffixConflictCallback(val conflictResolutionImpl: ConflictResolutionInterface) :
         ApolloInterceptor.CallBack {
         private val TAG = javaClass.simpleName
         val userCallback = queueCallback.removeFirst()

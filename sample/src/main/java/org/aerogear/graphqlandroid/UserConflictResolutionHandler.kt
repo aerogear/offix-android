@@ -1,13 +1,13 @@
 package org.aerogear.graphqlandroid
 
 import android.content.Context
-import org.aerogear.offix.interfaces.ConfliceResolutionInterface
+import org.aerogear.offix.interfaces.ConflictResolutionInterface
 
 /*
-UserConflictResolutionHandler extends ConfliceResolutionInterface.
+UserConflictResolutionHandler extends ConflictResolutionInterface.
 Here the user provides the custom implementation of resolving conflicts.
  */
-class UserConflictResolutionHandler(val context: Context) : ConfliceResolutionInterface {
+class UserConflictResolutionHandler(val context: Context) : ConflictResolutionInterface {
     val TAG = javaClass.simpleName
 
     /*
