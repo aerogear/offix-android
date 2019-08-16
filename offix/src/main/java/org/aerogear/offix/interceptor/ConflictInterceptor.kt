@@ -91,6 +91,9 @@ class ConflictInterceptor(private val conflictResolutionImpl: ConflictResolution
         Log.v(TAG, "Dispose called")
     }
 
+    /*
+    Callback class which handles conflicts.
+     */
     inner class OffixConflictCallback(val conflictResolutionImpl: ConflictResolutionInterface) :
         ApolloInterceptor.CallBack {
         private val TAG = javaClass.simpleName
@@ -133,6 +136,9 @@ class ConflictInterceptor(private val conflictResolutionImpl: ConflictResolution
         }
     }
 
+    /*
+    Callbacks class which handles offline requests.
+     */
     inner class OfflineCallback(val request: ApolloInterceptor.InterceptorRequest) : ApolloInterceptor.CallBack {
         val TAG = javaClass.simpleName
         val userOfflineCallback = queueCallback.removeFirst()
