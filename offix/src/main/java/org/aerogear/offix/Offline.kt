@@ -9,6 +9,9 @@ import android.net.ConnectivityManager
 import android.os.Bundle
 import android.util.Log
 import com.apollographql.apollo.ApolloClient
+import com.apollographql.apollo.interceptor.ApolloInterceptor
+import java.util.*
+import kotlin.collections.ArrayList
 
 class Offline private constructor(context: Context) {
 
@@ -93,6 +96,11 @@ class Offline private constructor(context: Context) {
 
         private var offline: Offline? = null
         var apClient: ApolloClient? = null
+
+        /* requestList is an arrayList which is used to store the requests of apollo call.
+           (For implementing offline support when app is in foreground.)
+         */
+        val requestList = ArrayList<ApolloInterceptor.InterceptorRequest>()
 
         /**
          * Returns an existing instance with the Offline class if it exists, else returns a new instance
