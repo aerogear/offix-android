@@ -19,6 +19,11 @@ import com.apollographql.apollo.fetcher.ApolloResponseFetchers
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.alertdialog_task.view.*
+import kotlinx.android.synthetic.main.alertdialog_task.view.etDesc
+import kotlinx.android.synthetic.main.alertdialog_task.view.etId
+import kotlinx.android.synthetic.main.alertdialog_task.view.etTitle
+import kotlinx.android.synthetic.main.alertdialog_task.view.etVersion
+import kotlinx.android.synthetic.main.alertfrag_create.view.*
 import org.aerogear.graphqlandroid.*
 import org.aerogear.graphqlandroid.adapter.TaskAdapter
 import org.aerogear.graphqlandroid.model.Task
@@ -74,7 +79,8 @@ class MainActivity : AppCompatActivity() {
                 .setPositiveButton("Yes") { dialog, which ->
                     val title = inflatedView.etTitle.text.toString()
                     val desc = inflatedView.etDesc.text.toString()
-                    createtask(title, desc)
+                    val version=inflatedView.etVer.text.toString()
+                    createtask(title, desc, version.toInt())
                     dialog.dismiss()
                 }
                 .create()
@@ -84,7 +90,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun doYourUpdate() {
 
-        Log.e(TAG, " ----- doYourUpdate")
+        Log.e(TAG, " -*-*-*- doYourUpdate")
         noteslist.clear()
 
         Utils.getApolloClient(this)?.query(
@@ -214,13 +220,13 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
-    fun createtask(title: String, description: String) {
+    fun createtask(title: String, description: String, version: Int) {
         Log.e(TAG, "inside create title")
 
         /*
          As version is assumed to be auto incremented ( //TODO Have to make changes in sqlite db)
          */
-        val input = TaskInput.builder().title(title).description(description).status("test").build()
+        val input = TaskInput.builder().title(title).description(description).version(version).status("test").build()
 
         val mutation = CreateTaskMutation.builder().input(input).build()
 
