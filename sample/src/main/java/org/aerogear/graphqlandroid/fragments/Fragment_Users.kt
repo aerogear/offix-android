@@ -2,6 +2,7 @@ package org.aerogear.graphqlandroid.fragments
 
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.support.v7.app.AlertDialog
 import android.support.v7.widget.LinearLayoutManager
 import android.util.Log
 import android.view.LayoutInflater
@@ -40,14 +41,13 @@ class Fragment_Users : Fragment() {
 
     val watchResponse = AtomicReference<Response<FindAllUsersQuery.Data>>()
     var apolloQueryWatcher: ApolloQueryWatcher<FindAllUsersQuery.Data>? = null
-    val ctx = activity?.baseContext
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_users, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        view.recycler_view_users.layoutManager = LinearLayoutManager(ctx)
+        view.recycler_view_users.layoutManager = LinearLayoutManager(activity)
         view.recycler_view_users.adapter = userAdapter
 
         pull_to_refresh_users.setOnRefreshListener {
@@ -57,24 +57,26 @@ class Fragment_Users : Fragment() {
 
         //Used for creating a new task
         insertbutton_users.setOnClickListener {
-            val inflatedView = LayoutInflater.from(ctx).inflate(R.layout.alertfrag_createuser, null, false)
-            val customAlert: android.support.v7.app.AlertDialog = android.support.v7.app.AlertDialog.Builder(ctx!!)
-                .setView(inflatedView)
-                .setTitle("Create a User!")
-                .setNegativeButton("No") { dialog, which ->
-                    dialog.dismiss()
-                }
-                .setPositiveButton("Yes") { dialog, which ->
-                    val taskId = inflatedView.etTaskIdUser.text.toString()
-                    val title=inflatedView.etTitleUser.text.toString()
-                    val firstName=inflatedView.etFirstName.text.toString()
-                    val lastName=inflatedView.etLastName.text.toString()
-                    val email=inflatedView.etEmail.text.toString()
-                    createUser(title,firstName,lastName,email,taskId)
-                    dialog.dismiss()
-                }
-                .create()
-            customAlert.show()
+            val inflatedView = LayoutInflater.from(activity).inflate(R.layout.alertfrag_createuser, null, false)
+            val customAlert: AlertDialog? = activity?.baseContext?.let { it1 ->
+                android.support.v7.app.AlertDialog.Builder(it1)
+                    .setView(inflatedView)
+                    .setTitle("Create a User!")
+                    .setNegativeButton("No") { dialog, which ->
+                        dialog.dismiss()
+                    }
+                    .setPositiveButton("Yes") { dialog, which ->
+                        val taskId = inflatedView.etTaskIdUser.text.toString()
+                        val title=inflatedView.etTitleUser.text.toString()
+                        val firstName=inflatedView.etFirstName.text.toString()
+                        val lastName=inflatedView.etLastName.text.toString()
+                        val email=inflatedView.etEmail.text.toString()
+                        createUser(title,firstName,lastName,email,taskId)
+                        dialog.dismiss()
+                    }
+                    .create()
+            }
+            customAlert?.show()
         }
     }
 
@@ -83,37 +85,39 @@ class Fragment_Users : Fragment() {
         Log.e(TAG, " -*-*-*- doYourUpdate")
         userList.clear()
 
-        Utils.getApolloClient(ctx!!)?.query(
-            FindAllUsersQuery.builder().build()
-        )?.watcher()
-            ?.refetchResponseFetcher(ApolloResponseFetchers.CACHE_AND_NETWORK)
-            ?.enqueueAndWatch(object : ApolloCall.Callback<FindAllUsersQuery.Data>() {
-                override fun onFailure(e: ApolloException) {
-                    e.printStackTrace()
-                    Log.e(TAG, " doYourUpdate onFailure----$e ")
-                }
+        activity?.baseContext?.let {
+            Utils.getApolloClient(it)?.query(
+                FindAllUsersQuery.builder().build()
+            )?.watcher()
+                ?.refetchResponseFetcher(ApolloResponseFetchers.CACHE_AND_NETWORK)
+                ?.enqueueAndWatch(object : ApolloCall.Callback<FindAllUsersQuery.Data>() {
+                    override fun onFailure(e: ApolloException) {
+                        e.printStackTrace()
+                        Log.e(TAG, " doYourUpdate onFailure----$e ")
+                    }
 
-                override fun onResponse(response: Response<FindAllUsersQuery.Data>) {
+                    override fun onResponse(response: Response<FindAllUsersQuery.Data>) {
 
-                    watchResponse.set(response)
+                        watchResponse.set(response)
 
-                    Log.e(TAG, "on Response doYourUpdate: Watcher ${response.data()}")
+                        Log.e(TAG, "on Response doYourUpdate: Watcher ${response.data()}")
 
-                    val result = watchResponse.get()?.data()?.findAllUsers()
-                    result?.forEach {
-                        val title = it.title()
-                        val id = it.taskId()
-                        val email = it.email()
-                        val firstName = it.firstName()
-                        val lastName = it.lastName()
-                        val user = User(id.toInt(),firstName,lastName,email,title)
-                        activity?.runOnUiThread {
-                            userList.add(user)
-                            userAdapter?.notifyDataSetChanged()
+                        val result = watchResponse.get()?.data()?.findAllUsers()
+                        result?.forEach {
+                            val title = it.title()
+                            val id = it.taskId()
+                            val email = it.email()
+                            val firstName = it.firstName()
+                            val lastName = it.lastName()
+                            val user = User(id.toInt(),firstName,lastName,email,title)
+                            activity?.runOnUiThread {
+                                userList.add(user)
+                                userAdapter?.notifyDataSetChanged()
+                            }
                         }
                     }
-                }
-            })
+                })
+        }
 
         pull_to_refresh_tasks.isRefreshing = false
     }
@@ -129,9 +133,11 @@ class Fragment_Users : Fragment() {
 
         val mutation = CreateUserMutation.builder().input(input).build()
 
-        val client = Utils.getApolloClient(ctx!!)?.mutate(
-            mutation
-        )?.refetchQueries(apolloQueryWatcher?.operation()?.name())
+        val client = activity?.baseContext?.let {
+            Utils.getApolloClient(it)?.mutate(
+                mutation
+            )?.refetchQueries(apolloQueryWatcher?.operation()?.name())
+        }
 
         Log.e(TAG, " createUser 22: - ${client?.operation()?.variables()?.valueMap()}")
 
@@ -147,12 +153,14 @@ class Fragment_Users : Fragment() {
             }
         }
 
-        Utils.getApolloClient(ctx)?.enqueue(
-            mutation as com.apollographql.apollo.api.Mutation<Operation.Data, Any, Operation.Variables>,
-            customCallback
-        )
+        activity?.baseContext?.let {
+            Utils.getApolloClient(it)?.enqueue(
+                mutation as com.apollographql.apollo.api.Mutation<Operation.Data, Any, Operation.Variables>,
+                customCallback
+            )
+        }
 
-        Toast.makeText(ctx, "Task with id $taskId is assigned to $firstName $lastName", Toast.LENGTH_SHORT).show()
+        Toast.makeText(activity, "Task with id $taskId is assigned to $firstName $lastName", Toast.LENGTH_SHORT).show()
     }
 
 
