@@ -10,6 +10,7 @@ import kotlinx.android.synthetic.main.alertdialog_task.view.*
 import kotlinx.android.synthetic.main.item_row_tasks.view.*
 import org.aerogear.graphqlandroid.R
 import org.aerogear.graphqlandroid.activities.MainActivity
+import org.aerogear.graphqlandroid.fragments.Fragment_Tasks
 import org.aerogear.graphqlandroid.model.Task
 
 class TaskAdapter(private val notes: List<Task>, private val context: Context) :
@@ -53,9 +54,7 @@ class TaskAdapter(private val notes: List<Task>, private val context: Context) :
                     val titleEt = inflatedView.etTitleTask.text.toString()
                     val versionEt = inflatedView.etVersion.text.toString()
 
-//                    Log.e("Adapter", "${inflatedView.etId.text}")
-
-                    if (context is MainActivity) this.context.updateTask(
+                    Fragment_Tasks().updateTask(
                         currentTask.id.toString(),
                         titleEt,
                         versionEt.toInt(),

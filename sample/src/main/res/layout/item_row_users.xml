@@ -28,7 +28,7 @@
                     android:textSize="18sp"
                     android:layout_height="wrap_content"/>
             <TextView
-                    android:id="@+id/first_name"
+                    android:id="@+id/first_name_tv"
                     android:layout_width="match_parent"
                     android:textColor="#050505"
                     android:textStyle="bold"
@@ -36,18 +36,22 @@
                     android:layout_marginStart="4dp"
                     android:textSize="22sp"
                     android:layout_height="wrap_content"/>
-
             <TextView
-                    android:id="@+id/last_name"
+                    android:id="@+id/last_name_tv"
                     android:textColor="#6e6d6d"
                     android:layout_width="match_parent"
                     android:layout_marginStart="4dp"
                     android:textSize="18sp"
                     android:layout_height="wrap_content"/>
-
-
             <TextView
-                    android:id="@+id/email_user_tv"
+                android:id="@+id/email_user_tv"
+                android:textColor="#6e6d6d"
+                android:layout_width="match_parent"
+                android:layout_marginStart="4dp"
+                android:textSize="18sp"
+                android:layout_height="wrap_content"/>
+            <TextView
+                    android:id="@+id/title_user_tv"
                     android:textColor="#6e6d6d"
                     android:layout_width="match_parent"
                     android:layout_marginStart="4dp"
