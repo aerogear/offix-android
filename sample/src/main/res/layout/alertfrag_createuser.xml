@@ -5,16 +5,17 @@
               android:layout_marginTop="4dp"
               android:layout_height="match_parent">
 
+
     <android.support.design.widget.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
         <EditText android:layout_width="match_parent"
                   android:layout_height="wrap_content"
-                  android:id="@+id/etId"
+                  android:id="@+id/etTaskIdUser"
                   android:layout_marginStart="24dp"
                   android:inputType="number"
                   android:layout_marginEnd="24dp"
-                  android:hint="Id of the Note"/>
+                  android:hint="TaskID to which user has to be assigned"/>
     </android.support.design.widget.TextInputLayout>
 
     <android.support.design.widget.TextInputLayout
@@ -22,22 +23,11 @@
             android:layout_height="wrap_content">
         <EditText android:layout_width="match_parent"
                   android:layout_height="wrap_content"
-                  android:id="@+id/etTitleTask"
-                  android:layout_marginStart="24dp"
-                  android:layout_marginEnd="24dp"
-                  android:hint="Title of the Note"/>
-    </android.support.design.widget.TextInputLayout>
-
-    <android.support.design.widget.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-        <EditText android:layout_width="match_parent"
-                  android:layout_height="wrap_content"
-                  android:id="@+id/etVersion"
+                  android:id="@+id/etFirstName"
                   android:layout_marginStart="24dp"
                   android:inputType="number"
                   android:layout_marginEnd="24dp"
-                  android:hint="Version of the Note"/>
+                  android:hint="First Name Of the user"/>
     </android.support.design.widget.TextInputLayout>
 
     <android.support.design.widget.TextInputLayout
@@ -45,12 +35,34 @@
             android:layout_height="wrap_content">
         <EditText android:layout_width="match_parent"
                   android:layout_height="wrap_content"
-                  android:id="@+id/etDescTask"
+                  android:id="@+id/etLastName"
                   android:layout_marginStart="24dp"
+                  android:inputType="number"
                   android:layout_marginEnd="24dp"
-                  android:hint="Description of the Note"/>
+                  android:hint="Last Name Of the user"/>
     </android.support.design.widget.TextInputLayout>
 
+    <android.support.design.widget.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+        <EditText android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:id="@+id/etTitleUser"
+                  android:layout_marginStart="24dp"
+                  android:layout_marginEnd="24dp"
+                  android:hint="Title of the task assigned to user."/>
+    </android.support.design.widget.TextInputLayout>
 
+    <android.support.design.widget.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+        <EditText android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:id="@+id/etEmail"
+                  android:layout_marginStart="24dp"
+                  android:inputType="number"
+                  android:layout_marginEnd="24dp"
+                  android:hint="Email of the user"/>
+    </android.support.design.widget.TextInputLayout>
 
 </LinearLayout>

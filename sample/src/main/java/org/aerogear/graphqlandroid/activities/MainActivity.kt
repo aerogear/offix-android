@@ -17,10 +17,10 @@ import com.apollographql.apollo.cache.normalized.ApolloStore
 import com.apollographql.apollo.exception.ApolloException
 import com.apollographql.apollo.fetcher.ApolloResponseFetchers
 import io.reactivex.disposables.CompositeDisposable
-import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.alertdialog_task.view.etDesc
-import kotlinx.android.synthetic.main.alertdialog_task.view.etTitle
-import kotlinx.android.synthetic.main.alertfrag_create.view.*
+import kotlinx.android.synthetic.main.alertdialog_task.view.etDescTask
+import kotlinx.android.synthetic.main.alertdialog_task.view.etTitleTask
+import kotlinx.android.synthetic.main.alertfrag_createtasks.view.*
+import kotlinx.android.synthetic.main.fragment_tasks.*
 import org.aerogear.graphqlandroid.*
 import org.aerogear.graphqlandroid.adapter.TaskAdapter
 import org.aerogear.graphqlandroid.model.Task
@@ -52,19 +52,19 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        recycler_view.layoutManager = LinearLayoutManager(this)
-        recycler_view.adapter = taskAdapter
+        recycler_view_tasks.layoutManager = LinearLayoutManager(this)
+        recycler_view_tasks.adapter = taskAdapter
 
         getTasks()
 
-        pull_to_refresh.setOnRefreshListener {
+        pull_to_refresh_tasks.setOnRefreshListener {
             doYourUpdate()
-            pull_to_refresh.isRefreshing = false
+            pull_to_refresh_tasks.isRefreshing = false
         }
 
         //Used for creating a new task
-        insertbutton.setOnClickListener {
-            val inflatedView = LayoutInflater.from(this).inflate(R.layout.alertfrag_create, null, false)
+        insertbutton_tasks.setOnClickListener {
+            val inflatedView = LayoutInflater.from(this).inflate(R.layout.alertfrag_createtasks, null, false)
             val customAlert: android.support.v7.app.AlertDialog = android.support.v7.app.AlertDialog.Builder(this)
                 .setView(inflatedView)
                 .setTitle("Create a new Note")
@@ -72,9 +72,9 @@ class MainActivity : AppCompatActivity() {
                     dialog.dismiss()
                 }
                 .setPositiveButton("Yes") { dialog, which ->
-                    val title = inflatedView.etTitle.text.toString()
-                    val desc = inflatedView.etDesc.text.toString()
-                    val version = inflatedView.etVer.text.toString()
+                    val title = inflatedView.etTitleTask.text.toString()
+                    val desc = inflatedView.etDescTask.text.toString()
+                    val version = inflatedView.etVerTask.text.toString()
                     createtask(title, desc, version.toInt())
                     dialog.dismiss()
                 }
@@ -119,7 +119,7 @@ class MainActivity : AppCompatActivity() {
                 }
             })
 
-        pull_to_refresh.isRefreshing = false
+        pull_to_refresh_tasks.isRefreshing = false
     }
 
     fun getTasks() {

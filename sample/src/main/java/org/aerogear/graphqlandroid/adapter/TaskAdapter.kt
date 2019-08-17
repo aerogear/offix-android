@@ -50,7 +50,7 @@ class TaskAdapter(private val notes: List<Task>, private val context: Context) :
                 .setPositiveButton("Yes") { dialog, which ->
 
                     val id = inflatedView.etId.toString()
-                    val titleEt = inflatedView.etTitle.text.toString()
+                    val titleEt = inflatedView.etTitleTask.text.toString()
                     val versionEt = inflatedView.etVersion.text.toString()
 
 //                    Log.e("Adapter", "${inflatedView.etId.text}")
