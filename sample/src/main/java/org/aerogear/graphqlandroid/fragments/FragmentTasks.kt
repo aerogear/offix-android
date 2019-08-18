@@ -51,18 +51,18 @@ class Fragment_Tasks : Fragment() {
 
         getTasks()
 
-        pull_to_refresh_tasks.setOnRefreshListener {
+        view.pull_to_refresh_tasks.setOnRefreshListener {
             doYourUpdate()
             pull_to_refresh_tasks.isRefreshing = false
         }
 
         //Used for creating a new task
-        insertbutton_tasks.setOnClickListener {
-            val inflatedView = LayoutInflater.from(activity?.baseContext).inflate(R.layout.alertfrag_createtasks, null, false)
-            val customAlert: AlertDialog? = activity?.baseContext?.let { it1 ->
+        view.insertbutton_tasks.setOnClickListener {
+            val inflatedView = LayoutInflater.from(it.context).inflate(R.layout.alertfrag_createtasks, null, false)
+            val customAlert: AlertDialog? = view.context.let { it1 ->
                 android.support.v7.app.AlertDialog.Builder(it1)
                     .setView(inflatedView)
-                    .setTitle("Create a new Note")
+                    .setTitle("Create a Task")
                     .setNegativeButton("No") { dialog, which ->
                         dialog.dismiss()
                     }

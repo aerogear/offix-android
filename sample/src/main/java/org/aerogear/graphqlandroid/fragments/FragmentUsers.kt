@@ -49,18 +49,18 @@ class Fragment_Users : Fragment() {
         view.recycler_view_users.adapter = userAdapter
 
         getUsers()
-        pull_to_refresh_users.setOnRefreshListener {
+        view.pull_to_refresh_users.setOnRefreshListener {
             doUserUpdate()
-            pull_to_refresh_tasks.isRefreshing = false
+            pull_to_refresh_users.isRefreshing = false
         }
 
         //Used for creating a new task
-        insertbutton_users.setOnClickListener {
-            val inflatedView = LayoutInflater.from(activity).inflate(R.layout.alertfrag_createuser, null, false)
-            val customAlert: AlertDialog? = activity?.baseContext?.let { it1 ->
+        view.insertbutton_users.setOnClickListener {
+            val inflatedView = LayoutInflater.from(it.context).inflate(R.layout.alertfrag_createuser, null, false)
+            val customAlert: AlertDialog? = view.context.let { it1 ->
                 android.support.v7.app.AlertDialog.Builder(it1)
                     .setView(inflatedView)
-                    .setTitle("Create a User!")
+                    .setTitle("Create a User")
                     .setNegativeButton("No") { dialog, which ->
                         dialog.dismiss()
                     }

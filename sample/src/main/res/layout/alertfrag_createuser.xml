@@ -25,7 +25,6 @@
                   android:layout_height="wrap_content"
                   android:id="@+id/etFirstName"
                   android:layout_marginStart="24dp"
-                  android:inputType="number"
                   android:layout_marginEnd="24dp"
                   android:hint="First Name Of the user"/>
     </android.support.design.widget.TextInputLayout>
@@ -37,7 +36,6 @@
                   android:layout_height="wrap_content"
                   android:id="@+id/etLastName"
                   android:layout_marginStart="24dp"
-                  android:inputType="number"
                   android:layout_marginEnd="24dp"
                   android:hint="Last Name Of the user"/>
     </android.support.design.widget.TextInputLayout>

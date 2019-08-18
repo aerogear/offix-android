@@ -14,12 +14,14 @@ import org.aerogear.graphqlandroid.activities.MainActivity
 import org.aerogear.graphqlandroid.fragments.Fragment_Tasks
 import org.aerogear.graphqlandroid.model.Task
 
-class TaskAdapter(private val notes: List<Task>, private val context: Context) :
+class TaskAdapter(private val notes: List<Task>, private var context: Context) :
     RecyclerView.Adapter<TaskAdapter.TaskHolder>() {
+
 
     inner class TaskHolder(view: View) : RecyclerView.ViewHolder(view)
 
     override fun onCreateViewHolder(container: ViewGroup, p1: Int): TaskHolder {
+        context = container.context
         return TaskHolder(
             LayoutInflater.from(container.context).inflate(
                 R.layout.item_row_tasks,

@@ -9,12 +9,13 @@ import kotlinx.android.synthetic.main.item_row_users.view.*
 import org.aerogear.graphqlandroid.R
 import org.aerogear.graphqlandroid.model.User
 
-class UserAdapter(private val users: List<User>, private val context: Context) :
+class UserAdapter(private val users: List<User>, private var context: Context) :
     RecyclerView.Adapter<UserAdapter.UserHolder>() {
 
     inner class UserHolder(view: View) : RecyclerView.ViewHolder(view)
 
     override fun onCreateViewHolder(container: ViewGroup, p1: Int): UserHolder {
+        context = container.context
         return UserHolder(LayoutInflater.from(container.context).inflate(R.layout.item_row_users, container, false))
     }
 
