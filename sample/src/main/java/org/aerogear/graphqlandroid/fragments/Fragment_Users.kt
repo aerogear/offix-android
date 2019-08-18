@@ -20,11 +20,9 @@ import kotlinx.android.synthetic.main.alertfrag_createuser.view.*
 import kotlinx.android.synthetic.main.fragment_tasks.*
 import kotlinx.android.synthetic.main.fragment_users.*
 import kotlinx.android.synthetic.main.fragment_users.view.*
-import org.aerogear.graphqlandroid.CreateUserMutation
-import org.aerogear.graphqlandroid.FindAllUsersQuery
-import org.aerogear.graphqlandroid.R
-import org.aerogear.graphqlandroid.Utils
+import org.aerogear.graphqlandroid.*
 import org.aerogear.graphqlandroid.adapter.UserAdapter
+import org.aerogear.graphqlandroid.model.Task
 import org.aerogear.graphqlandroid.model.User
 import org.aerogear.graphqlandroid.type.UserInput
 import org.aerogear.offix.enqueue
@@ -50,6 +48,7 @@ class Fragment_Users : Fragment() {
         view.recycler_view_users.layoutManager = LinearLayoutManager(activity)
         view.recycler_view_users.adapter = userAdapter
 
+        getUsers()
         pull_to_refresh_users.setOnRefreshListener {
             doUserUpdate()
             pull_to_refresh_tasks.isRefreshing = false
@@ -67,11 +66,11 @@ class Fragment_Users : Fragment() {
                     }
                     .setPositiveButton("Yes") { dialog, which ->
                         val taskId = inflatedView.etTaskIdUser.text.toString()
-                        val title=inflatedView.etTitleUser.text.toString()
-                        val firstName=inflatedView.etFirstName.text.toString()
-                        val lastName=inflatedView.etLastName.text.toString()
-                        val email=inflatedView.etEmail.text.toString()
-                        createUser(title,firstName,lastName,email,taskId)
+                        val title = inflatedView.etTitleUser.text.toString()
+                        val firstName = inflatedView.etFirstName.text.toString()
+                        val lastName = inflatedView.etLastName.text.toString()
+                        val email = inflatedView.etEmail.text.toString()
+                        createUser(title, firstName, lastName, email, taskId)
                         dialog.dismiss()
                     }
                     .create()
@@ -109,7 +108,7 @@ class Fragment_Users : Fragment() {
                             val email = it.email()
                             val firstName = it.firstName()
                             val lastName = it.lastName()
-                            val user = User(id.toInt(),firstName,lastName,email,title)
+                            val user = User(id.toInt(), firstName, lastName, email, title)
                             activity?.runOnUiThread {
                                 userList.add(user)
                                 userAdapter?.notifyDataSetChanged()
@@ -120,6 +119,50 @@ class Fragment_Users : Fragment() {
         }
 
         pull_to_refresh_tasks.isRefreshing = false
+    }
+
+    fun getUsers() {
+        Log.e(TAG, " ----- getUsers")
+
+        userList.clear()
+
+        FindAllUsersQuery.builder()?.build()?.let {
+            activity?.baseContext?.let { it1 ->
+                Utils.getApolloClient(it1)?.query(it)
+                    ?.responseFetcher(ApolloResponseFetchers.CACHE_FIRST)
+                    ?.enqueue(object : ApolloCall.Callback<FindAllUsersQuery.Data>() {
+
+                        override fun onFailure(e: ApolloException) {
+                            e.printStackTrace()
+                            Log.e(TAG, "----$e ")
+                        }
+
+                        override fun onResponse(response: Response<FindAllUsersQuery.Data>) {
+                            Log.e(TAG, "on Response : response.data ${response.data()}")
+                            val result = response.data()?.findAllUsers()
+
+
+                            result?.forEach {
+                                val title = it.title()
+                                val email = it.email()
+                                val taskId = it.taskId()
+                                val firstName = it.firstName()
+                                val lastName = it.lastName()
+                                Log.e("${TAG}10", "$title")
+                                Log.e("${TAG}11", "$email")
+                                Log.e("${TAG}12", "$taskId")
+                                Log.e("${TAG}13", "$firstName")
+
+                                val user = User(taskId.toInt(), firstName, lastName, email, title)
+                                userList.add(user)
+                            }
+                            activity?.runOnUiThread {
+                                userAdapter?.notifyDataSetChanged()
+                            }
+                        }
+                    })
+            }
+        }
     }
 
     fun createUser(title: String, firstName: String, lastName: String, email: String, taskId: String) {

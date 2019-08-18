@@ -13,7 +13,8 @@
             android:layout_width="match_parent"
             android:id="@+id/tablayout"
             app:tabTextColor="#ffffff"
-            android:background="@color/colorPrimary"
+            app:tabIndicatorColor="@color/colorAccent"
+            android:background="@drawable/background"
             android:layout_height="wrap_content"/>
 
 
