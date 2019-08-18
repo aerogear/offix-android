@@ -23,11 +23,11 @@ class UserAdapter(private val users: List<User>, private val context: Context) :
     override fun onBindViewHolder(holder: UserHolder, position: Int) {
         val currentUser = users[position]
         with(holder.itemView) {
-            first_name_tv.text = currentUser.firstName
-            last_name_tv.text = currentUser.lastName
-            email_user_tv.text = currentUser.email
-            taskIdUser_tv.text = currentUser.taskId.toString()
-            title_user_tv.text = currentUser.title
+            first_name_tv.text = "FirstName: ${currentUser.firstName}"
+            last_name_tv.text = "LastName: ${currentUser.lastName}"
+            email_user_tv.text = "Email: ${currentUser.email}"
+            taskIdUser_tv.text = "TaskId: ${currentUser.taskId.toString()}"
+            title_user_tv.text = "Title: ${currentUser.title}"
         }
 //TODO Give the update user functionality.
     }

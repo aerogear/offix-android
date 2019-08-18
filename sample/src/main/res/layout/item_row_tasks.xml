@@ -23,33 +23,32 @@
                     android:id="@+id/title_tv"
                     android:layout_width="match_parent"
                     android:textColor="#050505"
-                    android:textStyle="bold"
+                    android:textSize="18sp"
                     android:layout_marginTop="2dp"
                     android:layout_marginStart="4dp"
-                    android:textSize="22sp"
                     android:layout_height="wrap_content"/>
 
             <TextView
                     android:id="@+id/desc_tv"
-                    android:textColor="#6e6d6d"
+                    android:textColor="#050505"
+                    android:textSize="18sp"
                     android:layout_width="match_parent"
                     android:layout_marginStart="4dp"
-                    android:textSize="18sp"
                     android:layout_height="wrap_content"/>
 
             <TextView
                     android:id="@+id/id_tv"
-                    android:textColor="#6e6d6d"
+                    android:textColor="#050505"
+                    android:textSize="18sp"
                     android:layout_width="match_parent"
                     android:layout_marginStart="4dp"
-                    android:textSize="18sp"
                     android:layout_height="wrap_content"/>
 
             <TextView
                     android:id="@+id/version_tv"
-                    android:textColor="#6e6d6d"
                     android:layout_width="match_parent"
                     android:layout_marginStart="4dp"
+                    android:textColor="#050505"
                     android:textSize="18sp"
                     android:layout_height="wrap_content"/>
         </LinearLayout>

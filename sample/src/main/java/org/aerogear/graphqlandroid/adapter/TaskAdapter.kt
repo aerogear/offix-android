@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import kotlinx.android.synthetic.main.alertdialog_task.view.*
 import kotlinx.android.synthetic.main.item_row_tasks.view.*
+import okhttp3.internal.Version
 import org.aerogear.graphqlandroid.R
 import org.aerogear.graphqlandroid.activities.MainActivity
 import org.aerogear.graphqlandroid.fragments.Fragment_Tasks
@@ -34,10 +35,10 @@ class TaskAdapter(private val notes: List<Task>, private val context: Context) :
 
         val currentTask = notes[position]
         with(holder.itemView) {
-            title_tv.text = currentTask.title
-            desc_tv.text = currentTask.desc
-            id_tv.text = currentTask.id.toString()
-            version_tv.text = currentTask.version.toString()
+            title_tv.text = "Title: ${currentTask.title}"
+            desc_tv.text = "Description: ${currentTask.desc}"
+            id_tv.text = "TaskID: ${currentTask.id.toString()}"
+            version_tv.text = "Version: ${currentTask.version.toString()}"
         }
 
         holder.itemView.setOnClickListener {
