@@ -8,8 +8,8 @@
     "findAll": true,
     "find": true,
     "delete": false,
-    "subCreate": false,
-    "subUpdate": false,
+    "subCreate": true,
+    "subUpdate": true,
     "subDelete": false
   },
   "database": "sqlite3"
