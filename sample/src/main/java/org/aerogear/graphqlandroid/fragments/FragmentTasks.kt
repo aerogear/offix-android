@@ -14,7 +14,6 @@ import com.apollographql.apollo.ApolloQueryWatcher
 import com.apollographql.apollo.api.Mutation
 import com.apollographql.apollo.api.Operation
 import com.apollographql.apollo.api.Response
-import com.apollographql.apollo.cache.normalized.ApolloStore
 import com.apollographql.apollo.exception.ApolloException
 import com.apollographql.apollo.fetcher.ApolloResponseFetchers
 import kotlinx.android.synthetic.main.alertdialog_task.view.etDescTask
@@ -30,7 +29,7 @@ import org.aerogear.offix.enqueue
 import org.aerogear.offix.interfaces.ResponseCallback
 import java.util.concurrent.atomic.AtomicReference
 
-class Fragment_Tasks : Fragment() {
+class FragmentTasks : Fragment() {
 
     var noteslist = arrayListOf<Task>()
     val TAG = javaClass.simpleName
@@ -150,7 +149,7 @@ class Fragment_Tasks : Fragment() {
                                 Log.e("${TAG}11", "$desc")
                                 Log.e("${TAG}12", "$id")
                                 Log.e("${TAG}13", "$version")
-        //
+                                //
                                 val task = Task(title, desc, id.toInt(), version!!)
                                 noteslist.add(task)
                             }
@@ -164,7 +163,7 @@ class Fragment_Tasks : Fragment() {
     }
 
     fun updateTask(id: String, title: String, version: Int, description: String) {
-        Log.e(TAG, "inside update title in MainActivity")
+        Log.e(TAG, "inside update title in Fragment Tasks")
 
         /*
         As version is assumed to be auto incremented ( //TODO Have to make changes in sqlite db)
@@ -252,7 +251,6 @@ class Fragment_Tasks : Fragment() {
                 customCallback
             )
         }
-
         Toast.makeText(activity, "Mutation with title $title created", Toast.LENGTH_SHORT).show()
     }
 

@@ -8,15 +8,13 @@ import android.view.View
 import android.view.ViewGroup
 import kotlinx.android.synthetic.main.alertdialog_task.view.*
 import kotlinx.android.synthetic.main.item_row_tasks.view.*
-import okhttp3.internal.Version
 import org.aerogear.graphqlandroid.R
 import org.aerogear.graphqlandroid.activities.MainActivity
-import org.aerogear.graphqlandroid.fragments.Fragment_Tasks
+import org.aerogear.graphqlandroid.fragments.FragmentTasks
 import org.aerogear.graphqlandroid.model.Task
 
 class TaskAdapter(private val notes: List<Task>, private var context: Context) :
     RecyclerView.Adapter<TaskAdapter.TaskHolder>() {
-
 
     inner class TaskHolder(view: View) : RecyclerView.ViewHolder(view)
 
@@ -52,16 +50,16 @@ class TaskAdapter(private val notes: List<Task>, private var context: Context) :
                     dialog.dismiss()
                 }
                 .setPositiveButton("Yes") { dialog, which ->
-
-                    val id = inflatedView.etId.toString()
+                    val id = inflatedView.etId.text.toString()
                     val titleEt = inflatedView.etTitleTask.text.toString()
                     val versionEt = inflatedView.etVersion.text.toString()
+                    val description = inflatedView.etDescTask.text.toString()
 
-                    Fragment_Tasks().updateTask(
-                        currentTask.id.toString(),
+                    FragmentTasks().updateTask(
+                        id,
                         titleEt,
                         versionEt.toInt(),
-                        "description"
+                        description
                     )
                     dialog.dismiss()
                 }

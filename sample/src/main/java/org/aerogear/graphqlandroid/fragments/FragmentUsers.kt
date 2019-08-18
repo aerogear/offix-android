@@ -17,19 +17,20 @@ import com.apollographql.apollo.api.Response
 import com.apollographql.apollo.exception.ApolloException
 import com.apollographql.apollo.fetcher.ApolloResponseFetchers
 import kotlinx.android.synthetic.main.alertfrag_createuser.view.*
-import kotlinx.android.synthetic.main.fragment_tasks.*
 import kotlinx.android.synthetic.main.fragment_users.*
 import kotlinx.android.synthetic.main.fragment_users.view.*
-import org.aerogear.graphqlandroid.*
+import org.aerogear.graphqlandroid.CreateUserMutation
+import org.aerogear.graphqlandroid.FindAllUsersQuery
+import org.aerogear.graphqlandroid.R
+import org.aerogear.graphqlandroid.Utils
 import org.aerogear.graphqlandroid.adapter.UserAdapter
-import org.aerogear.graphqlandroid.model.Task
 import org.aerogear.graphqlandroid.model.User
 import org.aerogear.graphqlandroid.type.UserInput
 import org.aerogear.offix.enqueue
 import org.aerogear.offix.interfaces.ResponseCallback
 import java.util.concurrent.atomic.AtomicReference
 
-class Fragment_Users : Fragment() {
+class FragmentUsers : Fragment() {
 
     var userList = arrayListOf<User>()
     val TAG = javaClass.simpleName
@@ -117,8 +118,7 @@ class Fragment_Users : Fragment() {
                     }
                 })
         }
-
-        pull_to_refresh_tasks.isRefreshing = false
+        pull_to_refresh_users.isRefreshing = false
     }
 
     fun getUsers() {
