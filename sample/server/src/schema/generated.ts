@@ -90,4 +90,13 @@ export const typeDefs = gql`
     ## Custom mutations
     checkAndUpdateTask(id: ID!, title: String, description: String, version: Int!, status: String!): Task
   }
+
+  type Subscription {
+    newTask: Task!
+    newCreationMetadata: CreationMetadata!
+    newUser: User!
+    updatedTask: Task!
+    updatedCreationMetadata: CreationMetadata!
+    updatedUser: User!
+  }
 `
