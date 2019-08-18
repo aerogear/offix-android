@@ -10,9 +10,9 @@ import kotlinx.android.synthetic.main.alertdialog_task.view.*
 import kotlinx.android.synthetic.main.item_row_tasks.view.*
 import org.aerogear.graphqlandroid.R
 import org.aerogear.graphqlandroid.activities.MainActivity
-import org.aerogear.graphqlandroid.model.Task
+import org.aerogear.graphqlandroid.model.UserOutput
 
-class TaskAdapter(private val notes: List<Task>, private val context: Context) :
+class TaskAdapter(private val notes: List<UserOutput>, private val context: Context) :
     RecyclerView.Adapter<TaskAdapter.TaskHolder>() {
 
     inner class TaskHolder(view: View) : RecyclerView.ViewHolder(view)
@@ -36,7 +36,11 @@ class TaskAdapter(private val notes: List<Task>, private val context: Context) :
             title_tv.text = currentTask.title
             desc_tv.text = currentTask.desc
             id_tv.text = currentTask.id.toString()
-            version_tv.text = currentTask.version.toString()
+            if (currentTask.firstName.isNotEmpty()) {
+                firstName_tv.text = "${currentTask.firstName} ${currentTask.lastName}"
+            } else {
+                firstName_tv.text = "User not assigned"
+            }
         }
 
         holder.itemView.setOnClickListener {

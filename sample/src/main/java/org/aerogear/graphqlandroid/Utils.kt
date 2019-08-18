@@ -13,10 +13,8 @@ import com.apollographql.apollo.cache.normalized.lru.LruNormalizedCacheFactory
 import com.apollographql.apollo.cache.normalized.sql.ApolloSqlHelper
 import com.apollographql.apollo.cache.normalized.sql.SqlNormalizedCacheFactory
 import com.apollographql.apollo.subscription.WebSocketSubscriptionTransport
-import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import org.aerogear.offix.interceptor.ConflictInterceptor
-import java.nio.charset.Charset
 
 object Utils {
 
