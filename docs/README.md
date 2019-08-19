@@ -28,7 +28,7 @@ See [offix website](https://android.offix.dev) for usage and more details.
 
 - **Gradle**:<br/>
 
-  `implementation 'org.aerogear.offix:offix:0.2.0'`
+  `implementation 'org.aerogear.offix:offix:0.3.0'`
   
 - **Maven**:<br/> 
 
@@ -36,7 +36,7 @@ See [offix website](https://android.offix.dev) for usage and more details.
   <dependency>
 	<groupId>org.aerogear.offix</groupId>
 	<artifactId>offix</artifactId>
-	<version>0.2.0</version>
+	<version>0.3.0</version>
 	<type>pom</type>
   </dependency>
 ```
@@ -51,13 +51,12 @@ See [sample](https://github.com/aerogear/offix-android/tree/master/sample) for e
 
 ## Limitations
 
-1. No UI Bindings, you will have to update your UI manually.
-2. The library only supports apollo-android for the time being.
+1. The library only supports apollo-android for the time being.
 
 ## Features in Development 
 
-1. Adding Conflict Resolution mechanism to the library.
-2. Leveraging Offline Support to nested schema structure.
+1. Adding Offline Support when the app is in background.
+
 
 ## Contributing 
 
