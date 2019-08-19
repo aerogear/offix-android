@@ -3,15 +3,12 @@ package org.aerogear.offix
 import android.app.Activity
 import android.app.Application
 import android.arch.persistence.room.Room
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.net.ConnectivityManager
 import android.os.Bundle
 import android.util.Log
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.interceptor.ApolloInterceptor
-import java.util.*
-import kotlin.collections.ArrayList
 
 class Offline private constructor(context: Context) {
 
@@ -25,11 +22,6 @@ class Offline private constructor(context: Context) {
     private val packageManager by lazy {
         ctx.packageManager
     }
-
-    /*
-    Register a broadcast receiver for listening to network status while the app is foreground
-     */
-    private val br: BroadcastReceiver = NetworkChangeReceiver()
 
     /**
      * Event database is initialized and stored once

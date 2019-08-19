@@ -8,12 +8,5 @@
         <provider android:exported="false"
                   android:authorities="org.aerogear.offix"
                   android:name="org.aerogear.offix.provider.Provider"/>
-        <receiver
-                android:name="org.aerogear.offix.NetworkChangeReceiver"
-                android:exported="true">
-            <intent-filter>
-                <action android:name="android.net.conn.CONNECTIVITY_CHANGE"/>
-            </intent-filter>
-        </receiver>
     </application>
 </manifest>
