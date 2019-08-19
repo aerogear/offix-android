@@ -41,12 +41,10 @@ class ConflictResolutionHandler {
         string "conflictInfo".
         */
         if (parsedResponse == null || parsedResponse.get() == null || parsedResponse.get().hasErrors() == false) {
-            Log.d("$TAG  100", "ConflictResolutionHandler")
             return false
         }
 
         if (!parsedResponse.get().errors()[0].toString().contains("conflictInfo")) {
-            Log.d("$TAG  200", "ConflictResolutionHandler")
             return false
         }
 
