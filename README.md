@@ -18,7 +18,7 @@ Mutations are persisted when Offline
 and replicated back to server when online.
 
 #### Conflict Resolution
-Conflict resolution allows providing a mechanism for resolving conflicts between data sent to the server. It will allow developers to specify custom conflict resolution strategies to solve conflicts for mutations and replicate them back to the server after resolution.
+Provide custom conflict resolution strategies to solve conflicts among the mutations and replicate them back to the server after resolving conflicts.
 
 ## Documentation
 
@@ -30,7 +30,7 @@ See [offix website](https://android.offix.dev) for usage and more details.
 
   `implementation 'org.aerogear.offix:offix:0.3.1'`
   
-- **Maven**:<br/>
+- **Maven**:<br/> 
 
 ```xml
   <dependency>
@@ -43,19 +43,20 @@ See [offix website](https://android.offix.dev) for usage and more details.
 
 
 
+
+
 ## Example application
 
 See [sample](https://github.com/aerogear/offix-android/tree/master/sample) for example application.<br/>
 
 ## Limitations
 
-1. No UI Bindings, you will have to update your UI manually.
-2. The library only supports apollo-android for the time being.
+1. The library only supports apollo-android for the time being.
 
 ## Features in Development 
 
-1. Adding Conflict Resolution mechanism to the library.
-2. Provide Support for nested schema structure.
+1. Adding Offline Support when the app is in background.
+
 
 ## Contributing 
 
