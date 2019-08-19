@@ -37,7 +37,7 @@ class ConflictInterceptor(private val conflictResolutionImpl: ConflictResolution
             queueCallback.addLast(callBack)
         }
         Log.d("$TAG 1", "${request.operation}")
-        Log.d(TAG, "Size of queue callback list ${queueCallback.size}")
+        Log.d(TAG, "Size of queue callback list which stores all mutations ${queueCallback.size}")
 
         /* Check is the network connection is there or not.
          */

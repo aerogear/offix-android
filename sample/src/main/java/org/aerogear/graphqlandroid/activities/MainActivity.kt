@@ -1,8 +1,10 @@
 package org.aerogear.graphqlandroid.activities
 
 import android.os.Bundle
+import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
+import android.text.Html
 import android.util.Log
 import android.view.LayoutInflater
 import android.widget.Toast
@@ -13,7 +15,6 @@ import com.apollographql.apollo.ApolloQueryWatcher
 import com.apollographql.apollo.api.Mutation
 import com.apollographql.apollo.api.Operation
 import com.apollographql.apollo.api.Response
-import com.apollographql.apollo.cache.normalized.ApolloStore
 import com.apollographql.apollo.exception.ApolloException
 import com.apollographql.apollo.fetcher.ApolloResponseFetchers
 import io.reactivex.disposables.CompositeDisposable
@@ -54,48 +55,60 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        //Used for creating a new task
-        createtask.setOnClickListener {
-            val inflatedView = LayoutInflater.from(this).inflate(R.layout.alertfrag_create_tasks, null, false)
-            val customAlert: android.support.v7.app.AlertDialog = android.support.v7.app.AlertDialog.Builder(this)
-                .setView(inflatedView)
-                .setTitle("Create a new Note")
-                .setNegativeButton("No") { dialog, which ->
-                    dialog.dismiss()
+        fabAdd.setOnClickListener {
+            val options = arrayOf("Create a Task", "Assign a Task")
+            val builder = AlertDialog.Builder(this).setTitle("Choose an option!")
+            builder.setItems(options) { dialog, which ->
+                when (which) {
+                    0 -> {
+                        //Used for creating a new task
+                        val inflatedView =
+                            LayoutInflater.from(this).inflate(R.layout.alertfrag_create_tasks, null, false)
+                        val customAlert: AlertDialog = AlertDialog.Builder(this)
+                            .setView(inflatedView)
+                            .setTitle("Create a new Note")
+                            .setNegativeButton("No") { dialog, which ->
+                                dialog.dismiss()
+                            }
+                            .setPositiveButton("Yes") { dialog, which ->
+                                val title = inflatedView.etTitleTask.text.toString()
+                                val desc = inflatedView.etDescTask.text.toString()
+                                val version = inflatedView.etVerTask.text.toString()
+                                createtask(title, desc, version.toInt())
+                                dialog.dismiss()
+                            }
+                            .create()
+                        customAlert.show()
+                    }
+                    1 -> {
+                        //Used for assigning user
+                        val inflatedView =
+                            LayoutInflater.from(this).inflate(R.layout.alertfrag_create_user, null, false)
+                        val customAlert: AlertDialog = AlertDialog.Builder(this)
+                            .setView(inflatedView)
+                            .setTitle("Assign the User a task")
+                            .setNegativeButton("No") { dialog, which ->
+                                dialog.dismiss()
+                            }
+                            .setPositiveButton("Yes") { dialog, which ->
+                                val taskId = inflatedView.etTaskIdUser.text.toString()
+                                val title = inflatedView.etTitleUser.text.toString()
+                                val firstName = inflatedView.etFirstName.text.toString()
+                                val lastName = inflatedView.etLastName.text.toString()
+                                val email = inflatedView.etEmail.text.toString()
+                                createUser(title, firstName, lastName, email, taskId)
+                                dialog.dismiss()
+                            }
+                            .create()
+                        customAlert.show()
+                    }
                 }
-                .setPositiveButton("Yes") { dialog, which ->
-                    val title = inflatedView.etTitleTask.text.toString()
-                    val desc = inflatedView.etDescTask.text.toString()
-                    val version = inflatedView.etVerTask.text.toString()
-                    createtask(title, desc, version.toInt())
-                    dialog.dismiss()
-                }
-                .create()
-            customAlert.show()
-        }
+            }
 
-        //Used for assigning user
-        assignUser.setOnClickListener {
-            val inflatedView = LayoutInflater.from(this).inflate(R.layout.alertfrag_create_user, null, false)
-            val customAlert: android.support.v7.app.AlertDialog = android.support.v7.app.AlertDialog.Builder(this)
-                .setView(inflatedView)
-                .setTitle("Assign the User a task")
-                .setNegativeButton("No") { dialog, which ->
-                    dialog.dismiss()
-                }
-                .setPositiveButton("Yes") { dialog, which ->
-                    val taskId = inflatedView.etTaskIdUser.text.toString()
-                    val title = inflatedView.etTitleUser.text.toString()
-                    val firstName = inflatedView.etFirstName.text.toString()
-                    val lastName = inflatedView.etLastName.text.toString()
-                    val email = inflatedView.etEmail.text.toString()
-                    createUser(title, firstName, lastName, email, taskId)
-                    dialog.dismiss()
-                }
-                .create()
-            customAlert.show()
+            // create and show the alert dialog
+            val dialog = builder.create()
+            dialog.show()
         }
-
         recycler_view.layoutManager = LinearLayoutManager(this)
         recycler_view.adapter = taskAdapter
 
@@ -115,7 +128,7 @@ class MainActivity : AppCompatActivity() {
         Utils.getApolloClient(this)?.query(
             FindAllTasksQuery.builder().build()
         )?.watcher()
-            ?.refetchResponseFetcher(ApolloResponseFetchers.CACHE_AND_NETWORK)
+            ?.refetchResponseFetcher(ApolloResponseFetchers.CACHE_FIRST)
             ?.enqueueAndWatch(object : ApolloCall.Callback<FindAllTasksQuery.Data>() {
                 override fun onFailure(e: ApolloException) {
                     e.printStackTrace()
@@ -138,8 +151,8 @@ class MainActivity : AppCompatActivity() {
                         it.assignedTo()?.let {
                             firstName = it.firstName()
                             lastName = it.lastName()
-                        }?:kotlin.run {
-                            firstName = "Not assigned"
+                        } ?: kotlin.run {
+                            firstName = "User Not assigned"
                             lastName = ""
                         }
                         val taskOutput = UserOutput(title, desc, id.toInt(), firstName, lastName)
@@ -161,7 +174,7 @@ class MainActivity : AppCompatActivity() {
 
         FindAllTasksQuery.builder()?.build()?.let {
             Utils.getApolloClient(this)?.query(it)
-                ?.responseFetcher(ApolloResponseFetchers.CACHE_AND_NETWORK)
+                ?.responseFetcher(ApolloResponseFetchers.CACHE_FIRST)
                 ?.enqueue(object : ApolloCall.Callback<FindAllTasksQuery.Data>() {
 
                     override fun onFailure(e: ApolloException) {
@@ -170,36 +183,27 @@ class MainActivity : AppCompatActivity() {
                     }
 
                     override fun onResponse(response: Response<FindAllTasksQuery.Data>) {
-                        Log.e(TAG, "on Response : response.data ${response.data()}")
+                        Log.e(TAG, "on Response getTasks : Data ${response.data()}")
                         val result = response.data()?.findAllTasks()
 
                         result?.forEach {
                             val title = it.title()
                             val desc = it.description()
                             val id = it.id()
-
                             var firstName = ""
                             var lastName = ""
-
-                            val namePair = getUser(id.toInt())
-
-                            if (namePair.fName == "") {
-                                var firstName = "Not assigned"
-                                lastName = namePair.lName
-                            } else {
-                                firstName = namePair.fName
-                                lastName = namePair.lName
+                            it.assignedTo()?.let {
+                                firstName = it.firstName()
+                                lastName = it.lastName()
+                            } ?: kotlin.run {
+                                firstName = "User Not assigned"
+                                lastName = ""
                             }
-                            Log.e("${TAG}10 getTasks", "$title")
-                            Log.e("${TAG}11 getTasks", "$desc")
-                            Log.e("${TAG}12 getTasks", "$id")
-                            Log.e("${TAG}13 getTasks", "$firstName")
-
                             val taskOutput = UserOutput(title, desc, id.toInt(), firstName, lastName)
-                            tasksList.add(taskOutput)
-                        }
-                        runOnUiThread {
-                            taskAdapter.notifyDataSetChanged()
+                            runOnUiThread {
+                                tasksList.add(taskOutput)
+                                taskAdapter.notifyDataSetChanged()
+                            }
                         }
                     }
                 })
@@ -207,8 +211,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun getUser(id: Int): NamePair {
-
-        var namePair = NamePair(" ", " ")
+        Log.e("${TAG} Inside getUser", "TaskId: $id")
+        var namePair = NamePair("", "")
 
         val userFilter = UserFilter.builder().id(id.toString()).build()
         FindUsersQuery.builder().fields(userFilter).build()?.let {
@@ -359,8 +363,8 @@ class MainActivity : AppCompatActivity() {
         Toast.makeText(this, "Task with id $taskId is assigned to $firstName $lastName", Toast.LENGTH_LONG).show()
     }
 
-    fun getUsers() {
-        Log.e(TAG, " ----- getUsers")
+    fun getAllUsers() {
+        Log.e(TAG, " ----- getAllUsers")
 
         FindAllUsersQuery.builder()?.build()?.let {
             Utils.getApolloClient(this)?.query(it)
