@@ -18,6 +18,7 @@ import com.apollographql.apollo.exception.ApolloException
 import com.apollographql.apollo.fetcher.ApolloResponseFetchers
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.alert_update_task.view.*
 import kotlinx.android.synthetic.main.alert_update_user.view.*
 import kotlinx.android.synthetic.main.alertfrag_create_tasks.view.*
 import kotlinx.android.synthetic.main.alertfrag_create_user.view.*
@@ -55,7 +56,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         fabAdd.setOnClickListener {
-            val options = arrayOf("Create a Task", "Assign a Task", "Update User")
+            val options = arrayOf("Create a Task", "Assign Task to User", "Update Task", "Update User")
             val builder = AlertDialog.Builder(this).setTitle("Choose an option!")
             builder.setItems(options) { dialog, which ->
                 when (which) {
@@ -102,6 +103,31 @@ class MainActivity : AppCompatActivity() {
                         customAlert.show()
                     }
                     2 -> {
+                        //Used for updating details of user
+                        val inflatedView = LayoutInflater.from(this).inflate(R.layout.alert_update_task, null, false)
+                        val customAlert: AlertDialog = AlertDialog.Builder(this)
+                            .setView(inflatedView)
+                            .setTitle("Update the details of the Task")
+                            .setNegativeButton("No") { dialog, which ->
+                                dialog.dismiss()
+                            }
+                            .setPositiveButton("Yes") { dialog, which ->
+                                val id = inflatedView.etId.text.toString()
+                                val titleEt = inflatedView.etTitle.text.toString()
+                                val versionEt = inflatedView.etVersion.text.toString()
+                                val description = inflatedView.etDesc.text.toString()
+                                updateTask(
+                                    id,
+                                    titleEt,
+                                    versionEt.toInt(),
+                                    description
+                                )
+                                dialog.dismiss()
+                            }
+                            .create()
+                        customAlert.show()
+                    }
+                    3 -> {
                         //Used for updating details of user
                         val inflatedView =
                             LayoutInflater.from(this).inflate(R.layout.alert_update_user, null, false)

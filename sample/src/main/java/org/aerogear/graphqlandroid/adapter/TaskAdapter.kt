@@ -42,33 +42,5 @@ class TaskAdapter(private val notes: List<UserOutput>, private val context: Cont
                 firstName_tv.text = "User not assigned"
             }
         }
-
-        holder.itemView.setOnClickListener {
-            val inflatedView = LayoutInflater.from(context).inflate(R.layout.alert_update_task, null, false)
-            val customAlert: AlertDialog = AlertDialog.Builder(context)
-                .setView(inflatedView)
-                .setTitle("Update the clicked Note")
-                .setNegativeButton("No") { dialog, which ->
-                    dialog.dismiss()
-                }
-                .setPositiveButton("Yes") { dialog, which ->
-
-                    val id = inflatedView.etId.toString()
-                    val titleEt = inflatedView.etTitle.text.toString()
-                    val versionEt = inflatedView.etVersion.text.toString()
-
-//                    Log.e("Adapter", "${inflatedView.etId.text}")
-
-                    if (context is MainActivity) this.context.updateTask(
-                        currentTask.id.toString(),
-                        titleEt,
-                        versionEt.toInt(),
-                        "description"
-                    )
-                    dialog.dismiss()
-                }
-                .create()
-            customAlert.show()
-        }
     }
 }
