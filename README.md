@@ -56,7 +56,7 @@ See [sample](https://github.com/aerogear/offix-android/tree/master/sample) for e
 ## Features in Development 
 
 1. Adding Offline Support when the app is in background.
-2. Providing UI bindings in app. (For the time being, we are using subscriptions to provide them)
+2. Provide UI bindings in app. (For the time being, we are using subscriptions to provide them)
 
 ## Contributing 
 
