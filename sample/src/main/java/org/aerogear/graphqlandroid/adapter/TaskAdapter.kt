@@ -1,15 +1,12 @@
 package org.aerogear.graphqlandroid.adapter
 
 import android.content.Context
-import android.support.v7.app.AlertDialog
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import kotlinx.android.synthetic.main.alert_update_task.view.*
 import kotlinx.android.synthetic.main.item_row_tasks.view.*
 import org.aerogear.graphqlandroid.R
-import org.aerogear.graphqlandroid.activities.MainActivity
 import org.aerogear.graphqlandroid.model.UserOutput
 
 class TaskAdapter(private val notes: List<UserOutput>, private val context: Context) :

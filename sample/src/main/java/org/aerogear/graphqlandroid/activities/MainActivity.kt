@@ -11,8 +11,6 @@ import androidx.work.Constraints
 import androidx.work.NetworkType
 import com.apollographql.apollo.ApolloCall
 import com.apollographql.apollo.ApolloQueryWatcher
-import com.apollographql.apollo.api.Mutation
-import com.apollographql.apollo.api.Operation
 import com.apollographql.apollo.api.Response
 import com.apollographql.apollo.exception.ApolloException
 import com.apollographql.apollo.fetcher.ApolloResponseFetchers
@@ -30,8 +28,7 @@ import org.aerogear.graphqlandroid.model.UserOutput
 import org.aerogear.graphqlandroid.type.TaskInput
 import org.aerogear.graphqlandroid.type.UserFilter
 import org.aerogear.graphqlandroid.type.UserInput
-import org.aerogear.offix.enqueue
-import org.aerogear.offix.interfaces.ResponseCallback
+import org.aerogear.offix.Offline
 import java.util.concurrent.atomic.AtomicReference
 
 class MainActivity : AppCompatActivity() {
@@ -301,24 +298,28 @@ class MainActivity : AppCompatActivity() {
 
         Log.e(TAG, " updateTask ********: - $mutation")
 
-        val client = Utils.getApolloClient(this)?.mutate(
+        val mutationCall = Utils.getApolloClient(this)?.mutate(
             mutation
         )?.refetchQueries(apolloQueryWatcher?.operation()?.name())
 
         Log.e(TAG, " updateTask class name: - ${mutation.javaClass.simpleName}")
         Log.e(
             TAG,
-            " updateTask 20: - ${client?.requestHeaders(com.apollographql.apollo.request.RequestHeaders.builder().build())}"
+            " updateTask 20: - ${mutationCall?.requestHeaders(com.apollographql.apollo.request.RequestHeaders.builder().build())}"
         )
-        Log.e(TAG, " updateTask 21: - ${client?.operation()?.queryDocument()}")
-        Log.e(TAG, " updateTask 22: - ${client?.operation()?.variables()?.valueMap()}")
-        Log.e(TAG, " updateTask 23: - ${client?.operation()?.name()}")
+        Log.e(TAG, " updateTask 21: - ${mutationCall?.operation()?.queryDocument()}")
+        Log.e(TAG, " updateTask 22: - ${mutationCall?.operation()?.variables()?.valueMap()}")
+        Log.e(TAG, " updateTask 23: - ${mutationCall?.operation()?.name()}")
 
-        val customCallback = object : ResponseCallback {
+        val callback = object : ApolloCall.Callback<UpdateTaskMutation.Data>() {
+            override fun onFailure(e: ApolloException) {
+                Log.e("onFailure() updateTask", "${mutation.variables().valueMap()}")
+                e.printStackTrace()
+            }
 
-            override fun onSuccess(response: Response<Any>) {
-                Log.e("onSuccess() updateTask", "${response.data()}")
-                val result = response.data()
+            override fun onResponse(response: Response<UpdateTaskMutation.Data>) {
+                Log.e("onResponse() updateTask", "${response.data()?.updateTask()?.title()}")
+                val result = response.data()?.updateTask()
 
                 //In case of conflicts data returned from the server id null.
                 result?.let {
@@ -326,17 +327,18 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
-            override fun onSchedule(e: ApolloException, mutation: Mutation<Operation.Data, Any, Operation.Variables>) {
-                Log.e("onSchedule() updateTask", "${mutation.variables().valueMap()}")
-                e.printStackTrace()
-            }
         }
+        mutationCall?.enqueue(callback)
+        if (Offline.isNetwork()) {
+            Toast.makeText(this@MainActivity, "Task with $id is updated", Toast.LENGTH_LONG).show()
+        } else {
+            Toast.makeText(
+                this@MainActivity,
+                "Task with $id is stored offline. Changes will be synced to the server when app comes online.",
+                Toast.LENGTH_LONG
+            ).show()
 
-        Utils.getApolloClient(this)?.enqueue(
-            mutation as com.apollographql.apollo.api.Mutation<Operation.Data, Any, Operation.Variables>,
-            customCallback
-        )
-        Toast.makeText(this, "Task with $id is updated", Toast.LENGTH_LONG).show()
+        }
     }
 
     fun updateUser(idUser: String, taskId: String, title: String, firstName: String, lastName: String, email: String) {
@@ -352,41 +354,47 @@ class MainActivity : AppCompatActivity() {
 
         Log.e(TAG, " updateUser ********: - $mutation")
 
-        val client = Utils.getApolloClient(this)?.mutate(
+        val mutationCall = Utils.getApolloClient(this)?.mutate(
             mutation
         )?.refetchQueries(apolloQueryWatcher?.operation()?.name())
 
         Log.e(TAG, " updateUser class name: - ${mutation.javaClass.simpleName}")
         Log.e(
             TAG,
-            " updateUser 20: - ${client?.requestHeaders(com.apollographql.apollo.request.RequestHeaders.builder().build())}"
+            " updateUser 20: - ${mutationCall?.requestHeaders(com.apollographql.apollo.request.RequestHeaders.builder().build())}"
         )
-        Log.e(TAG, " updateUser 21: - ${client?.operation()?.queryDocument()}")
-        Log.e(TAG, " updateUser 22: - ${client?.operation()?.variables()?.valueMap()}")
-        Log.e(TAG, " updateUser 23: - ${client?.operation()?.name()}")
+        Log.e(TAG, " updateUser 21: - ${mutationCall?.operation()?.queryDocument()}")
+        Log.e(TAG, " updateUser 22: - ${mutationCall?.operation()?.variables()?.valueMap()}")
+        Log.e(TAG, " updateUser 23: - ${mutationCall?.operation()?.name()}")
 
-        val customCallback = object : ResponseCallback {
+        val callback = object : ApolloCall.Callback<UpdateUserMutation.Data>() {
+            override fun onFailure(e: ApolloException) {
+                Log.e("onFailure() updateTask", "${mutation.variables().valueMap()}")
+                e.printStackTrace()
+            }
 
-            override fun onSuccess(response: Response<Any>) {
-                Log.e("onSuccess() updateUser", "${response.data()}")
-                val result = response.data()
+            override fun onResponse(response: Response<UpdateUserMutation.Data>) {
+                Log.e("onResponse() updateTask", "${response.data()?.updateUser()?.title()}")
+                val result = response.data()?.updateUser()
 
                 //In case of conflicts data returned from the server id null.
                 result?.let {
-                    Log.e(TAG, "onResponse-updateUser- $it")
+                    Log.e(TAG, "onResponse-UpdateTask- $it")
                 }
             }
 
-            override fun onSchedule(e: ApolloException, mutation: Mutation<Operation.Data, Any, Operation.Variables>) {
-                Log.e("onSchedule() updateUser", "${mutation.variables().valueMap()}")
-                e.printStackTrace()
-            }
         }
-        Utils.getApolloClient(this)?.enqueue(
-            mutation as com.apollographql.apollo.api.Mutation<Operation.Data, Any, Operation.Variables>,
-            customCallback
-        )
-        Toast.makeText(this, "User with $idUser is updated", Toast.LENGTH_LONG).show()
+        mutationCall?.enqueue(callback)
+        if (Offline.isNetwork()) {
+            Toast.makeText(this, "User with $idUser is updated", Toast.LENGTH_LONG).show()
+        } else {
+            Toast.makeText(
+                this,
+                "Updated in User with $idUser is stored offline. Changes will be synced to the server when app comes online.",
+                Toast.LENGTH_LONG
+            ).show()
+        }
+
     }
 
     fun createtask(title: String, description: String, version: Int) {
@@ -399,30 +407,40 @@ class MainActivity : AppCompatActivity() {
 
         val mutation = CreateTaskMutation.builder().input(input).build()
 
-        val client = Utils.getApolloClient(this)?.mutate(
+        val mutationCall = Utils.getApolloClient(this)?.mutate(
             mutation
         )?.refetchQueries(apolloQueryWatcher?.operation()?.name())
 
-        Log.e(TAG, " updateTask 22: - ${client?.operation()?.variables()?.valueMap()}")
+        Log.e(TAG, " updateTask 22: - ${mutationCall?.operation()?.variables()?.valueMap()}")
 
-        val customCallback = object : ResponseCallback {
 
-            override fun onSuccess(response: Response<Any>) {
-                Log.e("onSuccess() createTask", "${response.data()}")
+        val callback = object : ApolloCall.Callback<CreateTaskMutation.Data>() {
+            override fun onFailure(e: ApolloException) {
+                Log.e("onFailure() updateTask", "${mutation.variables().valueMap()}")
+                e.printStackTrace()
             }
 
-            override fun onSchedule(e: ApolloException, mutation: Mutation<Operation.Data, Any, Operation.Variables>) {
-                e.printStackTrace()
-                Log.e("onSchedule() createTask", "${mutation.variables().valueMap()}")
+            override fun onResponse(response: Response<CreateTaskMutation.Data>) {
+                Log.e("onResponse() updateTask", "${response.data()}")
+                val result = response.data()?.createTask()
+
+                //In case of conflicts data returned from the server id null.
+                result?.let {
+                    Log.e(TAG, "onResponse-UpdateTask- $it")
+                }
             }
         }
+        mutationCall?.enqueue(callback)
 
-        Utils.getApolloClient(this)?.enqueue(
-            mutation as com.apollographql.apollo.api.Mutation<Operation.Data, Any, Operation.Variables>,
-            customCallback
-        )
-
-        Toast.makeText(this, "Mutation with title $title is created", Toast.LENGTH_LONG).show()
+        if (Offline.isNetwork()) {
+            Toast.makeText(this, "Mutation with title $title is created", Toast.LENGTH_LONG).show()
+        } else {
+            Toast.makeText(
+                this,
+                "Create mutation with title $title is stored offline. Changes will be synced to the server when app comes online.",
+                Toast.LENGTH_LONG
+            ).show()
+        }
     }
 
     fun createUser(title: String, firstName: String, lastName: String, email: String, taskId: String) {
@@ -436,29 +454,37 @@ class MainActivity : AppCompatActivity() {
 
         val mutation = CreateUserMutation.builder().input(input).build()
 
-        val client = Utils.getApolloClient(this)?.mutate(
+        val mutationCall = Utils.getApolloClient(this)?.mutate(
             mutation
         )?.refetchQueries(apolloQueryWatcher?.operation()?.name())
 
-        Log.e(TAG, " createUser 22: - ${client?.operation()?.variables()?.valueMap()}")
-
-        val customCallback = object : ResponseCallback {
-
-            override fun onSuccess(response: Response<Any>) {
-                Log.e("onSuccess() createTask", "${response.data()}")
+        Log.e(TAG, " createUser 22: - ${mutationCall?.operation()?.variables()?.valueMap()}")
+        val callback = object : ApolloCall.Callback<CreateUserMutation.Data>() {
+            override fun onFailure(e: ApolloException) {
+                Log.e("onFailure() updateTask", "${mutation.variables().valueMap()}")
+                e.printStackTrace()
             }
 
-            override fun onSchedule(e: ApolloException, mutation: Mutation<Operation.Data, Any, Operation.Variables>) {
-                e.printStackTrace()
-                Log.e("onSchedule() createUser", "${mutation.variables().valueMap()}")
+            override fun onResponse(response: Response<CreateUserMutation.Data>) {
+                Log.e("onResponse() updateTask", "${response.data()}")
+                val result = response.data()?.createUser()
+
+                //In case of conflicts data returned from the server id null.
+                result?.let {
+                    Log.e(TAG, "onResponse-UpdateTask- $it")
+                }
             }
         }
-
-        Utils.getApolloClient(this)?.enqueue(
-            mutation as com.apollographql.apollo.api.Mutation<Operation.Data, Any, Operation.Variables>,
-            customCallback
-        )
-        Toast.makeText(this, "Task with id $taskId is assigned to $firstName $lastName", Toast.LENGTH_LONG).show()
+        mutationCall?.enqueue(callback)
+        if (Offline.isNetwork()) {
+            Toast.makeText(this, "Task with id $taskId is assigned to $firstName $lastName", Toast.LENGTH_LONG).show()
+        } else {
+            Toast.makeText(
+                this,
+                "Update in user where Task with id $taskId is assigned to $firstName $lastName is stored offline. Changes will be synced to the server when app comes online.",
+                Toast.LENGTH_LONG
+            ).show()
+        }
     }
 
     fun getAllUsers() {

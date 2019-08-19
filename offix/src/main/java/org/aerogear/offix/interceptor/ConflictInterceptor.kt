@@ -78,8 +78,6 @@ class ConflictInterceptor(private val conflictResolutionImpl: ConflictResolution
                     Log.d("$TAG", "-------")
                     chain.proceedAsync(it, dispatcher, OfflineCallback(it))
                 }
-
-                Offline.requestList.clear()
             } else {
                 Log.d("$TAG 200", "--------")
                 chain.proceedAsync(request, dispatcher, OffixConflictCallback(conflictResolutionImpl))
@@ -145,9 +143,9 @@ class ConflictInterceptor(private val conflictResolutionImpl: ConflictResolution
         override fun onResponse(response: ApolloInterceptor.InterceptorResponse) {
             Log.d(TAG, "onResponse()")
             Log.d(TAG, "OfflineCallback: Size of OfflineCallback list--- ${queueCallback.size}")
-            Offline.requestList.remove(request)
             Log.d(TAG, "SIZE OF Request LIST in OfflineCallback ****: ${Offline.requestList.size}")
             userOfflineCallback.onResponse(response)
+            Offline.requestList.remove(request)
         }
 
         override fun onFetch(sourceType: ApolloInterceptor.FetchSourceType?) {

@@ -18,80 +18,6 @@ conflictedMutationClass variable stores the name of the mutation class in which 
  */
 lateinit var conflictedMutationClass: String
 
-/* Extension function on ApolloClient which will be used by the user while making a call request.
-   @receiver parameter is ApolloClient on which the call will be made by the user.
-   @param mutation which will be stored in the list if network connection is not there.
-   @param responseCallback which is of type ResponseCallback.
- */
-fun ApolloClient.enqueue(
-    mutation: Mutation<Operation.Data, Any, Operation.Variables>,
-    responseCallback: ResponseCallback
-) {
-    /* Set apollo client given by the user.
-     */
-    Offline.apClient = this
-
-    /*
-     Create an object of ApolloCall.Callback
-    */
-    val apolloCallback = object : ApolloCall.Callback<Any>() {
-
-        /**
-         * Called when the request could not be executed due to cancellation, a connectivity problem or
-         * timeout.
-         */
-        override fun onFailure(e: ApolloException) {
-            Log.d("Extension Callback - ", "$e")
-
-            /* If the user is offline:
-               1. Make an object of (org.aerogear.offix.persistence)Mutation.
-               2. Store it in database
-             */
-
-            /* Get access to the dao of the database
-             */
-            val libDao = getDao()
-
-            /* Insert mutation object in the database.
-            */
-            libDao?.insertMutation(getPersistenceMutation(mutation))
-            Log.d("Extension", " size of db list after inserting mutations: ${libDao?.getAllMutations()?.size}")
-
-            /*
-             Set the exception that caused onFailure() and the mutation object in the onSchedule() of responseCallback.
-             */
-            responseCallback.onSchedule(e, mutation)
-        }
-
-        override fun onResponse(response: Response<Any>) {
-            val result = response.data().toString()
-            Log.d("Extension Callback * ", result)
-
-            /*
-             1. Check if the response data is null or not. If it's null that means the conflict has happened.
-             2. Store the mutation class name in which conflict has occurred in the conflictedMutationClass variable.
-             */
-
-            Log.d("Response DATA: ", " ${response.data()}")
-
-            if (response.data()==null) {
-                conflictedMutationClass = mutation.javaClass.simpleName
-            }
-
-            /*
-            Set the response received from the server in the onSuccess() of responseCallback.
-            In case of conflicts null is returned from the server as response.
-            */
-            responseCallback.onSuccess(response)
-        }
-    }
-
-    /*
-      Make a call with the mutation to the server.
-     */
-    this.mutate(mutation).enqueue(apolloCallback)
-}
-
 /*
  This function takes in an object of Mutation<D,T,V> and returns an object of com.aerogear.offix.persistence.Mutation.
  */
@@ -195,9 +121,3 @@ fun getDao() = Offline.getDb()?.mutationDao()
    To check if the string provided in the function matches apollo Input class or not.
  */
 fun inputTypeChecker(string: String) = string.equals("com.apollographql.apollo.api.Input")
-
-/*  Extension function for ApolloClient Builder
-    @receiver param: ApolloClient.Buidler, which can be used by the user for creating a custom client.
-    @return ApolloClient.Buidler
- */
-fun ApolloClient.Builder.OfflineClientBuilder(): ApolloClient.Builder = this
