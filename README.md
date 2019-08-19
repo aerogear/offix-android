@@ -17,9 +17,6 @@ For more information about the Apollo and GraphQL please go to https://www.apoll
 Mutations are persisted when Offline
 and replicated back to server when online.
 
-#### Conflict Resolution
-Provide custom conflict resolution strategies to solve conflicts among the mutations and replicate them back to the server after resolving conflicts.
-
 ## Documentation
 
 See [offix website](https://android.offix.dev) for usage and more details.
@@ -28,20 +25,18 @@ See [offix website](https://android.offix.dev) for usage and more details.
 
 - **Gradle**:<br/>
 
-  `implementation 'org.aerogear.offix:offix:0.3.1'`
+  `implementation 'org.aerogear.offix:offix:0.2.0'`
   
-- **Maven**:<br/> 
+- **Maven**:<br/>
 
 ```xml
   <dependency>
 	<groupId>org.aerogear.offix</groupId>
 	<artifactId>offix</artifactId>
-	<version>0.3.1</version>
+	<version>0.2.0</version>
 	<type>pom</type>
   </dependency>
 ```
-
-
 
 
 
@@ -51,12 +46,13 @@ See [sample](https://github.com/aerogear/offix-android/tree/master/sample) for e
 
 ## Limitations
 
-1. The library only supports apollo-android for the time being.
+1. No UI Bindings, you will have to update your UI manually.
+2. The library only supports apollo-android for the time being.
 
 ## Features in Development 
 
-1. Adding Offline Support when the app is in background.
-2. Provide UI bindings in app. (For the time being, we are using subscriptions to provide them)
+1. Adding Conflict Resolution mechanism to the library.
+2. Provide Support for nested schema structure.
 
 ## Contributing 
 

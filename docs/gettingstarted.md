@@ -2,13 +2,11 @@
 
 ## 1. Setup of Backened Server
 
-- Clone this [offix-android](https://github.com/aerogear/offix-android.git) repository.
-- The [server]((https://github.com/aerogear/offix-android/tree/master/sample/server)) in sample app server as a backened server for now.
+- Clone the [ionic showcase](https://github.com/aerogear/ionic-showcase.git) repository which serves as a backened server for now.
 - Run the following commands **to start the server:**
-  - cd ./sample
   - cd ./server
-  - graphback generate
-  - npm run build
+  - docker-compose up
+  - npm install
   - npm run start
 - This will start your server. 
 
@@ -24,7 +22,7 @@
 
 Add the following dependency in your **module's build.gradle**:
   
-  ```  implementation 'org.aerogear.offix:offix:0.3.1' ```
+  ```  implementation 'org.aerogear.offix:offix:0.2.0' ```
 
 For **maven**, add the following dependency: <br/> 
 
@@ -32,7 +30,7 @@ For **maven**, add the following dependency: <br/>
 <dependency>
 	<groupId>org.aerogear.offix</groupId>
 	<artifactId>offix</artifactId>
-	<version>0.3.1</version>
+	<version>0.2.0</version>
 	<type>pom</type>
 </dependency>
 ```
