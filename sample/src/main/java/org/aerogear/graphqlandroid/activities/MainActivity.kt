@@ -19,8 +19,10 @@ import com.apollographql.apollo.exception.ApolloException
 import com.apollographql.apollo.fetcher.ApolloResponseFetchers
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.alert_update_user.view.*
 import kotlinx.android.synthetic.main.alertfrag_create_tasks.view.*
 import kotlinx.android.synthetic.main.alertfrag_create_user.view.*
+import kotlinx.android.synthetic.main.alertfrag_create_user.view.etTitleUser
 import org.aerogear.graphqlandroid.*
 import org.aerogear.graphqlandroid.adapter.TaskAdapter
 import org.aerogear.graphqlandroid.model.NamePair
@@ -56,7 +58,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         fabAdd.setOnClickListener {
-            val options = arrayOf("Create a Task", "Assign a Task")
+            val options = arrayOf("Create a Task", "Assign a Task", "Update User")
             val builder = AlertDialog.Builder(this).setTitle("Choose an option!")
             builder.setItems(options) { dialog, which ->
                 when (which) {
@@ -97,6 +99,29 @@ class MainActivity : AppCompatActivity() {
                                 val lastName = inflatedView.etLastName.text.toString()
                                 val email = inflatedView.etEmail.text.toString()
                                 createUser(title, firstName, lastName, email, taskId)
+                                dialog.dismiss()
+                            }
+                            .create()
+                        customAlert.show()
+                    }
+                    2 -> {
+                        //Used for updating details of user
+                        val inflatedView =
+                            LayoutInflater.from(this).inflate(R.layout.alert_update_user, null, false)
+                        val customAlert: AlertDialog = AlertDialog.Builder(this)
+                            .setView(inflatedView)
+                            .setTitle("Update details of the User")
+                            .setNegativeButton("No") { dialog, which ->
+                                dialog.dismiss()
+                            }
+                            .setPositiveButton("Yes") { dialog, which ->
+                                val taskId = inflatedView.etIdassigned.text.toString()
+                                val userId = inflatedView.etIdUSer.text.toString()
+                                val title = inflatedView.etTitleUser.text.toString()
+                                val firstName = inflatedView.etFname.text.toString()
+                                val lastName = inflatedView.etLname.text.toString()
+                                val email = inflatedView.etLEmailUSer.text.toString()
+                                updateUser(userId, taskId, title, firstName, lastName, email)
                                 dialog.dismiss()
                             }
                             .create()
@@ -288,6 +313,57 @@ class MainActivity : AppCompatActivity() {
             mutation as com.apollographql.apollo.api.Mutation<Operation.Data, Any, Operation.Variables>,
             customCallback
         )
+        Toast.makeText(this, "Task with $id is updated", Toast.LENGTH_LONG).show()
+    }
+
+    fun updateUser(idUser: String, taskId: String, title: String, firstName: String, lastName: String, email: String) {
+        Log.e(TAG, "inside updateUser in MainActivity")
+
+        /*
+        As version is assumed to be auto incremented ( //TODO Have to make changes in sqlite db)
+        */
+        val input = UserInput.builder().title(title).lastName(lastName).firstName(firstName).email(email).taskId(taskId)
+            .creationmetadataId(taskId).build()
+
+        var mutation = UpdateUserMutation.builder().id(idUser).input(input).build()
+
+        Log.e(TAG, " updateUser ********: - $mutation")
+
+        val client = Utils.getApolloClient(this)?.mutate(
+            mutation
+        )?.refetchQueries(apolloQueryWatcher?.operation()?.name())
+
+        Log.e(TAG, " updateUser class name: - ${mutation.javaClass.simpleName}")
+        Log.e(
+            TAG,
+            " updateUser 20: - ${client?.requestHeaders(com.apollographql.apollo.request.RequestHeaders.builder().build())}"
+        )
+        Log.e(TAG, " updateUser 21: - ${client?.operation()?.queryDocument()}")
+        Log.e(TAG, " updateUser 22: - ${client?.operation()?.variables()?.valueMap()}")
+        Log.e(TAG, " updateUser 23: - ${client?.operation()?.name()}")
+
+        val customCallback = object : ResponseCallback {
+
+            override fun onSuccess(response: Response<Any>) {
+                Log.e("onSuccess() updateUser", "${response.data()}")
+                val result = response.data()
+
+                //In case of conflicts data returned from the server id null.
+                result?.let {
+                    Log.e(TAG, "onResponse-updateUser- $it")
+                }
+            }
+
+            override fun onSchedule(e: ApolloException, mutation: Mutation<Operation.Data, Any, Operation.Variables>) {
+                Log.e("onSchedule() updateUser", "${mutation.variables().valueMap()}")
+                e.printStackTrace()
+            }
+        }
+        Utils.getApolloClient(this)?.enqueue(
+            mutation as com.apollographql.apollo.api.Mutation<Operation.Data, Any, Operation.Variables>,
+            customCallback
+        )
+        Toast.makeText(this, "User with $idUser is updated", Toast.LENGTH_LONG).show()
     }
 
     fun createtask(title: String, description: String, version: Int) {
@@ -359,7 +435,6 @@ class MainActivity : AppCompatActivity() {
             mutation as com.apollographql.apollo.api.Mutation<Operation.Data, Any, Operation.Variables>,
             customCallback
         )
-
         Toast.makeText(this, "Task with id $taskId is assigned to $firstName $lastName", Toast.LENGTH_LONG).show()
     }
 

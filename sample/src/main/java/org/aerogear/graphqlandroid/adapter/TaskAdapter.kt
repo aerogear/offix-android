@@ -6,7 +6,7 @@ import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import kotlinx.android.synthetic.main.alertdialog_task.view.*
+import kotlinx.android.synthetic.main.alert_update_task.view.*
 import kotlinx.android.synthetic.main.item_row_tasks.view.*
 import org.aerogear.graphqlandroid.R
 import org.aerogear.graphqlandroid.activities.MainActivity
@@ -44,7 +44,7 @@ class TaskAdapter(private val notes: List<UserOutput>, private val context: Cont
         }
 
         holder.itemView.setOnClickListener {
-            val inflatedView = LayoutInflater.from(context).inflate(R.layout.alertdialog_task, null, false)
+            val inflatedView = LayoutInflater.from(context).inflate(R.layout.alert_update_task, null, false)
             val customAlert: AlertDialog = AlertDialog.Builder(context)
                 .setView(inflatedView)
                 .setTitle("Update the clicked Note")
