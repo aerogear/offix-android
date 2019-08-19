@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
-import android.text.Html
 import android.util.Log
 import android.view.LayoutInflater
 import android.widget.Toast
@@ -30,10 +29,8 @@ import org.aerogear.graphqlandroid.model.UserOutput
 import org.aerogear.graphqlandroid.type.TaskInput
 import org.aerogear.graphqlandroid.type.UserFilter
 import org.aerogear.graphqlandroid.type.UserInput
-import org.aerogear.graphqlandroid.worker.SampleWorker
 import org.aerogear.offix.enqueue
 import org.aerogear.offix.interfaces.ResponseCallback
-import org.aerogear.offix.scheduleWorker
 import java.util.concurrent.atomic.AtomicReference
 
 class MainActivity : AppCompatActivity() {
@@ -474,18 +471,6 @@ class MainActivity : AppCompatActivity() {
                     }
                 })
         }
-    }
-
-    /*
-     In the activity's onStop(), schedule a worker that would try to replicate the mutations done when offline (stored in database )
-     to the server whenever network connection is regained.
-     */
-    override fun onStop() {
-        /* Schedule a worker by calling scheduleWorker() of the library.
-           @param Worker class which extend OffixWorker class of the library.
-        */
-        scheduleWorker(SampleWorker::class.java)
-        super.onStop()
     }
 
     override fun onDestroy() {

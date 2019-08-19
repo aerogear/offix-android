@@ -25,7 +25,7 @@
                   android:id="@+id/etFname"
                   android:layout_marginStart="24dp"
                   android:layout_marginEnd="24dp"
-                  android:hint="First Name os the user"/>
+                  android:hint="First Name of the user"/>
     </android.support.design.widget.TextInputLayout>
 
     <android.support.design.widget.TextInputLayout
@@ -36,7 +36,7 @@
               android:id="@+id/etLname"
               android:layout_marginStart="24dp"
               android:layout_marginEnd="24dp"
-              android:hint="Last Name of the user."/>
+              android:hint="Last Name of the user"/>
 </android.support.design.widget.TextInputLayout>
 
     <android.support.design.widget.TextInputLayout
@@ -47,7 +47,7 @@
                   android:id="@+id/etLEmailUSer"
                   android:layout_marginStart="24dp"
                   android:layout_marginEnd="24dp"
-                  android:hint="Email of the user."/>
+                  android:hint="Email of the user"/>
     </android.support.design.widget.TextInputLayout>
 
     <android.support.design.widget.TextInputLayout

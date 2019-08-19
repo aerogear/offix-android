@@ -67,8 +67,7 @@ class ConflictInterceptor(private val conflictResolutionImpl: ConflictResolution
              */
             if (Offline.requestList.isNotEmpty()) {
                 chain.proceedAsync(request, dispatcher, OffixConflictCallback(conflictResolutionImpl))
-//                Offline.requestList.remove(request)
-                Log.d("$TAG 100", "If list is not empty: ${Offline.requestList.size}")
+                Log.d("$TAG 100", "Net comes and requestList is not empty: ${Offline.requestList.size}")
                 /* When user comes from offline to online, we wait for the user to perform any mutation.
                    Now along with the mutation performed by the user, we fetch the mutation requests stored in the list and
                    replicate them back to the server.
@@ -80,6 +79,7 @@ class ConflictInterceptor(private val conflictResolutionImpl: ConflictResolution
                     chain.proceedAsync(it, dispatcher, OfflineCallback(it))
                 }
 
+                Offline.requestList.clear()
             } else {
                 Log.d("$TAG 200", "--------")
                 chain.proceedAsync(request, dispatcher, OffixConflictCallback(conflictResolutionImpl))
@@ -144,9 +144,9 @@ class ConflictInterceptor(private val conflictResolutionImpl: ConflictResolution
         val userOfflineCallback = queueCallback.removeFirst()
         override fun onResponse(response: ApolloInterceptor.InterceptorResponse) {
             Log.d(TAG, "onResponse()")
-            Log.d(TAG, "OfflineCallback: Size of OfflineCallback list ${queueCallback.size}")
+            Log.d(TAG, "OfflineCallback: Size of OfflineCallback list--- ${queueCallback.size}")
             Offline.requestList.remove(request)
-            Log.d(TAG, "SIZE OF Request LIST in OfflineCallback: ${Offline.requestList.size}")
+            Log.d(TAG, "SIZE OF Request LIST in OfflineCallback ****: ${Offline.requestList.size}")
             userOfflineCallback.onResponse(response)
         }
 
