@@ -1,6 +1,6 @@
 import { GraphQLContext } from '../../context'
 
-enum Subscriptions {
+ enum Subscriptions {
   NEW_CREATIONMETADATA = 'newcreationmetadata',
   UPDATED_CREATIONMETADATA = 'updatedcreationmetadata'
 }
@@ -24,7 +24,8 @@ export const creationmetadataResolvers = {
 
   Mutation: {
     createCreationMetadata: async (_: any, args: any, context: GraphQLContext) => {
-      const result = await context.db('creationmetadata').insert(args.input).returning('*')
+      const [ id ] = await context.db('creationmetadata').insert(args.input).returning('id')
+      const result = await context.db.select().from('creationmetadata').where('id', '=', id)
       context.pubsub.publish(Subscriptions.NEW_CREATIONMETADATA, {
         newCreationMetadata: result[0]
       })

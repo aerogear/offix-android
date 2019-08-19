@@ -1,6 +1,6 @@
 import { GraphQLContext } from '../../context'
 
-enum Subscriptions {
+ enum Subscriptions {
   NEW_USER = 'newuser',
   UPDATED_USER = 'updateduser'
 }
@@ -17,7 +17,8 @@ export const userResolvers = {
 
   Mutation: {
     createUser: async (_: any, args: any, context: GraphQLContext) => {
-      const result = await context.db('user').insert(args.input).returning('*')
+      const [ id ] = await context.db('user').insert(args.input).returning('id')
+      const result = await context.db.select().from('user').where('id', '=', id)
       context.pubsub.publish(Subscriptions.NEW_USER, {
         newUser: result[0]
       })
