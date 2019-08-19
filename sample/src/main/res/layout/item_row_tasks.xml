@@ -13,7 +13,8 @@
             app:cardCornerRadius="4dp"
             android:layout_marginLeft="6dp"
             android:layout_marginRight="6dp"
-            app:cardBackgroundColor="#ffffff"
+            android:layout_marginBottom="4dp"
+            app:cardBackgroundColor="#FDFCF2"
             android:layout_height="wrap_content">
 
         <LinearLayout android:layout_width="match_parent"
@@ -31,26 +32,29 @@
 
             <TextView
                     android:id="@+id/desc_tv"
-                    android:textColor="#6e6d6d"
+                    android:textColor="#058CF7"
                     android:layout_width="match_parent"
                     android:layout_marginStart="4dp"
-                    android:textSize="18sp"
+                    android:textSize="16sp"
+                    android:textStyle="normal"
                     android:layout_height="wrap_content"/>
 
             <TextView
                     android:id="@+id/id_tv"
-                    android:textColor="#6e6d6d"
+                    android:textColor="#030303"
                     android:layout_width="match_parent"
                     android:layout_marginStart="4dp"
                     android:textSize="18sp"
+                    android:textStyle="normal"
                     android:layout_height="wrap_content"/>
 
             <TextView
-                    android:id="@+id/version_tv"
-                    android:textColor="#6e6d6d"
+                    android:id="@+id/firstName_tv"
+                    android:textColor="#F50303"
                     android:layout_width="match_parent"
                     android:layout_marginStart="4dp"
                     android:textSize="18sp"
+                    android:textStyle="normal"
                     android:layout_height="wrap_content"/>
         </LinearLayout>
 

@@ -34,7 +34,7 @@ class ConflictResolutionHandler {
     }
 
     internal fun conflictPresent(parsedResponse: Optional<Response<Any>>?): Boolean {
-        Log.d(TAG, "inside conflictPresent parsed response")
+        Log.d(TAG, "inside conflictPresent parsed response $parsedResponse")
 
         /*Check if the parsed response contains a conflict.
         The contract for conflicts is that the response will contain an error with the
@@ -44,12 +44,11 @@ class ConflictResolutionHandler {
             return false
         }
 
-        Log.d(TAG, "Thread:[" + Thread.currentThread().id + "]: onResponse -- found error")
-
         if (!parsedResponse.get().errors()[0].toString().contains("conflictInfo")) {
             return false
         }
-      return true
-    }
 
+        Log.d("$TAG  300", "ConflictResolutionHandler")
+        return true
+    }
 }

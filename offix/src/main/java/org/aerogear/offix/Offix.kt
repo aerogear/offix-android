@@ -182,7 +182,6 @@ fun getMutation(storedmutation: org.aerogear.offix.persistence.Mutation): Mutati
 
     //Make an object of mutation (done by reflection)
     val obj = constructor.newInstance(*jsonValues.toArray())
-
     return obj as Mutation<Operation.Data, Operation.Data, Operation.Variables>
 }
 
