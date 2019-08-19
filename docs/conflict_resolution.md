@@ -69,7 +69,7 @@ class UserConflictResolutionHandler(val context: Context) : ConflictResolutionIn
                 }
                 
                 "UpdateUserMutation" -> {
-                    /*Similar for UpdateUserMutation
+                    /* Similar for UpdateUserMutation
                     1. Get all the fields from the clientState.
                     2. Create an object of mutation.
                     3. Again make a call to the server.
