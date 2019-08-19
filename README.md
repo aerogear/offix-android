@@ -18,7 +18,7 @@ Mutations are persisted when Offline
 and replicated back to server when online.
 
 #### Conflict Resolution
-Provide custom conflict resolution strategies to solve conflicts among the mutations and replicate them back to the server after resolving conflicts.
+Conflict resolution allows providing a mechanism for resolving conflicts between data sent to the server. It will allow developers to specify custom conflict resolution strategies to solve conflicts for mutations and replicate them back to the server after resolution.
 
 ## Documentation
 
