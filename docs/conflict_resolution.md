@@ -8,7 +8,12 @@
 - You also get the **`operation type`** of the conflicted mutation. Run a switch case on the operation type to detect which type of mutation is it in which conflict occured and accordingly create an object of that mutation while resolving conflicts.
 - You can resolve conflicts based on your business logic and again make a call to the server.
 
+#### The [conflict protocol/structure](https://offix.dev/#/ref-conflict-server?id=structure-of-the-conflict-error) is descibed on [offix.dev](https://offix.dev/)
+
+
 ### Code:
+#### The sample app contains conflict resolution based on the version strategy. However, the user can use their own markers to resolve conflicts.
+
 
 ```kotlin
 /*
