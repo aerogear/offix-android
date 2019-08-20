@@ -14,7 +14,11 @@ import com.apollographql.apollo.ApolloQueryWatcher
 import com.apollographql.apollo.api.Response
 import com.apollographql.apollo.exception.ApolloException
 import com.apollographql.apollo.fetcher.ApolloResponseFetchers
+import com.apollographql.apollo.rx2.Rx2Apollo
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.schedulers.Schedulers
+import io.reactivex.subscribers.DisposableSubscriber
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.alert_update_task.view.*
 import kotlinx.android.synthetic.main.alert_update_user.view.*
@@ -45,7 +49,6 @@ class MainActivity : AppCompatActivity() {
             .build()
     }
     private val disposables = CompositeDisposable()
-    val watchResponse = AtomicReference<Response<FindAllTasksQuery.Data>>()
     var apolloQueryWatcher: ApolloQueryWatcher<FindAllTasksQuery.Data>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -63,7 +66,7 @@ class MainActivity : AppCompatActivity() {
                             LayoutInflater.from(this).inflate(R.layout.alertfrag_create_tasks, null, false)
                         val customAlert: AlertDialog = AlertDialog.Builder(this)
                             .setView(inflatedView)
-                            .setTitle("Create a new Note")
+                            .setTitle("Create a new Task")
                             .setNegativeButton("No") { dialog, which ->
                                 dialog.dismiss()
                             }
@@ -160,56 +163,14 @@ class MainActivity : AppCompatActivity() {
         getTasks()
 
         pull_to_refresh.setOnRefreshListener {
-            doYourUpdate()
+            doSampleUpdate()
             pull_to_refresh.isRefreshing = false
         }
     }
 
-    private fun doYourUpdate() {
-
-        Log.e(TAG, " -*-*-*- doYourUpdate")
-        tasksList.clear()
-
-        Utils.getApolloClient(this)?.query(
-            FindAllTasksQuery.builder().build()
-        )?.watcher()
-            ?.refetchResponseFetcher(ApolloResponseFetchers.CACHE_FIRST)
-            ?.enqueueAndWatch(object : ApolloCall.Callback<FindAllTasksQuery.Data>() {
-                override fun onFailure(e: ApolloException) {
-                    e.printStackTrace()
-                    Log.e(TAG, " doYourUpdate onFailure----$e ")
-                }
-
-                override fun onResponse(response: Response<FindAllTasksQuery.Data>) {
-
-                    watchResponse.set(response)
-
-                    Log.e(TAG, "on Response doYourUpdate: Watcher ${response.data()}")
-
-                    val result = watchResponse.get()?.data()?.findAllTasks()
-                    result?.forEach {
-                        val title = it.title()
-                        val desc = it.description()
-                        val id = it.id()
-                        var firstName = ""
-                        var lastName = ""
-                        it.assignedTo()?.let {
-                            firstName = it.firstName()
-                            lastName = it.lastName()
-                        } ?: kotlin.run {
-                            firstName = "User Not assigned"
-                            lastName = ""
-                        }
-                        val taskOutput = UserOutput(title, desc, id.toInt(), firstName, lastName)
-                        runOnUiThread {
-                            tasksList.add(taskOutput)
-                            taskAdapter.notifyDataSetChanged()
-                        }
-                    }
-                }
-            })
-
-        pull_to_refresh.isRefreshing = false
+    fun doSampleUpdate() {
+        Log.e(TAG, " --------------- doSampleUpdate")
+        getTasks()
     }
 
     fun getTasks() {
@@ -219,7 +180,7 @@ class MainActivity : AppCompatActivity() {
 
         FindAllTasksQuery.builder()?.build()?.let {
             Utils.getApolloClient(this)?.query(it)
-                ?.responseFetcher(ApolloResponseFetchers.CACHE_FIRST)
+                ?.responseFetcher(ApolloResponseFetchers.NETWORK_FIRST)
                 ?.enqueue(object : ApolloCall.Callback<FindAllTasksQuery.Data>() {
 
                     override fun onFailure(e: ApolloException) {
@@ -258,14 +219,12 @@ class MainActivity : AppCompatActivity() {
     fun getUser(id: Int): NamePair {
         Log.e("${TAG} Inside getUser", "TaskId: $id")
         var namePair = NamePair("", "")
-
         val userFilter = UserFilter.builder().id(id.toString()).build()
         FindUsersQuery.builder().fields(userFilter).build()?.let {
             Utils.getApolloClient(this)?.query(it)?.responseFetcher(ApolloResponseFetchers.CACHE_FIRST)
                 ?.enqueue(object : ApolloCall.Callback<FindUsersQuery.Data>() {
                     override fun onFailure(e: ApolloException) {
                         e.printStackTrace()
-                        Log.e(TAG, "getUser----$e ")
                     }
 
                     override fun onResponse(response: Response<FindUsersQuery.Data>) {
@@ -275,8 +234,6 @@ class MainActivity : AppCompatActivity() {
                         result?.forEach {
                             var firstName = it.firstName()
                             var lastName = it.lastName()
-                            Log.e("${TAG}100", "$title")
-                            Log.e("${TAG}138", firstName)
                             namePair.fName = firstName
                             namePair.lName = lastName
                         }
@@ -318,7 +275,6 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onResponse(response: Response<UpdateTaskMutation.Data>) {
-                Log.e("onResponse() updateTask", "${response.data()?.updateTask()?.title()}")
                 val result = response.data()?.updateTask()
 
                 //In case of conflicts data returned from the server id null.
@@ -326,7 +282,6 @@ class MainActivity : AppCompatActivity() {
                     Log.e(TAG, "onResponse-UpdateTask- $it")
                 }
             }
-
         }
         mutationCall?.enqueue(callback)
         if (Offline.isNetwork()) {
@@ -374,7 +329,6 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onResponse(response: Response<UpdateUserMutation.Data>) {
-                Log.e("onResponse() updateTask", "${response.data()?.updateUser()?.title()}")
                 val result = response.data()?.updateUser()
 
                 //In case of conflicts data returned from the server id null.
@@ -382,7 +336,6 @@ class MainActivity : AppCompatActivity() {
                     Log.e(TAG, "onResponse-UpdateTask- $it")
                 }
             }
-
         }
         mutationCall?.enqueue(callback)
         if (Offline.isNetwork()) {
@@ -421,7 +374,6 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onResponse(response: Response<CreateTaskMutation.Data>) {
-                Log.e("onResponse() updateTask", "${response.data()}")
                 val result = response.data()?.createTask()
 
                 //In case of conflicts data returned from the server id null.
@@ -466,7 +418,6 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onResponse(response: Response<CreateUserMutation.Data>) {
-                Log.e("onResponse() updateTask", "${response.data()}")
                 val result = response.data()?.createUser()
 
                 //In case of conflicts data returned from the server id null.
@@ -487,42 +438,134 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun getAllUsers() {
-        Log.e(TAG, " ----- getAllUsers")
+    fun subscriptionNewTask() {
+        val subscription = NewTaskSubscription()
+        val subscriptionCall = Utils.getApolloClient(this)
+            ?.subscribe(subscription)
 
-        FindAllUsersQuery.builder()?.build()?.let {
-            Utils.getApolloClient(this)?.query(it)
-                ?.responseFetcher(ApolloResponseFetchers.CACHE_FIRST)
-                ?.enqueue(object : ApolloCall.Callback<FindAllUsersQuery.Data>() {
-
-                    override fun onFailure(e: ApolloException) {
-                        e.printStackTrace()
-                        Log.e(TAG, "----$e ")
-                    }
-
-                    override fun onResponse(response: Response<FindAllUsersQuery.Data>) {
-                        Log.e(TAG, "on Response : response.data ${response.data()}")
-                        val result = response.data()?.findAllUsers()
-
-
-                        result?.forEach {
-                            val title = it.title()
-                            val email = it.email()
-                            val taskId = it.taskId()
-                            val firstName = it.firstName()
-                            val lastName = it.lastName()
-                            Log.e("${TAG}10", "$title")
-                            Log.e("${TAG}11", "$email")
-                            Log.e("${TAG}12", "$taskId")
-                            Log.e("${TAG}13", "$firstName")
-                            // UI
+        disposables.add(
+            Rx2Apollo.from<NewTaskSubscription.Data>(subscriptionCall!!)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(
+                    object : DisposableSubscriber<Response<NewTaskSubscription.Data>>() {
+                        override fun onNext(response: Response<NewTaskSubscription.Data>) {
+                            val res = response.data()?.newTask()
+                            res?.let {
+                            }
                         }
-                        runOnUiThread {
-                            //
+
+                        override fun onError(e: Throwable) {
+                            Log.e(TAG, e.message, e)
+                        }
+
+                        override fun onComplete() {
+                            Log.e(TAG, "Subscription new task added exhausted")
                         }
                     }
-                })
+                )
+        )
+    }
+
+    fun subscriptionUpdateTask() {
+
+        val subscription = UpdatedTaskSubscription()
+        val subscriptionCall = Utils.getApolloClient(this)
+            ?.subscribe(subscription)
+
+        disposables.add(Rx2Apollo.from<UpdatedTaskSubscription.Data>(subscriptionCall!!)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeWith(
+                object : DisposableSubscriber<Response<UpdatedTaskSubscription.Data>>() {
+                    override fun onNext(response: Response<UpdatedTaskSubscription.Data>) {
+                        val res = response.data()?.updatedTask()
+                        res?.let {
+                            Log.e(TAG, " inside subscriptionUpdateTask ${it.title()} mutated upon updating")
+                        }
+                    }
+
+                    override fun onError(e: Throwable) {
+                        Log.e(TAG, e.message, e)
+                    }
+
+                    override fun onComplete() {
+                        Log.e(TAG, "subscriptionUpdateTask exhausted")
+                    }
+                }
+            )
+        )
+    }
+
+    fun subscriptionNewUser() {
+        val subscription = NewUserSubscription()
+        val subscriptionCall = Utils.getApolloClient(this)
+            ?.subscribe(subscription)
+
+        disposables.add(
+            Rx2Apollo.from<NewUserSubscription.Data>(subscriptionCall!!)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(
+                    object : DisposableSubscriber<Response<NewUserSubscription.Data>>() {
+                        override fun onNext(response: Response<NewUserSubscription.Data>) {
+                            val res = response.data()?.newUser()
+                            res?.let {
+                                Log.e(TAG, " inside subscriptionNewUser ${it.title()} mutated upon new title")
+                            }
+                        }
+
+                        override fun onError(e: Throwable) {
+                            Log.e(TAG, e.message, e)
+                        }
+
+                        override fun onComplete() {
+                            Log.e(TAG, "Subscription new user added exhausted")
+                        }
+                    }
+                )
+        )
+    }
+
+    fun subscriptionUpdateUser() {
+
+        val subscription = UpdatedUserSubscription()
+        val subscriptionCall = Utils.getApolloClient(this)
+            ?.subscribe(subscription)
+
+        disposables.add(Rx2Apollo.from<UpdatedUserSubscription.Data>(subscriptionCall!!)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeWith(
+                object : DisposableSubscriber<Response<UpdatedUserSubscription.Data>>() {
+                    override fun onNext(response: Response<UpdatedUserSubscription.Data>) {
+
+                        val res = response.data()?.updatedUser()
+                        res?.let {
+                            Log.e(TAG, " inside subscriptionUpdateUser ${it.title()} mutated upon updating")
+                        }
+                    }
+
+                    override fun onError(e: Throwable) {
+                        Log.e(TAG, e.message, e)
+                    }
+
+                    override fun onComplete() {
+                        Log.e(TAG, "subscriptionUpdateUser exhausted")
+                    }
+                }
+            )
+        )
+    }
+
+    override fun onStart() {
+        if (Offline.isNetwork()) {
+            subscriptionNewTask()
+            subscriptionNewUser()
+            subscriptionUpdateTask()
+            subscriptionUpdateUser()
         }
+        super.onStart()
     }
 
     override fun onDestroy() {

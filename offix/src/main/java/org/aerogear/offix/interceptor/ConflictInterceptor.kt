@@ -33,11 +33,7 @@ class ConflictInterceptor(private val conflictResolutionImpl: ConflictResolution
         dispatcher: Executor,
         callBack: ApolloInterceptor.CallBack
     ) {
-        if (request.operation is Mutation) {
-            queueCallback.addLast(callBack)
-        }
         Log.d("$TAG 1", "${request.operation}")
-        Log.d(TAG, "Size of queue callback list which stores all mutations ${queueCallback.size}")
 
         /* Check is the network connection is there or not.
          */
@@ -47,6 +43,7 @@ class ConflictInterceptor(private val conflictResolutionImpl: ConflictResolution
              */
             if (request.operation is Mutation) {
                 Offline.requestList.add(request)
+                queueCallback.add(callBack)
             }
             Log.d(TAG, "SIZE OF Request LIST : ${Offline.requestList.size}")
         } else {
@@ -66,7 +63,7 @@ class ConflictInterceptor(private val conflictResolutionImpl: ConflictResolution
                when the user was offline.
              */
             if (Offline.requestList.isNotEmpty()) {
-                chain.proceedAsync(request, dispatcher, OffixConflictCallback(conflictResolutionImpl))
+                chain.proceedAsync(request, dispatcher, OffixConflictCallback(conflictResolutionImpl, callBack))
                 Log.d("$TAG 100", "Net comes and requestList is not empty: ${Offline.requestList.size}")
                 /* When user comes from offline to online, we wait for the user to perform any mutation.
                    Now along with the mutation performed by the user, we fetch the mutation requests stored in the list and
@@ -76,11 +73,11 @@ class ConflictInterceptor(private val conflictResolutionImpl: ConflictResolution
 
                 Offline.requestList.forEach {
                     Log.d("$TAG", "-------")
-                    chain.proceedAsync(it, dispatcher, OfflineCallback(it))
+                    chain.proceedAsync(it, dispatcher, OfflineCallback(it, queueCallback.removeFirst()))
                 }
             } else {
                 Log.d("$TAG 200", "--------")
-                chain.proceedAsync(request, dispatcher, OffixConflictCallback(conflictResolutionImpl))
+                chain.proceedAsync(request, dispatcher, OffixConflictCallback(conflictResolutionImpl, callBack))
             }
         }
     }
@@ -92,13 +89,18 @@ class ConflictInterceptor(private val conflictResolutionImpl: ConflictResolution
     /*
     Callback class which handles conflicts.
      */
-    inner class OffixConflictCallback(val conflictResolutionImpl: ConflictResolutionInterface) :
+    inner class OffixConflictCallback(
+        val conflictResolutionImpl: ConflictResolutionInterface,
+        callBack: ApolloInterceptor.CallBack
+    ) :
         ApolloInterceptor.CallBack {
         private val TAG = javaClass.simpleName
-        val userCallback = queueCallback.removeFirst()
+        //        val userCallback = queueCallback.removeFirst()
+        val userCallback = callBack
 
         override fun onResponse(response: ApolloInterceptor.InterceptorResponse) {
-            Log.d(TAG, "OffixConflictCallback : Size of OfflineCallback list ${queueCallback.size}")
+//            Log.d(TAG, "OffixConflictCallback : Size of OfflineCallback list ${queueCallback.size}")
+            Log.d(TAG, "OffixConflictCallback : response ****** ${response}")
 
             /* Check if the conflict is present in the response of not using the ConflictResolutionHandler class.
              */
@@ -137,12 +139,17 @@ class ConflictInterceptor(private val conflictResolutionImpl: ConflictResolution
     /*
     Callbacks class which handles offline requests.
      */
-    inner class OfflineCallback(val request: ApolloInterceptor.InterceptorRequest) : ApolloInterceptor.CallBack {
+    inner class OfflineCallback(
+        val request: ApolloInterceptor.InterceptorRequest,
+        callBack: ApolloInterceptor.CallBack
+    ) : ApolloInterceptor.CallBack {
         val TAG = javaClass.simpleName
-        val userOfflineCallback = queueCallback.removeFirst()
+        //        val userOfflineCallback = queueCallback.removeFirst()
+        val userOfflineCallback = callBack
+
         override fun onResponse(response: ApolloInterceptor.InterceptorResponse) {
             Log.d(TAG, "onResponse()")
-            Log.d(TAG, "OfflineCallback: Size of OfflineCallback list--- ${queueCallback.size}")
+//            Log.d(TAG, "OfflineCallback: Size of OfflineCallback list--- ${queueCallback.size}")
             Log.d(TAG, "SIZE OF Request LIST in OfflineCallback ****: ${Offline.requestList.size}")
             userOfflineCallback.onResponse(response)
             Offline.requestList.remove(request)
