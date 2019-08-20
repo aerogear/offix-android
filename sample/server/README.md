@@ -8,9 +8,9 @@ The project has been created using `graphback`. Run the project using the follow
 - Generate resources(schema and resolvers) and create database
 ```
 graphback generate
-graphback db
+npm run build
 ```
 - Start the server
 ```
-npm start
+npm run start
 ```
