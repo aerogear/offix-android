@@ -14,7 +14,11 @@ import com.apollographql.apollo.ApolloQueryWatcher
 import com.apollographql.apollo.api.Response
 import com.apollographql.apollo.exception.ApolloException
 import com.apollographql.apollo.fetcher.ApolloResponseFetchers
+import com.apollographql.apollo.rx2.Rx2Apollo
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.schedulers.Schedulers
+import io.reactivex.subscribers.DisposableSubscriber
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.alert_update_task.view.*
 import kotlinx.android.synthetic.main.alert_update_user.view.*
@@ -158,6 +162,13 @@ class MainActivity : AppCompatActivity() {
         recycler_view.adapter = taskAdapter
 
         getTasks()
+
+        if (Offline.isNetwork()) {
+            subscriptionNewTask()
+            subscriptionNewUser()
+            subscriptionUpdateTask()
+            subscriptionUpdateUser()
+        }
 
         pull_to_refresh.setOnRefreshListener {
             doYourUpdate()
@@ -485,6 +496,220 @@ class MainActivity : AppCompatActivity() {
                 Toast.LENGTH_LONG
             ).show()
         }
+    }
+
+    fun subscriptionNewTask() {
+        val subscription = NewTaskSubscription()
+        val subscriptionCall = Utils.getApolloClient(this)
+            ?.subscribe(subscription)
+
+        disposables.add(
+            Rx2Apollo.from<NewTaskSubscription.Data>(subscriptionCall!!)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(
+                    object : DisposableSubscriber<Response<NewTaskSubscription.Data>>() {
+                        override fun onNext(response: Response<NewTaskSubscription.Data>) {
+
+                            val res = response.data()?.newTask()
+                            res?.let {
+
+                                Log.e(TAG, " inside subscriptionNewTask ${it.title()} mutated upon new title")
+                                //
+                                //                            runOnUiThread {
+                                //                                tasksList.add(Task(it.title(), it.description(), it.id().toInt(), it.version()!!))
+                                //                                taskAdapter.notifyDataSetChanged()
+                                //                            }
+                            }
+                            runOnUiThread {
+                                Log.e(TAG, " subscriptionNewTask :Response recived")
+                                Toast.makeText(
+                                    this@MainActivity,
+                                    "Subscription new task added response received",
+                                    Toast.LENGTH_SHORT
+                                )
+                                    .show()
+                            }
+                        }
+
+                        override fun onError(e: Throwable) {
+                            Log.e(TAG, e.message, e)
+                            Toast.makeText(this@MainActivity, "Subscription new task added failure", Toast.LENGTH_SHORT)
+                                .show()
+                        }
+
+                        override fun onComplete() {
+                            Log.d(TAG, "Subscription new task added exhausted")
+                            Toast.makeText(
+                                this@MainActivity,
+                                "Subscription new task added complete",
+                                Toast.LENGTH_SHORT
+                            )
+                                .show()
+                        }
+                    }
+                )
+        )
+    }
+
+    fun subscriptionUpdateTask() {
+
+        val subscription = UpdatedTaskSubscription()
+        val subscriptionCall = Utils.getApolloClient(this)
+            ?.subscribe(subscription)
+
+        disposables.add(Rx2Apollo.from<UpdatedTaskSubscription.Data>(subscriptionCall!!)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeWith(
+                object : DisposableSubscriber<Response<UpdatedTaskSubscription.Data>>() {
+                    override fun onNext(response: Response<UpdatedTaskSubscription.Data>) {
+
+                        val res = response.data()?.updatedTask()
+                        res?.let {
+
+                            Log.e(TAG, " inside subscriptionUpdateTask ${it.title()} mutated upon updating")
+                            Log.e(TAG, " inside subscriptionUpdateTask ${res.title()}")
+//
+//                            runOnUiThread {
+//                                Log.e(TAG, " inside subscription1  *** ${it.title()} mutated upon updating")
+//                                val tasktoberemoved =
+//                                Task(it.title(), it.description(), it.id().toInt(), it.version()!! - 1)
+//                                noteslist.remove(tasktoberemoved)
+//                                noteslist.add(Task(it.title(), it.description(), it.id().toInt(), it.version()!!))
+//                                taskAdapter.notifyDataSetChanged()
+//                            }
+                        }
+
+                        Toast.makeText(
+                            this@MainActivity,
+                            "subscriptionUpdateTask response received",
+                            Toast.LENGTH_SHORT
+                        )
+                            .show()
+                    }
+
+                    override fun onError(e: Throwable) {
+                        Log.e(TAG, e.message, e)
+                        Toast.makeText(this@MainActivity, "subscriptionUpdateTask failure", Toast.LENGTH_SHORT)
+                            .show()
+                    }
+
+                    override fun onComplete() {
+                        Log.d(TAG, "subscriptionUpdateTask exhausted")
+                        Toast.makeText(this@MainActivity, "subscriptionUpdateTask complete", Toast.LENGTH_SHORT)
+                            .show()
+                    }
+                }
+            )
+        )
+    }
+
+    fun subscriptionNewUser() {
+        val subscription = NewUserSubscription()
+        val subscriptionCall = Utils.getApolloClient(this)
+            ?.subscribe(subscription)
+
+        disposables.add(
+            Rx2Apollo.from<NewUserSubscription.Data>(subscriptionCall!!)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(
+                    object : DisposableSubscriber<Response<NewUserSubscription.Data>>() {
+                        override fun onNext(response: Response<NewUserSubscription.Data>) {
+
+                            val res = response.data()?.newUser()
+                            res?.let {
+
+                                Log.e(TAG, " inside subscriptionNewUser ${it.title()} mutated upon new title")
+                                //
+                                //                            runOnUiThread {
+                                //                                tasksList.add(Task(it.title(), it.description(), it.id().toInt(), it.version()!!))
+                                //                                taskAdapter.notifyDataSetChanged()
+                                //                            }
+                            }
+                            runOnUiThread {
+                                Log.e(TAG, " subscriptionNewUser :Response recived")
+                                Toast.makeText(
+                                    this@MainActivity,
+                                    "Subscription new user added response received",
+                                    Toast.LENGTH_SHORT
+                                )
+                                    .show()
+                            }
+                        }
+
+                        override fun onError(e: Throwable) {
+                            Log.e(TAG, e.message, e)
+                            Toast.makeText(this@MainActivity, "Subscription new user added failure", Toast.LENGTH_SHORT)
+                                .show()
+                        }
+
+                        override fun onComplete() {
+                            Log.d(TAG, "Subscription new user added exhausted")
+                            Toast.makeText(
+                                this@MainActivity,
+                                "Subscription new user added complete",
+                                Toast.LENGTH_SHORT
+                            )
+                                .show()
+                        }
+                    }
+                )
+        )
+    }
+
+    fun subscriptionUpdateUser() {
+
+        val subscription = UpdatedUserSubscription()
+        val subscriptionCall = Utils.getApolloClient(this)
+            ?.subscribe(subscription)
+
+        disposables.add(Rx2Apollo.from<UpdatedUserSubscription.Data>(subscriptionCall!!)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeWith(
+                object : DisposableSubscriber<Response<UpdatedUserSubscription.Data>>() {
+                    override fun onNext(response: Response<UpdatedUserSubscription.Data>) {
+
+                        val res = response.data()?.updatedUser()
+                        res?.let {
+
+                            Log.e(TAG, " inside subscriptionUpdateUser ${it.title()} mutated upon updating")
+                            Log.e(TAG, " inside subscriptionUpdateUser ${res.title()}")
+//
+//                            runOnUiThread {
+//                                Log.e(TAG, " inside subscription1  *** ${it.title()} mutated upon updating")
+//                                val tasktoberemoved =
+//                                Task(it.title(), it.description(), it.id().toInt(), it.version()!! - 1)
+//                                noteslist.remove(tasktoberemoved)
+//                                noteslist.add(Task(it.title(), it.description(), it.id().toInt(), it.version()!!))
+//                                taskAdapter.notifyDataSetChanged()
+//                            }
+                        }
+
+                        Toast.makeText(
+                            this@MainActivity,
+                            "subscriptionUpdateUser response received",
+                            Toast.LENGTH_SHORT
+                        )
+                            .show()
+                    }
+
+                    override fun onError(e: Throwable) {
+                        Log.e(TAG, e.message, e)
+                        Toast.makeText(this@MainActivity, "subscriptionUpdateUser failure", Toast.LENGTH_SHORT)
+                            .show()
+                    }
+
+                    override fun onComplete() {
+                        Log.d(TAG, "subscriptionUpdateUser exhausted")
+                        Toast.makeText(this@MainActivity, "subscriptionUpdateUser complete", Toast.LENGTH_SHORT)
+                            .show()
+                    }
+                }
+            )
+        )
     }
 
     fun getAllUsers() {
