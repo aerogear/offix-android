@@ -27,6 +27,7 @@ class UserConflictResolutionHandler(val context: Context) : ConflictResolutionIn
         operationType: String
     ) {
         /*Version based approach of Conflict Resolution, for instance.
+          You can resolve them based on your logics.
         */
         val serverMap = serverState
         val containsVersion = serverMap.containsKey("version")
@@ -37,42 +38,17 @@ class UserConflictResolutionHandler(val context: Context) : ConflictResolutionIn
             /* You can run a switch case on the operation type to detect which type of mutation is it in which conflict occured
                and accordingly create an object of that mutation, resolve conflict and make a server call with it.
              */
-            when (operationType) {
-                /*
-                According to the schema structure, used a version based approach of resolving conflicts.
-                If operationType is "UpdateTaskMutation" perform the following steps to resolve conflicts.
-                 */
+            when (operationType) {           
                 "UpdateTaskMutation" -> {
-                 
-                    val input = TaskInput.builder().title(clientState["title"].toString()).version(versionAfterConflict)
-                        .description(clientState["description"].toString()).status("test").build()
-                   
-                    var mutation = UpdateTaskMutation.builder().id(clientState["id"].toString()).input(input).build()
-                   
-                    val mutationCall = Utils.getApolloClient(context)?.mutate(mutation)
-
-                    val callback = object : ApolloCall.Callback<UpdateTaskMutation.Data>() {
-                        override fun onFailure(e: ApolloException) {                       
-                            e.printStackTrace()
-                        }
-
-                        override fun onResponse(response: Response<UpdateTaskMutation.Data>) {
-                            Log.e("onResponse() updateTask", "${response.data()?.updateTask()?.title()}")
-                            val result = response.data()?.updateTask()
-                            //In case of conflicts, data returned from the server is null.
-                            result?.let {
-                                Log.e(TAG, "onResponse-UpdateTask- $it")
-                            }
-                        }
-                    }
-                    mutationCall?.enqueue(callback)
-                }
-                
-                "UpdateUserMutation" -> {
-                    /* Similar for UpdateUserMutation
-                    1. Get all the fields from the clientState.
+                    /* 
+                    1. Get the necessary fields from the clientState.
                     2. Create an object of mutation.
                     3. Again make a call to the server.
+                    */
+                }              
+                "UpdateUserMutation" -> {
+                    /* 
+                     Resolve conflicts and make a call to the server.
                     */
                 }
             }
