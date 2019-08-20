@@ -184,7 +184,7 @@ class MainActivity : AppCompatActivity() {
         Utils.getApolloClient(this)?.query(
             FindAllTasksQuery.builder().build()
         )?.watcher()
-            ?.refetchResponseFetcher(ApolloResponseFetchers.CACHE_FIRST)
+            ?.refetchResponseFetcher(ApolloResponseFetchers.NETWORK_FIRST)
             ?.enqueueAndWatch(object : ApolloCall.Callback<FindAllTasksQuery.Data>() {
                 override fun onFailure(e: ApolloException) {
                     e.printStackTrace()
@@ -220,6 +220,8 @@ class MainActivity : AppCompatActivity() {
                 }
             })
 
+//        getTasks()
+
         pull_to_refresh.isRefreshing = false
     }
 
@@ -230,7 +232,7 @@ class MainActivity : AppCompatActivity() {
 
         FindAllTasksQuery.builder()?.build()?.let {
             Utils.getApolloClient(this)?.query(it)
-                ?.responseFetcher(ApolloResponseFetchers.CACHE_FIRST)
+                ?.responseFetcher(ApolloResponseFetchers.NETWORK_FIRST)
                 ?.enqueue(object : ApolloCall.Callback<FindAllTasksQuery.Data>() {
 
                     override fun onFailure(e: ApolloException) {
