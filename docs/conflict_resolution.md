@@ -49,6 +49,29 @@ class UserConflictResolutionHandler(val context: Context) : ConflictResolutionIn
                     2. Create an object of mutation.
                     3. Again make a call to the server.
                     */
+                      
+                    val input = TaskInput.builder().title(clientState["title"].toString()).version(versionAfterConflict)
+                        .description(clientState["description"].toString()).status("test").build()
+                   
+                    var mutation = UpdateTaskMutation.builder().id(clientState["id"].toString()).input(input).build()
+                   
+                    val mutationCall = apolloclient.mutate(mutation)
+
+                    val callback = object : ApolloCall.Callback<UpdateTaskMutation.Data>() {
+                        override fun onFailure(e: ApolloException) {                       
+                            e.printStackTrace()
+                        }
+                        
+                     override fun onResponse(response: Response<UpdateTaskMutation.Data>) {                         
+                            val result = response.data()?.updateTask()
+                            //In case of conflicts, data returned from the server is null.
+                            result?.let {
+                              //Perform UI Bindings here.
+                            }
+                        }
+                    }
+                    
+                  mutationCall?.enqueue(callback)
                 }              
                 "UpdateUserMutation" -> {
                     /* 
