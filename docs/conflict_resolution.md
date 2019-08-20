@@ -16,7 +16,6 @@ UserConflictResolutionHandler extends ConflictResolutionInterface.
 Here the user provides the custom implementation of resolving conflicts.
  */
 class UserConflictResolutionHandler(val context: Context) : ConflictResolutionInterface {
-    val TAG = javaClass.simpleName
 
     /*User get the server state and the client state.
      This function resolves the conflicts based on the user business logic.
