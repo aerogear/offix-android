@@ -12,6 +12,7 @@
   - npm run start
 - This will start your server. 
 
+
 ## 2. Android Setup
 
 - Clone [this](https://github.com/aerogear/offix-android.git) repository. 
@@ -36,3 +37,6 @@ For **maven**, add the following dependency: <br/>
 	<type>pom</type>
 </dependency>
 ```
+
+
+#### Note: The library works with the offix-sever that is node.js based and [conflict protocol](https://offix.dev/#/ref-conflict-server?id=structure-of-the-conflict-error) is descibed on [offix.dev](https://offix.dev/)
