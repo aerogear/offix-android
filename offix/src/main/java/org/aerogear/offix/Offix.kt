@@ -4,19 +4,15 @@ package org.aerogear.offix
 
 import android.util.Log
 import androidx.work.*
-import com.apollographql.apollo.ApolloCall
-import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.api.Input
 import com.apollographql.apollo.api.Mutation
 import com.apollographql.apollo.api.Operation
-import com.apollographql.apollo.api.Response
-import com.apollographql.apollo.exception.ApolloException
-import org.aerogear.offix.interfaces.ResponseCallback
 import org.json.JSONObject
+
 /*
 conflictedMutationClass variable stores the name of the mutation class in which conflict has occurred.
  */
-lateinit var conflictedMutationClass: String
+var conflictedMutationClass=""
 
 /*
  This function takes in an object of Mutation<D,T,V> and returns an object of com.aerogear.offix.persistence.Mutation.
@@ -40,31 +36,6 @@ fun getPersistenceMutation(mutation: Mutation<Operation.Data, Any, Operation.Var
         responseClassName
     )
     return mutationDbObj
-}
-
-/* scheduleWorker() takes in a worker class and schedule a work manager to replicate all the
-   mutations stored in database to the server when the app is in background, i.e when the app is closed.
-   @param Class of type worker
-   @return unit
- */
-fun <T : Worker> scheduleWorker(workerClass: Class<T>) {
-    Log.d("Extension sWorker", "Inside worker")
-
-    /* Set the constraints to check the network connection.
-     */
-    val constraints = Constraints.Builder()
-        .setRequiredNetworkType(NetworkType.CONNECTED)
-        .build()
-
-    /* Create an object of oneTimeWorkRequest.
-    */
-    val oneTimeWorkRequest = OneTimeWorkRequest.Builder(workerClass)
-        .setConstraints(constraints)
-        .build()
-
-    /* Get an instance of WorkManager and pass the oneTimeWorkRequest to it.
-    */
-    WorkManager.getInstance().enqueue(oneTimeWorkRequest)
 }
 
 /*

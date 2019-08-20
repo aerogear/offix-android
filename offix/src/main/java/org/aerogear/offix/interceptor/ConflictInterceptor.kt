@@ -91,12 +91,10 @@ class ConflictInterceptor(private val conflictResolutionImpl: ConflictResolution
      */
     inner class OffixConflictCallback(
         val conflictResolutionImpl: ConflictResolutionInterface,
-        callBack: ApolloInterceptor.CallBack
+        val callBack: ApolloInterceptor.CallBack
     ) :
         ApolloInterceptor.CallBack {
         private val TAG = javaClass.simpleName
-        //        val userCallback = queueCallback.removeFirst()
-        val userCallback = callBack
 
         override fun onResponse(response: ApolloInterceptor.InterceptorResponse) {
 //            Log.d(TAG, "OffixConflictCallback : Size of OfflineCallback list ${queueCallback.size}")
@@ -118,7 +116,7 @@ class ConflictInterceptor(private val conflictResolutionImpl: ConflictResolution
 
                 conflictResolutionImpl.resolveConflict(serverStateMap, clientStateMap, conflictedMutationClass)
             } else {
-                userCallback.onResponse(response)
+                callBack.onResponse(response)
             }
         }
 
@@ -131,7 +129,7 @@ class ConflictInterceptor(private val conflictResolutionImpl: ConflictResolution
         }
 
         override fun onFailure(e: ApolloException) {
-            userCallback.onFailure(e)
+            callBack.onFailure(e)
             Log.d(TAG, "onFailure()*******")
         }
     }
@@ -141,17 +139,15 @@ class ConflictInterceptor(private val conflictResolutionImpl: ConflictResolution
      */
     inner class OfflineCallback(
         val request: ApolloInterceptor.InterceptorRequest,
-        callBack: ApolloInterceptor.CallBack
+        val callBack: ApolloInterceptor.CallBack
     ) : ApolloInterceptor.CallBack {
         val TAG = javaClass.simpleName
-        //        val userOfflineCallback = queueCallback.removeFirst()
-        val userOfflineCallback = callBack
 
         override fun onResponse(response: ApolloInterceptor.InterceptorResponse) {
             Log.d(TAG, "onResponse()")
 //            Log.d(TAG, "OfflineCallback: Size of OfflineCallback list--- ${queueCallback.size}")
             Log.d(TAG, "SIZE OF Request LIST in OfflineCallback ****: ${Offline.requestList.size}")
-            userOfflineCallback.onResponse(response)
+            callBack.onResponse(response)
             Offline.requestList.remove(request)
         }
 
