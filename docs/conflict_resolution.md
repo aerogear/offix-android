@@ -2,7 +2,7 @@
 
 ### Steps to support Conflict Resolution in your app:
 
-- Create a class, let say `UserConflictResolutionHandler` which extends `ConfliceResolutionInterface` provided by the library.
+- Create a class, let say `UserConflictResolutionHandler` which implements `ConfliceResolutionInterface` provided by the library.
 - Override the `resolveConflict()` method of the interface in your class.
 - You get the **`server state`** and the **`client state`** data associated with that mutation in which conflict occurred.
 - You also get the **`operation type`** of the conflicted mutation. Run a switch case on the operation type to detect which type of mutation is it in which conflict occured and accordingly create an object of that mutation while resolving conflicts.
