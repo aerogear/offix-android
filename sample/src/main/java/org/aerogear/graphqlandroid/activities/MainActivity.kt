@@ -49,7 +49,6 @@ class MainActivity : AppCompatActivity() {
             .build()
     }
     private val disposables = CompositeDisposable()
-    val watchResponse = AtomicReference<Response<FindAllTasksQuery.Data>>()
     var apolloQueryWatcher: ApolloQueryWatcher<FindAllTasksQuery.Data>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -67,7 +66,7 @@ class MainActivity : AppCompatActivity() {
                             LayoutInflater.from(this).inflate(R.layout.alertfrag_create_tasks, null, false)
                         val customAlert: AlertDialog = AlertDialog.Builder(this)
                             .setView(inflatedView)
-                            .setTitle("Create a new Note")
+                            .setTitle("Create a new Task")
                             .setNegativeButton("No") { dialog, which ->
                                 dialog.dismiss()
                             }
@@ -163,66 +162,15 @@ class MainActivity : AppCompatActivity() {
 
         getTasks()
 
-        if (Offline.isNetwork()) {
-            subscriptionNewTask()
-            subscriptionNewUser()
-            subscriptionUpdateTask()
-            subscriptionUpdateUser()
-        }
-
         pull_to_refresh.setOnRefreshListener {
-            doYourUpdate()
+            doSampleUpdate()
             pull_to_refresh.isRefreshing = false
         }
     }
 
-    private fun doYourUpdate() {
-
-        Log.e(TAG, " -*-*-*- doYourUpdate")
-        tasksList.clear()
-
-        Utils.getApolloClient(this)?.query(
-            FindAllTasksQuery.builder().build()
-        )?.watcher()
-            ?.refetchResponseFetcher(ApolloResponseFetchers.NETWORK_FIRST)
-            ?.enqueueAndWatch(object : ApolloCall.Callback<FindAllTasksQuery.Data>() {
-                override fun onFailure(e: ApolloException) {
-                    e.printStackTrace()
-                    Log.e(TAG, " doYourUpdate onFailure----$e ")
-                }
-
-                override fun onResponse(response: Response<FindAllTasksQuery.Data>) {
-
-                    watchResponse.set(response)
-
-                    Log.e(TAG, "on Response doYourUpdate: Watcher ${response.data()}")
-
-                    val result = watchResponse.get()?.data()?.findAllTasks()
-                    result?.forEach {
-                        val title = it.title()
-                        val desc = it.description()
-                        val id = it.id()
-                        var firstName = ""
-                        var lastName = ""
-                        it.assignedTo()?.let {
-                            firstName = it.firstName()
-                            lastName = it.lastName()
-                        } ?: kotlin.run {
-                            firstName = "User Not assigned"
-                            lastName = ""
-                        }
-                        val taskOutput = UserOutput(title, desc, id.toInt(), firstName, lastName)
-                        runOnUiThread {
-                            tasksList.add(taskOutput)
-                            taskAdapter.notifyDataSetChanged()
-                        }
-                    }
-                }
-            })
-
-//        getTasks()
-
-        pull_to_refresh.isRefreshing = false
+    fun doSampleUpdate() {
+        Log.e(TAG, " --------------- doSampleUpdate")
+        getTasks()
     }
 
     fun getTasks() {
@@ -271,14 +219,12 @@ class MainActivity : AppCompatActivity() {
     fun getUser(id: Int): NamePair {
         Log.e("${TAG} Inside getUser", "TaskId: $id")
         var namePair = NamePair("", "")
-
         val userFilter = UserFilter.builder().id(id.toString()).build()
         FindUsersQuery.builder().fields(userFilter).build()?.let {
             Utils.getApolloClient(this)?.query(it)?.responseFetcher(ApolloResponseFetchers.CACHE_FIRST)
                 ?.enqueue(object : ApolloCall.Callback<FindUsersQuery.Data>() {
                     override fun onFailure(e: ApolloException) {
                         e.printStackTrace()
-                        Log.e(TAG, "getUser----$e ")
                     }
 
                     override fun onResponse(response: Response<FindUsersQuery.Data>) {
@@ -288,8 +234,6 @@ class MainActivity : AppCompatActivity() {
                         result?.forEach {
                             var firstName = it.firstName()
                             var lastName = it.lastName()
-                            Log.e("${TAG}100", "$title")
-                            Log.e("${TAG}138", firstName)
                             namePair.fName = firstName
                             namePair.lName = lastName
                         }
@@ -331,7 +275,6 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onResponse(response: Response<UpdateTaskMutation.Data>) {
-                Log.e("onResponse() updateTask", "${response.data()?.updateTask()?.title()}")
                 val result = response.data()?.updateTask()
 
                 //In case of conflicts data returned from the server id null.
@@ -339,7 +282,6 @@ class MainActivity : AppCompatActivity() {
                     Log.e(TAG, "onResponse-UpdateTask- $it")
                 }
             }
-
         }
         mutationCall?.enqueue(callback)
         if (Offline.isNetwork()) {
@@ -387,7 +329,6 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onResponse(response: Response<UpdateUserMutation.Data>) {
-                Log.e("onResponse() updateTask", "${response.data()?.updateUser()?.title()}")
                 val result = response.data()?.updateUser()
 
                 //In case of conflicts data returned from the server id null.
@@ -395,7 +336,6 @@ class MainActivity : AppCompatActivity() {
                     Log.e(TAG, "onResponse-UpdateTask- $it")
                 }
             }
-
         }
         mutationCall?.enqueue(callback)
         if (Offline.isNetwork()) {
@@ -434,7 +374,6 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onResponse(response: Response<CreateTaskMutation.Data>) {
-                Log.e("onResponse() updateTask", "${response.data()}")
                 val result = response.data()?.createTask()
 
                 //In case of conflicts data returned from the server id null.
@@ -479,7 +418,6 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onResponse(response: Response<CreateUserMutation.Data>) {
-                Log.e("onResponse() updateTask", "${response.data()}")
                 val result = response.data()?.createUser()
 
                 //In case of conflicts data returned from the server id null.
@@ -512,42 +450,17 @@ class MainActivity : AppCompatActivity() {
                 .subscribeWith(
                     object : DisposableSubscriber<Response<NewTaskSubscription.Data>>() {
                         override fun onNext(response: Response<NewTaskSubscription.Data>) {
-
                             val res = response.data()?.newTask()
                             res?.let {
-
-                                Log.e(TAG, " inside subscriptionNewTask ${it.title()} mutated upon new title")
-                                //
-                                //                            runOnUiThread {
-                                //                                tasksList.add(Task(it.title(), it.description(), it.id().toInt(), it.version()!!))
-                                //                                taskAdapter.notifyDataSetChanged()
-                                //                            }
-                            }
-                            runOnUiThread {
-                                Log.e(TAG, " subscriptionNewTask :Response recived")
-                                Toast.makeText(
-                                    this@MainActivity,
-                                    "Subscription new task added response received",
-                                    Toast.LENGTH_SHORT
-                                )
-                                    .show()
                             }
                         }
 
                         override fun onError(e: Throwable) {
                             Log.e(TAG, e.message, e)
-                            Toast.makeText(this@MainActivity, "Subscription new task added failure", Toast.LENGTH_SHORT)
-                                .show()
                         }
 
                         override fun onComplete() {
-                            Log.d(TAG, "Subscription new task added exhausted")
-                            Toast.makeText(
-                                this@MainActivity,
-                                "Subscription new task added complete",
-                                Toast.LENGTH_SHORT
-                            )
-                                .show()
+                            Log.e(TAG, "Subscription new task added exhausted")
                         }
                     }
                 )
@@ -566,41 +479,18 @@ class MainActivity : AppCompatActivity() {
             .subscribeWith(
                 object : DisposableSubscriber<Response<UpdatedTaskSubscription.Data>>() {
                     override fun onNext(response: Response<UpdatedTaskSubscription.Data>) {
-
                         val res = response.data()?.updatedTask()
                         res?.let {
-
                             Log.e(TAG, " inside subscriptionUpdateTask ${it.title()} mutated upon updating")
-                            Log.e(TAG, " inside subscriptionUpdateTask ${res.title()}")
-//
-//                            runOnUiThread {
-//                                Log.e(TAG, " inside subscription1  *** ${it.title()} mutated upon updating")
-//                                val tasktoberemoved =
-//                                Task(it.title(), it.description(), it.id().toInt(), it.version()!! - 1)
-//                                noteslist.remove(tasktoberemoved)
-//                                noteslist.add(Task(it.title(), it.description(), it.id().toInt(), it.version()!!))
-//                                taskAdapter.notifyDataSetChanged()
-//                            }
                         }
-
-                        Toast.makeText(
-                            this@MainActivity,
-                            "subscriptionUpdateTask response received",
-                            Toast.LENGTH_SHORT
-                        )
-                            .show()
                     }
 
                     override fun onError(e: Throwable) {
                         Log.e(TAG, e.message, e)
-                        Toast.makeText(this@MainActivity, "subscriptionUpdateTask failure", Toast.LENGTH_SHORT)
-                            .show()
                     }
 
                     override fun onComplete() {
-                        Log.d(TAG, "subscriptionUpdateTask exhausted")
-                        Toast.makeText(this@MainActivity, "subscriptionUpdateTask complete", Toast.LENGTH_SHORT)
-                            .show()
+                        Log.e(TAG, "subscriptionUpdateTask exhausted")
                     }
                 }
             )
@@ -619,42 +509,18 @@ class MainActivity : AppCompatActivity() {
                 .subscribeWith(
                     object : DisposableSubscriber<Response<NewUserSubscription.Data>>() {
                         override fun onNext(response: Response<NewUserSubscription.Data>) {
-
                             val res = response.data()?.newUser()
                             res?.let {
-
                                 Log.e(TAG, " inside subscriptionNewUser ${it.title()} mutated upon new title")
-                                //
-                                //                            runOnUiThread {
-                                //                                tasksList.add(Task(it.title(), it.description(), it.id().toInt(), it.version()!!))
-                                //                                taskAdapter.notifyDataSetChanged()
-                                //                            }
-                            }
-                            runOnUiThread {
-                                Log.e(TAG, " subscriptionNewUser :Response recived")
-                                Toast.makeText(
-                                    this@MainActivity,
-                                    "Subscription new user added response received",
-                                    Toast.LENGTH_SHORT
-                                )
-                                    .show()
                             }
                         }
 
                         override fun onError(e: Throwable) {
                             Log.e(TAG, e.message, e)
-                            Toast.makeText(this@MainActivity, "Subscription new user added failure", Toast.LENGTH_SHORT)
-                                .show()
                         }
 
                         override fun onComplete() {
-                            Log.d(TAG, "Subscription new user added exhausted")
-                            Toast.makeText(
-                                this@MainActivity,
-                                "Subscription new user added complete",
-                                Toast.LENGTH_SHORT
-                            )
-                                .show()
+                            Log.e(TAG, "Subscription new user added exhausted")
                         }
                     }
                 )
@@ -676,80 +542,30 @@ class MainActivity : AppCompatActivity() {
 
                         val res = response.data()?.updatedUser()
                         res?.let {
-
                             Log.e(TAG, " inside subscriptionUpdateUser ${it.title()} mutated upon updating")
-                            Log.e(TAG, " inside subscriptionUpdateUser ${res.title()}")
-//
-//                            runOnUiThread {
-//                                Log.e(TAG, " inside subscription1  *** ${it.title()} mutated upon updating")
-//                                val tasktoberemoved =
-//                                Task(it.title(), it.description(), it.id().toInt(), it.version()!! - 1)
-//                                noteslist.remove(tasktoberemoved)
-//                                noteslist.add(Task(it.title(), it.description(), it.id().toInt(), it.version()!!))
-//                                taskAdapter.notifyDataSetChanged()
-//                            }
                         }
-
-                        Toast.makeText(
-                            this@MainActivity,
-                            "subscriptionUpdateUser response received",
-                            Toast.LENGTH_SHORT
-                        )
-                            .show()
                     }
 
                     override fun onError(e: Throwable) {
                         Log.e(TAG, e.message, e)
-                        Toast.makeText(this@MainActivity, "subscriptionUpdateUser failure", Toast.LENGTH_SHORT)
-                            .show()
                     }
 
                     override fun onComplete() {
-                        Log.d(TAG, "subscriptionUpdateUser exhausted")
-                        Toast.makeText(this@MainActivity, "subscriptionUpdateUser complete", Toast.LENGTH_SHORT)
-                            .show()
+                        Log.e(TAG, "subscriptionUpdateUser exhausted")
                     }
                 }
             )
         )
     }
 
-    fun getAllUsers() {
-        Log.e(TAG, " ----- getAllUsers")
-
-        FindAllUsersQuery.builder()?.build()?.let {
-            Utils.getApolloClient(this)?.query(it)
-                ?.responseFetcher(ApolloResponseFetchers.CACHE_FIRST)
-                ?.enqueue(object : ApolloCall.Callback<FindAllUsersQuery.Data>() {
-
-                    override fun onFailure(e: ApolloException) {
-                        e.printStackTrace()
-                        Log.e(TAG, "----$e ")
-                    }
-
-                    override fun onResponse(response: Response<FindAllUsersQuery.Data>) {
-                        Log.e(TAG, "on Response : response.data ${response.data()}")
-                        val result = response.data()?.findAllUsers()
-
-
-                        result?.forEach {
-                            val title = it.title()
-                            val email = it.email()
-                            val taskId = it.taskId()
-                            val firstName = it.firstName()
-                            val lastName = it.lastName()
-                            Log.e("${TAG}10", "$title")
-                            Log.e("${TAG}11", "$email")
-                            Log.e("${TAG}12", "$taskId")
-                            Log.e("${TAG}13", "$firstName")
-                            // UI
-                        }
-                        runOnUiThread {
-                            //
-                        }
-                    }
-                })
+    override fun onStart() {
+        if (Offline.isNetwork()) {
+            subscriptionNewTask()
+            subscriptionNewUser()
+            subscriptionUpdateTask()
+            subscriptionUpdateUser()
         }
+        super.onStart()
     }
 
     override fun onDestroy() {
