@@ -8,7 +8,7 @@
 
 ## Introduction
 
-Offix extends capabilities of Apollo GraphQL providing fully featured Offline Workflow and Conflict Resolution for Android Platform. User can perform queries and mutations when offline and these would be automatically synced to the server when they come online. It also enables working with localy cached GraphQL compilant data without access to server. It will leverage capabilities of Apollo GraphQL cache do deliver seamless experience for querying data even when server side data is not reachable.
+Offix extends capabilities of Apollo GraphQL providing fully featured Offline Workflow and Conflict Resolution for Android Platform. User can perform queries and mutations when offline and these would be automatically synced to the server when they come online. It also enables working with locally cached GraphQL compliant data without access to server. It will leverage capabilities of Apollo GraphQL cache do deliver seamless experience for querying data even when server side data is not reachable.
 
 For more information about the Apollo and GraphQL please go to https://www.apollographql.com/
 ## Features 
