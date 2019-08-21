@@ -8,6 +8,8 @@ import com.apollographql.apollo.interceptor.ApolloInterceptor
 import com.apollographql.apollo.interceptor.ApolloInterceptorChain
 import org.aerogear.offix.ConflictResolutionHandler
 import org.aerogear.offix.Offline
+import org.aerogear.offix.callbacks.OffixConflictCallback
+import org.aerogear.offix.callbacks.OfflineCallback
 import org.aerogear.offix.conflictedMutationClass
 import org.aerogear.offix.interfaces.ConflictResolutionInterface
 import java.util.*
@@ -84,88 +86,5 @@ class ConflictInterceptor(private val conflictResolutionImpl: ConflictResolution
 
     override fun dispose() {
         Log.v(TAG, "Dispose called")
-    }
-
-    /*
-    Callback class which handles conflicts.
-     */
-    inner class OffixConflictCallback(
-        val conflictResolutionImpl: ConflictResolutionInterface,
-        callBack: ApolloInterceptor.CallBack
-    ) :
-        ApolloInterceptor.CallBack {
-        private val TAG = javaClass.simpleName
-        //        val userCallback = queueCallback.removeFirst()
-        val userCallback = callBack
-
-        override fun onResponse(response: ApolloInterceptor.InterceptorResponse) {
-//            Log.d(TAG, "OffixConflictCallback : Size of OfflineCallback list ${queueCallback.size}")
-            Log.d(TAG, "OffixConflictCallback : response ****** ${response}")
-
-            /* Check if the conflict is present in the response of not using the ConflictResolutionHandler class.
-             */
-            if (ConflictResolutionHandler().conflictPresent(response.parsedResponse)) {
-
-                Log.d("$TAG 100", "**********")
-                /* Parse the response from the server into a Map object and extract the serverState and clientState.
-                   Make an object of ServerClientData and add to the list.
-                */
-                val conflictInfo =
-                    (((response.parsedResponse.get().errors()[0] as Error).customAttributes()["extensions"] as Map<*, *>)["exception"] as Map<*, *>)["conflictInfo"] as Map<*, *>
-
-                val serverStateMap = conflictInfo["serverState"] as Map<String, Any>
-                val clientStateMap = conflictInfo["clientState"] as Map<String, Any>
-
-                conflictResolutionImpl.resolveConflict(serverStateMap, clientStateMap, conflictedMutationClass)
-            } else {
-                userCallback.onResponse(response)
-            }
-        }
-
-        override fun onFetch(sourceType: ApolloInterceptor.FetchSourceType?) {
-            Log.d(TAG, "onFetch()*******")
-        }
-
-        override fun onCompleted() {
-            Log.d(TAG, "onCompleted()*******")
-        }
-
-        override fun onFailure(e: ApolloException) {
-            userCallback.onFailure(e)
-            Log.d(TAG, "onFailure()*******")
-        }
-    }
-
-    /*
-    Callbacks class which handles offline requests.
-     */
-    inner class OfflineCallback(
-        val request: ApolloInterceptor.InterceptorRequest,
-        callBack: ApolloInterceptor.CallBack
-    ) : ApolloInterceptor.CallBack {
-        val TAG = javaClass.simpleName
-        //        val userOfflineCallback = queueCallback.removeFirst()
-        val userOfflineCallback = callBack
-
-        override fun onResponse(response: ApolloInterceptor.InterceptorResponse) {
-            Log.d(TAG, "onResponse()")
-//            Log.d(TAG, "OfflineCallback: Size of OfflineCallback list--- ${queueCallback.size}")
-            Log.d(TAG, "SIZE OF Request LIST in OfflineCallback ****: ${Offline.requestList.size}")
-            userOfflineCallback.onResponse(response)
-            Offline.requestList.remove(request)
-        }
-
-        override fun onFetch(sourceType: ApolloInterceptor.FetchSourceType?) {
-            Log.d(TAG, "onFetch()---------")
-        }
-
-        override fun onCompleted() {
-            Log.d(TAG, "onCompleted()--------")
-        }
-
-        override fun onFailure(e: ApolloException) {
-            Log.d(TAG, "onFailure()----------")
-            Log.d(TAG, "-- ${e.printStackTrace()}")
-        }
     }
 }
