@@ -5,8 +5,7 @@ import com.apollographql.apollo.exception.ApolloException
 import com.apollographql.apollo.interceptor.ApolloInterceptor
 import org.aerogear.offix.Offline
 
-/*
-Callbacks class which handles offline requests.
+/*Callbacks class which handles offline requests.
  */
 class OfflineCallback(
     val request: ApolloInterceptor.InterceptorRequest,

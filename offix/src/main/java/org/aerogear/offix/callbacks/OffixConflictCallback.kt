@@ -8,8 +8,7 @@ import org.aerogear.offix.ConflictResolutionHandler
 import org.aerogear.offix.conflictedMutationClass
 import org.aerogear.offix.interfaces.ConflictResolutionInterface
 
-/*
-Callback class which handles conflicts.
+/*Callback class which handles conflicts.
  */
 class OffixConflictCallback(
     val conflictResolutionImpl: ConflictResolutionInterface,
