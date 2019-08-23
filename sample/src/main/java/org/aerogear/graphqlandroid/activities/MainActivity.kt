@@ -42,12 +42,7 @@ class MainActivity : AppCompatActivity() {
     val taskAdapter by lazy {
         TaskAdapter(tasksList, this)
     }
-    val constraints by lazy {
-        Constraints.Builder()
-            .setRequiredNetworkType(NetworkType.CONNECTED)
-            .setRequiresBatteryNotLow(true)
-            .build()
-    }
+
     private val disposables = CompositeDisposable()
     var apolloQueryWatcher: ApolloQueryWatcher<FindAllTasksQuery.Data>? = null
 
@@ -73,8 +68,7 @@ class MainActivity : AppCompatActivity() {
                             .setPositiveButton("Yes") { dialog, which ->
                                 val title = inflatedView.etTitleTask.text.toString()
                                 val desc = inflatedView.etDescTask.text.toString()
-                                val version = inflatedView.etVerTask.text.toString()
-                                createtask(title, desc, version.toInt())
+                                createtask(title, desc)
                                 dialog.dismiss()
                             }
                             .create()
@@ -114,12 +108,10 @@ class MainActivity : AppCompatActivity() {
                             .setPositiveButton("Yes") { dialog, which ->
                                 val id = inflatedView.etId.text.toString()
                                 val titleEt = inflatedView.etTitle.text.toString()
-                                val versionEt = inflatedView.etVersion.text.toString()
                                 val description = inflatedView.etDesc.text.toString()
                                 updateTask(
                                     id,
                                     titleEt,
-                                    versionEt.toInt(),
                                     description
                                 )
                                 dialog.dismiss()
@@ -170,6 +162,7 @@ class MainActivity : AppCompatActivity() {
 
     fun doSampleUpdate() {
         Log.e(TAG, " --------------- doSampleUpdate")
+        tasksList.clear()
         getTasks()
     }
 
@@ -243,13 +236,13 @@ class MainActivity : AppCompatActivity() {
         return namePair
     }
 
-    fun updateTask(id: String, title: String, version: Int, description: String) {
+    fun updateTask(id: String, title: String, description: String) {
         Log.e(TAG, "inside update title in MainActivity")
 
         /*
         As version is assumed to be auto incremented ( //TODO Have to make changes in sqlite db)
         */
-        val input = TaskInput.builder().title(title).version(version).description(description).status("test").build()
+        val input = TaskInput.builder().title(title).version(1).description(description).status("test").build()
 
         var mutation = UpdateTaskMutation.builder().id(id).input(input).build()
 
@@ -299,9 +292,6 @@ class MainActivity : AppCompatActivity() {
     fun updateUser(idUser: String, taskId: String, title: String, firstName: String, lastName: String, email: String) {
         Log.e(TAG, "inside updateUser in MainActivity")
 
-        /*
-        As version is assumed to be auto incremented ( //TODO Have to make changes in sqlite db)
-        */
         val input = UserInput.builder().title(title).lastName(lastName).firstName(firstName).email(email).taskId(taskId)
             .creationmetadataId(taskId).build()
 
@@ -350,13 +340,13 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    fun createtask(title: String, description: String, version: Int) {
+    fun createtask(title: String, description: String) {
         Log.e(TAG, "inside create title")
 
         /*
          As version is assumed to be auto incremented ( //TODO Have to make changes in sqlite db)
          */
-        val input = TaskInput.builder().title(title).description(description).version(version).status("test").build()
+        val input = TaskInput.builder().title(title).description(description).version(1).status("test").build()
 
         val mutation = CreateTaskMutation.builder().input(input).build()
 
@@ -398,9 +388,6 @@ class MainActivity : AppCompatActivity() {
     fun createUser(title: String, firstName: String, lastName: String, email: String, taskId: String) {
         Log.e(TAG, "inside create user")
 
-        /*
-         As version is assumed to be auto incremented ( //TODO Have to make changes in sqlite db)
-         */
         val input = UserInput.builder().taskId(taskId).email(email).firstName(firstName).lastName(lastName).title(title)
             .creationmetadataId(taskId).build()
 

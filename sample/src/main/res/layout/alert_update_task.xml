@@ -33,18 +33,6 @@
             android:layout_height="wrap_content">
         <EditText android:layout_width="match_parent"
                   android:layout_height="wrap_content"
-                  android:id="@+id/etVersion"
-                  android:layout_marginStart="24dp"
-                  android:inputType="number"
-                  android:layout_marginEnd="24dp"
-                  android:hint="Version of the Note"/>
-    </android.support.design.widget.TextInputLayout>
-
-    <android.support.design.widget.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-        <EditText android:layout_width="match_parent"
-                  android:layout_height="wrap_content"
                   android:id="@+id/etDesc"
                   android:layout_marginStart="24dp"
                   android:layout_marginEnd="24dp"
