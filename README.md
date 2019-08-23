@@ -49,15 +49,7 @@ See [offix website](https://android.offix.dev) for usage and more details.
 
 See [sample](https://github.com/aerogear/offix-android/tree/master/sample) for example application.<br/>
 
-## Limitations
-
-1. The library only supports apollo-android for the time being.
-
-## Features in Development 
-
-1. Adding Offline Support when the app is in background.
-2. Provide UI bindings in app. (For the time being, you can use subscriptions to have UI bindings.)
-
+ 
 ## Contributing 
 
 See [contribution guidelines](./CONTRIBUTING.md) file for more information
