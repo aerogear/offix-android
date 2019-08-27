@@ -18,6 +18,7 @@
                 android:layout_height="match_parent"/>
     </android.support.v4.widget.SwipeRefreshLayout>
 
+
     <android.support.design.widget.FloatingActionButton
             android:id="@+id/fabAdd"
             android:layout_width="wrap_content"

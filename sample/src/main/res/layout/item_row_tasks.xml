@@ -18,46 +18,77 @@
             android:layout_height="wrap_content">
 
         <LinearLayout android:layout_width="match_parent"
-                      android:orientation="vertical"
-                      android:layout_height="wrap_content">
-            <TextView
-                    android:id="@+id/title_tv"
-                    android:layout_width="match_parent"
-                    android:textColor="#050505"
-                    android:textStyle="bold"
-                    android:layout_marginTop="2dp"
-                    android:layout_marginStart="4dp"
-                    android:textSize="22sp"
-                    android:layout_height="wrap_content"/>
+                      android:orientation="horizontal"
+                      android:layout_height="match_parent">
+            <LinearLayout android:layout_width="0dp"
+                          android:orientation="vertical"
+                          android:layout_weight="6"
+                          android:layout_height="wrap_content">
+                <TextView
+                        android:id="@+id/title_tv"
+                        android:layout_width="match_parent"
+                        android:textColor="#050505"
+                        android:textStyle="bold"
+                        android:layout_marginTop="2dp"
+                        android:layout_marginStart="4dp"
+                        android:textSize="22sp"
+                        android:layout_height="wrap_content"/>
 
-            <TextView
-                    android:id="@+id/desc_tv"
-                    android:textColor="#058CF7"
-                    android:layout_width="match_parent"
-                    android:layout_marginStart="4dp"
-                    android:textSize="16sp"
-                    android:textStyle="normal"
-                    android:layout_height="wrap_content"/>
+                <TextView
+                        android:id="@+id/desc_tv"
+                        android:textColor="#058CF7"
+                        android:layout_width="match_parent"
+                        android:layout_marginStart="4dp"
+                        android:textSize="16sp"
+                        android:textStyle="normal"
+                        android:layout_height="wrap_content"/>
 
-            <TextView
-                    android:id="@+id/id_tv"
-                    android:textColor="#030303"
-                    android:layout_width="match_parent"
-                    android:layout_marginStart="4dp"
-                    android:textSize="18sp"
-                    android:textStyle="normal"
-                    android:layout_height="wrap_content"/>
+                <TextView
+                        android:id="@+id/id_tv"
+                        android:textColor="#030303"
+                        android:layout_width="match_parent"
+                        android:layout_marginStart="4dp"
+                        android:textSize="18sp"
+                        android:textStyle="normal"
+                        android:layout_height="wrap_content"/>
 
-            <TextView
-                    android:id="@+id/firstName_tv"
-                    android:textColor="#F50303"
-                    android:layout_width="match_parent"
-                    android:layout_marginStart="4dp"
-                    android:textSize="18sp"
-                    android:textStyle="normal"
-                    android:layout_height="wrap_content"/>
+                <TextView
+                        android:id="@+id/firstName_tv"
+                        android:textColor="#F50303"
+                        android:layout_width="match_parent"
+                        android:layout_marginStart="4dp"
+                        android:textSize="18sp"
+                        android:textStyle="normal"
+                        android:layout_height="wrap_content"/>
+            </LinearLayout>
+
+            <LinearLayout android:layout_width="0dp"
+                          android:layout_weight="1"
+                          android:layout_height="match_parent">
+
+                <LinearLayout android:layout_width="match_parent"
+                              android:orientation="vertical"
+                              android:layout_height="match_parent">
+
+                    <Switch
+                            android:layout_width="match_parent"
+                            android:layout_height="0dp"
+                            android:layout_weight="1"
+                            android:checked="false"
+                            android:id="@+id/user_switch"/>
+
+                    <Button android:layout_width="match_parent"
+                            android:layout_height="0dp"
+                            android:layout_weight="1.02"
+                            android:id="@+id/imgUser"
+                            android:backgroundTint="@color/user_icon"
+                            android:background="@drawable/ic_person_black_24dp"
+                    />
+
+                </LinearLayout>
+
+            </LinearLayout>
         </LinearLayout>
-
 
 
     </android.support.v7.widget.CardView>
