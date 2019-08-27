@@ -74,9 +74,9 @@ object Utils {
     private fun cacheResolver(): CacheKeyResolver {
         return object : CacheKeyResolver() {
             override fun fromFieldRecordSet(field: ResponseField, recordSet: Map<String, Any>): CacheKey {
-                Log.e("UtilClass", "fromFieldRecordSet ${(recordSet["id"] as String)}")
-                if (recordSet.containsKey("id")) {
-                    val typeNameAndIDKey = recordSet["__typename"].toString() + "." + recordSet["id"]
+                Log.e("UtilClass", "fromFieldRecordSet ${(recordSet["taskId"] as String)}")
+                if (recordSet.containsKey("taskId")) {
+                    val typeNameAndIDKey = recordSet["__typename"].toString() + "." + recordSet["taskId"]
                     return CacheKey.from(typeNameAndIDKey)
                 }
                 return CacheKey.NO_KEY

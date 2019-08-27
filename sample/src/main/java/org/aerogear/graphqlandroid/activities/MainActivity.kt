@@ -49,106 +49,6 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
-        fabAdd.setOnClickListener {
-            val options = arrayOf("Create a Task", "Assign Task to User", "Update Task", "Update User")
-            val builder = AlertDialog.Builder(this).setTitle("Choose an option!")
-            builder.setItems(options) { dialog, which ->
-                when (which) {
-                    0 -> {
-                        //Used for creating a new task
-                        val inflatedView =
-                            LayoutInflater.from(this).inflate(R.layout.alertfrag_create_tasks, null, false)
-                        val customAlert: AlertDialog = AlertDialog.Builder(this)
-                            .setView(inflatedView)
-                            .setTitle("Create a new Task")
-                            .setNegativeButton("No") { dialog, which ->
-                                dialog.dismiss()
-                            }
-                            .setPositiveButton("Yes") { dialog, which ->
-                                val title = inflatedView.etTitleTask.text.toString()
-                                val desc = inflatedView.etDescTask.text.toString()
-                                createtask(title, desc)
-                                dialog.dismiss()
-                            }
-                            .create()
-                        customAlert.show()
-                    }
-                    1 -> {
-                        //Used for assigning user
-                        val inflatedView =
-                            LayoutInflater.from(this).inflate(R.layout.alertfrag_create_user, null, false)
-                        val customAlert: AlertDialog = AlertDialog.Builder(this)
-                            .setView(inflatedView)
-                            .setTitle("Assign the User a task")
-                            .setNegativeButton("No") { dialog, which ->
-                                dialog.dismiss()
-                            }
-                            .setPositiveButton("Yes") { dialog, which ->
-                                val taskId = inflatedView.etTaskIdUser.text.toString()
-                                val title = inflatedView.etTitleUser.text.toString()
-                                val firstName = inflatedView.etFirstName.text.toString()
-                                val lastName = inflatedView.etLastName.text.toString()
-                                val email = inflatedView.etEmail.text.toString()
-                                createUser(title, firstName, lastName, email, taskId)
-                                dialog.dismiss()
-                            }
-                            .create()
-                        customAlert.show()
-                    }
-                    2 -> {
-                        //Used for updating details of user
-                        val inflatedView = LayoutInflater.from(this).inflate(R.layout.alert_update_task, null, false)
-                        val customAlert: AlertDialog = AlertDialog.Builder(this)
-                            .setView(inflatedView)
-                            .setTitle("Update the details of the Task")
-                            .setNegativeButton("No") { dialog, which ->
-                                dialog.dismiss()
-                            }
-                            .setPositiveButton("Yes") { dialog, which ->
-                                val id = inflatedView.etId.text.toString()
-                                val titleEt = inflatedView.etTitle.text.toString()
-                                val description = inflatedView.etDesc.text.toString()
-                                updateTask(
-                                    id,
-                                    titleEt,
-                                    description
-                                )
-                                dialog.dismiss()
-                            }
-                            .create()
-                        customAlert.show()
-                    }
-                    3 -> {
-                        //Used for updating details of user
-                        val inflatedView =
-                            LayoutInflater.from(this).inflate(R.layout.alert_update_user, null, false)
-                        val customAlert: AlertDialog = AlertDialog.Builder(this)
-                            .setView(inflatedView)
-                            .setTitle("Update details of the User")
-                            .setNegativeButton("No") { dialog, which ->
-                                dialog.dismiss()
-                            }
-                            .setPositiveButton("Yes") { dialog, which ->
-                                val taskId = inflatedView.etIdassigned.text.toString()
-                                val userId = inflatedView.etIdUSer.text.toString()
-                                val title = inflatedView.etTitleUser.text.toString()
-                                val firstName = inflatedView.etFname.text.toString()
-                                val lastName = inflatedView.etLname.text.toString()
-                                val email = inflatedView.etLEmailUSer.text.toString()
-                                updateUser(userId, taskId, title, firstName, lastName, email)
-                                dialog.dismiss()
-                            }
-                            .create()
-                        customAlert.show()
-                    }
-                }
-            }
-
-            // create and show the alert dialog
-            val dialog = builder.create()
-            dialog.show()
-        }
         recycler_view.layoutManager = LinearLayoutManager(this)
         recycler_view.adapter = taskAdapter
 
@@ -191,14 +91,22 @@ class MainActivity : AppCompatActivity() {
                             val id = it.id()
                             var firstName = ""
                             var lastName = ""
+                            var email = ""
+                            var userId = ""
                             it.assignedTo()?.let {
                                 firstName = it.firstName()
                                 lastName = it.lastName()
+                                email = it.email()
+                                userId = it.id().toString()
                             } ?: kotlin.run {
                                 firstName = "User Not assigned"
                                 lastName = ""
+                                email = ""
+                                userId = ""
                             }
-                            val taskOutput = UserOutput(title, desc, id.toInt(), firstName, lastName)
+
+                            Log.e(TAG, "$firstName $email $title $desc")
+                            val taskOutput = UserOutput(title, desc, id.toInt(), firstName, lastName, userId, email)
                             runOnUiThread {
                                 tasksList.add(taskOutput)
                                 taskAdapter.notifyDataSetChanged()
@@ -270,7 +178,7 @@ class MainActivity : AppCompatActivity() {
             override fun onResponse(response: Response<UpdateTaskMutation.Data>) {
                 val result = response.data()?.updateTask()
 
-                //In case of conflicts data returned from the server id null.
+                //In case of conflicts data returned from the server taskId null.
                 result?.let {
                     Log.e(TAG, "onResponse-UpdateTask- $it")
                 }
@@ -321,7 +229,7 @@ class MainActivity : AppCompatActivity() {
             override fun onResponse(response: Response<UpdateUserMutation.Data>) {
                 val result = response.data()?.updateUser()
 
-                //In case of conflicts data returned from the server id null.
+                //In case of conflicts data returned from the server taskId null.
                 result?.let {
                     Log.e(TAG, "onResponse-UpdateTask- $it")
                 }
@@ -366,7 +274,7 @@ class MainActivity : AppCompatActivity() {
             override fun onResponse(response: Response<CreateTaskMutation.Data>) {
                 val result = response.data()?.createTask()
 
-                //In case of conflicts data returned from the server id null.
+                //In case of conflicts data returned from the server taskId null.
                 result?.let {
                     Log.e(TAG, "onResponse-UpdateTask- $it")
                 }
@@ -407,7 +315,7 @@ class MainActivity : AppCompatActivity() {
             override fun onResponse(response: Response<CreateUserMutation.Data>) {
                 val result = response.data()?.createUser()
 
-                //In case of conflicts data returned from the server id null.
+                //In case of conflicts data returned from the server taskId null.
                 result?.let {
                     Log.e(TAG, "onResponse-UpdateTask- $it")
                 }
@@ -415,11 +323,12 @@ class MainActivity : AppCompatActivity() {
         }
         mutationCall?.enqueue(callback)
         if (Offline.isNetwork()) {
-            Toast.makeText(this, "Task with id $taskId is assigned to $firstName $lastName", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "Task with taskId $taskId is assigned to $firstName $lastName", Toast.LENGTH_LONG)
+                .show()
         } else {
             Toast.makeText(
                 this,
-                "Update in user where Task with id $taskId is assigned to $firstName $lastName is stored offline. Changes will be synced to the server when app comes online.",
+                "Update in user where Task with taskId $taskId is assigned to $firstName $lastName is stored offline. Changes will be synced to the server when app comes online.",
                 Toast.LENGTH_LONG
             ).show()
         }

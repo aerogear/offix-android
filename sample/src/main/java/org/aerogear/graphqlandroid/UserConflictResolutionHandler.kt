@@ -48,7 +48,7 @@ class UserConflictResolutionHandler(val context: Context) : ConflictResolutionIn
                     val input = TaskInput.builder().title(clientState["title"].toString()).version(versionAfterConflict)
                         .description(clientState["description"].toString()).status("test").build()
 
-                    var mutation = UpdateTaskMutation.builder().id(clientState["id"].toString()).input(input).build()
+                    var mutation = UpdateTaskMutation.builder().id(clientState["taskId"].toString()).input(input).build()
                     val mutationCall = Utils.getApolloClient(context)?.mutate(
                         mutation
                     )
@@ -63,7 +63,7 @@ class UserConflictResolutionHandler(val context: Context) : ConflictResolutionIn
                             Log.e("onResponse() updateTask", "${response.data()?.updateTask()?.title()}")
                             val result = response.data()?.updateTask()
 
-                            //In case of conflicts data returned from the server id null.
+                            //In case of conflicts data returned from the server taskId null.
                             result?.let {
                                 Log.e(TAG, "onResponse-UpdateTask- $it")
                             }
