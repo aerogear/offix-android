@@ -3,7 +3,7 @@ package org.aerogear.graphqlandroid.model
 data class UserOutput(
     val title: String,
     val desc: String,
-    val taskId: Int,
+    val id: Int,
     val firstName: String,
     val lastName: String,
     val userId: String,

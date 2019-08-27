@@ -43,12 +43,12 @@ class TaskAdapter(private val notes: List<UserOutput>, private val context: Cont
         val currentTask = notes[position]
         var title_task = currentTask.title
         var desc_task = currentTask.desc
-        var id_task = currentTask.taskId.toString()
+        var id_task = currentTask.id.toString()
 
         with(holder.itemView) {
             title_tv.text = currentTask.title
             desc_tv.text = currentTask.desc
-            id_tv.text = currentTask.taskId.toString()
+            id_tv.text = currentTask.id.toString()
             if (currentTask.firstName.isNotEmpty()) {
                 firstName_tv.text = "${currentTask.firstName} ${currentTask.lastName}"
             } else {
@@ -88,7 +88,7 @@ class TaskAdapter(private val notes: List<UserOutput>, private val context: Cont
                             val email = inflatedView.etEmail.text.toString()
                             MainActivity().createUser(title, firstName, lastName, email, taskId)
 
-//                            if (context is MainActivity) context.callingActivity.  .crea(title, firstName, lastName, email, taskId)
+//                            if (context is MainActivity) context.callingActivity.  .crea(title, firstName, lastName, email, id)
                             dialog.dismiss()
                         }
                         .create()

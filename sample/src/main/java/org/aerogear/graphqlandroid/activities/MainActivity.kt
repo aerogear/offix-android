@@ -178,7 +178,7 @@ class MainActivity : AppCompatActivity() {
             override fun onResponse(response: Response<UpdateTaskMutation.Data>) {
                 val result = response.data()?.updateTask()
 
-                //In case of conflicts data returned from the server taskId null.
+                //In case of conflicts data returned from the server id null.
                 result?.let {
                     Log.e(TAG, "onResponse-UpdateTask- $it")
                 }
@@ -229,7 +229,7 @@ class MainActivity : AppCompatActivity() {
             override fun onResponse(response: Response<UpdateUserMutation.Data>) {
                 val result = response.data()?.updateUser()
 
-                //In case of conflicts data returned from the server taskId null.
+                //In case of conflicts data returned from the server id null.
                 result?.let {
                     Log.e(TAG, "onResponse-UpdateTask- $it")
                 }
@@ -274,7 +274,7 @@ class MainActivity : AppCompatActivity() {
             override fun onResponse(response: Response<CreateTaskMutation.Data>) {
                 val result = response.data()?.createTask()
 
-                //In case of conflicts data returned from the server taskId null.
+                //In case of conflicts data returned from the server id null.
                 result?.let {
                     Log.e(TAG, "onResponse-UpdateTask- $it")
                 }
@@ -315,7 +315,7 @@ class MainActivity : AppCompatActivity() {
             override fun onResponse(response: Response<CreateUserMutation.Data>) {
                 val result = response.data()?.createUser()
 
-                //In case of conflicts data returned from the server taskId null.
+                //In case of conflicts data returned from the server id null.
                 result?.let {
                     Log.e(TAG, "onResponse-UpdateTask- $it")
                 }
@@ -323,12 +323,12 @@ class MainActivity : AppCompatActivity() {
         }
         mutationCall?.enqueue(callback)
         if (Offline.isNetwork()) {
-            Toast.makeText(this, "Task with taskId $taskId is assigned to $firstName $lastName", Toast.LENGTH_LONG)
+            Toast.makeText(this, "Task with id $taskId is assigned to $firstName $lastName", Toast.LENGTH_LONG)
                 .show()
         } else {
             Toast.makeText(
                 this,
-                "Update in user where Task with taskId $taskId is assigned to $firstName $lastName is stored offline. Changes will be synced to the server when app comes online.",
+                "Update in user where Task with id $taskId is assigned to $firstName $lastName is stored offline. Changes will be synced to the server when app comes online.",
                 Toast.LENGTH_LONG
             ).show()
         }
