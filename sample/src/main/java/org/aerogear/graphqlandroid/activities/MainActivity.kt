@@ -104,8 +104,6 @@ class MainActivity : AppCompatActivity() {
                                 email = ""
                                 userId = ""
                             }
-
-                            Log.e(TAG, "$firstName $email $title $desc")
                             val taskOutput = UserOutput(title, desc, id.toInt(), firstName, lastName, userId, email)
                             runOnUiThread {
                                 tasksList.add(taskOutput)
