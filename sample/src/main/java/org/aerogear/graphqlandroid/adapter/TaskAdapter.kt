@@ -44,6 +44,7 @@ class TaskAdapter(private val notes: List<UserOutput>, private val context: Cont
         var title_task = currentTask.title
         var desc_task = currentTask.desc
         var id_task = currentTask.id.toString()
+        var checkBool = true
 
         with(holder.itemView) {
             title_tv.text = currentTask.title
@@ -55,19 +56,17 @@ class TaskAdapter(private val notes: List<UserOutput>, private val context: Cont
                 firstName_tv.text = "User not assigned!"
             }
 
-//            if (sharedPreferences.contains(currentTask.id.toString())) {
-//                val bool = sharedPreferences.getBoolean(currentTask.id.toString(), true)
-//                this.user_switch.isChecked=bool
-//            }
+            user_switch.isChecked = false
 
-//            if (currentTask.firstName.isNotEmpty()) {
-//            Log.e("Adapter $position", user_switch.isChecked.toString())
-//            this.user_switch.isChecked=true
-//        }
-//            if (firstName_tv.text.toString().equals("User not assigned!")) {
-//                Log.e("Adapter $position", user_switch.isChecked.toString())
-//                user_switch.isChecked=false
-//            }
+            if (currentTask.firstName.isEmpty()) {
+                Log.e("Adapter --- $position", user_switch.isChecked.toString())
+                user_switch.isChecked = false
+            }
+
+            if (sharedPreferences.contains(currentTask.id.toString())) {
+                checkBool = false
+                user_switch.isChecked = true
+            }
         }
 
         holder.itemView.setOnClickListener {
@@ -99,35 +98,45 @@ class TaskAdapter(private val notes: List<UserOutput>, private val context: Cont
         }
 
         holder.itemView.user_switch.setOnCheckedChangeListener { buttonView, isChecked ->
-            if (isChecked) {
-                //Used for assigning user
-                val inflatedView =
-                    LayoutInflater.from(context)
-                        .inflate(org.aerogear.graphqlandroid.R.layout.alertfrag_create_user, null, false)
-                inflatedView.etTaskIdUser.setText(id_task, TextView.BufferType.EDITABLE)
-                inflatedView.etTitleUser.setText(title_task, TextView.BufferType.EDITABLE)
-                val customAlert: AlertDialog = AlertDialog.Builder(context)
-                    .setView(inflatedView)
-                    .setTitle("Assign the User a task")
-                    .setNegativeButton("No") { dialog, which ->
-                        buttonView.setChecked(false)
-                        dialog.dismiss()
-                    }
-                    .setPositiveButton("Yes") { dialog, which ->
-                        val taskId = inflatedView.etTaskIdUser.text.toString()
-                        val title = inflatedView.etTitleUser.text.toString()
-                        val firstName = inflatedView.etFirstName.text.toString()
-                        val lastName = inflatedView.etLastName.text.toString()
-                        val email = inflatedView.etEmail.text.toString()
-                        if (context is MainActivity) this.context.createUser(title, firstName, lastName, email,id_task)
-                        dialog.dismiss()
-                    }
-                    .create()
-                customAlert.show()
-            } else {
+            if (holder.itemView.user_switch.isPressed) {
+                if (isChecked && checkBool) {
+                    //Used for assigning user
+                    val inflatedView =
+                        LayoutInflater.from(context)
+                            .inflate(org.aerogear.graphqlandroid.R.layout.alertfrag_create_user, null, false)
+                    inflatedView.etTaskIdUser.setText(id_task, TextView.BufferType.EDITABLE)
+                    inflatedView.etTitleUser.setText(title_task, TextView.BufferType.EDITABLE)
+                    val customAlert: AlertDialog = AlertDialog.Builder(context)
+                        .setView(inflatedView)
+                        .setTitle("Assign the User a task")
+                        .setNegativeButton("No") { dialog, which ->
+                            buttonView.setChecked(false)
+                            dialog.dismiss()
+                        }
+                        .setPositiveButton("Yes") { dialog, which ->
+                            val taskId = inflatedView.etTaskIdUser.text.toString()
+                            val title = inflatedView.etTitleUser.text.toString()
+                            val firstName = inflatedView.etFirstName.text.toString()
+                            val lastName = inflatedView.etLastName.text.toString()
+                            val email = inflatedView.etEmail.text.toString()
+                            if (context is MainActivity) this.context.createUser(
+                                title,
+                                firstName,
+                                lastName,
+                                email,
+                                id_task
+                            )
+                            dialog.dismiss()
+                            checkBool = true
+                        }
+                        .create()
+                    customAlert.show()
+                } else {
+                    Log.e("False empty", "-----")
+                }
+                editor.putBoolean(currentTask.id.toString(), isChecked)
+                editor.apply()
             }
-            editor.putBoolean(currentTask.id.toString(), isChecked)
-            editor.apply()
         }
 
         holder.itemView.imgUser.setOnClickListener {
@@ -154,7 +163,14 @@ class TaskAdapter(private val notes: List<UserOutput>, private val context: Cont
                     val firstName = inflatedView.etFname.text.toString()
                     val lastName = inflatedView.etLname.text.toString()
                     val email = inflatedView.etLEmailUSer.text.toString()
-                    if (context is MainActivity) this.context.updateUser(userId, taskId, title, firstName, lastName, email)
+                    if (context is MainActivity) this.context.updateUser(
+                        userId,
+                        taskId,
+                        title,
+                        firstName,
+                        lastName,
+                        email
+                    )
                     dialog.dismiss()
                 }
                 .create()
