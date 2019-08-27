@@ -49,6 +49,26 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        fabAdd.setOnClickListener {
+            //Used for creating a new task
+            val inflatedView =
+                LayoutInflater.from(this).inflate(R.layout.alertfrag_create_tasks, null, false)
+            val customAlert: AlertDialog = AlertDialog.Builder(this)
+                .setView(inflatedView)
+                .setTitle("Create a new Task")
+                .setNegativeButton("No") { dialog, which ->
+                    dialog.dismiss()
+                }
+                .setPositiveButton("Yes") { dialog, which ->
+                    val title = inflatedView.etTitleTask.text.toString()
+                    val desc = inflatedView.etDescTask.text.toString()
+                    createtask(title, desc)
+                    dialog.dismiss()
+                }
+                .create()
+            customAlert.show()
+        }
         recycler_view.layoutManager = LinearLayoutManager(this)
         recycler_view.adapter = taskAdapter
 
