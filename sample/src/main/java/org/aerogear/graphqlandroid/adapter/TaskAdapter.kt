@@ -4,7 +4,6 @@ import android.content.Context
 import android.preference.PreferenceManager
 import android.support.v7.app.AlertDialog
 import android.support.v7.widget.RecyclerView
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -44,35 +43,23 @@ class TaskAdapter(private val notes: List<UserOutput>, private val context: Cont
         var title_task = currentTask.title
         var desc_task = currentTask.desc
         var id_task = currentTask.id.toString()
-        var checkBool = true
 
         with(holder.itemView) {
             title_tv.text = currentTask.title
             desc_tv.text = currentTask.desc
             id_tv.text = currentTask.id.toString()
-            if (currentTask.firstName.isNotEmpty()) {
+            if (!currentTask.firstName.isNullOrBlank()) {
+                user_switch.isChecked = true
                 firstName_tv.text = "${currentTask.firstName} ${currentTask.lastName}"
             } else {
-                firstName_tv.text = "User not assigned!"
             }
 
-            user_switch.isChecked = false
-
-            if (currentTask.firstName.isEmpty()) {
-                Log.e("Adapter --- $position", user_switch.isChecked.toString())
-                user_switch.isChecked = false
-            }
-
-            if (sharedPreferences.contains(currentTask.id.toString())) {
-                checkBool = false
-                user_switch.isChecked = true
-            }
         }
 
         holder.itemView.setOnClickListener {
             //Used for updating details of user
             val inflatedView = LayoutInflater.from(context)
-                .inflate(org.aerogear.graphqlandroid.R.layout.alert_update_task, null, false)
+                .inflate(R.layout.alert_update_task, null, false)
             inflatedView.etId.setText(id_task, TextView.BufferType.EDITABLE)
             inflatedView.etTitle.setText(title_task, TextView.BufferType.EDITABLE)
             inflatedView.etDesc.setText(desc_task, TextView.BufferType.EDITABLE)
@@ -98,19 +85,18 @@ class TaskAdapter(private val notes: List<UserOutput>, private val context: Cont
         }
 
         holder.itemView.user_switch.setOnCheckedChangeListener { buttonView, isChecked ->
-            if (holder.itemView.user_switch.isPressed) {
-                if (isChecked && checkBool) {
-                    //Used for assigning user
+            if (isChecked) {
+                if (currentTask.firstName.isEmpty()) {
                     val inflatedView =
                         LayoutInflater.from(context)
-                            .inflate(org.aerogear.graphqlandroid.R.layout.alertfrag_create_user, null, false)
+                            .inflate(R.layout.alertfrag_create_user, null, false)
                     inflatedView.etTaskIdUser.setText(id_task, TextView.BufferType.EDITABLE)
                     inflatedView.etTitleUser.setText(title_task, TextView.BufferType.EDITABLE)
                     val customAlert: AlertDialog = AlertDialog.Builder(context)
                         .setView(inflatedView)
                         .setTitle("Assign the User a task")
                         .setNegativeButton("No") { dialog, which ->
-                            buttonView.setChecked(false)
+                            buttonView.isChecked = false
                             dialog.dismiss()
                         }
                         .setPositiveButton("Yes") { dialog, which ->
@@ -126,16 +112,16 @@ class TaskAdapter(private val notes: List<UserOutput>, private val context: Cont
                                 email,
                                 id_task
                             )
+                            buttonView.isChecked = true
                             dialog.dismiss()
-                            checkBool = true
                         }
                         .create()
                     customAlert.show()
                 } else {
-                    Log.e("False empty", "-----")
+                    return@setOnCheckedChangeListener
                 }
-                editor.putBoolean(currentTask.id.toString(), isChecked)
-                editor.apply()
+            } else if (!isChecked) {
+                //Do nothing
             }
         }
 
