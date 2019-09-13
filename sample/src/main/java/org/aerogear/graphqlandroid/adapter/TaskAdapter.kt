@@ -4,7 +4,6 @@ import android.content.Context
 import android.preference.PreferenceManager
 import android.support.v7.app.AlertDialog
 import android.support.v7.widget.RecyclerView
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -53,7 +52,6 @@ class TaskAdapter(private val notes: List<UserOutput>, private val context: Cont
                 user_switch.isChecked = true
                 firstName_tv.text = "${currentTask.firstName} ${currentTask.lastName}"
             } else {
-//                firstName_tv.text = "User not assigned!"
             }
 
         }
