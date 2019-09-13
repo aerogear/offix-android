@@ -19,7 +19,7 @@ import org.aerogear.offix.interceptor.ConflictInterceptor
 object Utils {
 
     //To run on emulator use http://10.0.2.2:4000/graphql
-    const val BASE_URL = "http://192.168.0.101:4000/graphql"
+    const val BASE_URL = "http://10.0.2.2:4000/graphql"
     private const val SQL_CACHE_NAME = "tasks4Db"
     private var apClient: ApolloClient? = null
     private var httpClient: OkHttpClient? = null

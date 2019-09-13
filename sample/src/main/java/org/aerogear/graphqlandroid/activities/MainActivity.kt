@@ -7,8 +7,6 @@ import android.support.v7.widget.LinearLayoutManager
 import android.util.Log
 import android.view.LayoutInflater
 import android.widget.Toast
-import androidx.work.Constraints
-import androidx.work.NetworkType
 import com.apollographql.apollo.ApolloCall
 import com.apollographql.apollo.ApolloQueryWatcher
 import com.apollographql.apollo.api.Response
@@ -20,11 +18,7 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subscribers.DisposableSubscriber
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.alert_update_task.view.*
-import kotlinx.android.synthetic.main.alert_update_user.view.*
 import kotlinx.android.synthetic.main.alertfrag_create_tasks.view.*
-import kotlinx.android.synthetic.main.alertfrag_create_user.view.*
-import kotlinx.android.synthetic.main.alertfrag_create_user.view.etTitleUser
 import org.aerogear.graphqlandroid.*
 import org.aerogear.graphqlandroid.adapter.TaskAdapter
 import org.aerogear.graphqlandroid.model.NamePair
@@ -33,7 +27,6 @@ import org.aerogear.graphqlandroid.type.TaskInput
 import org.aerogear.graphqlandroid.type.UserFilter
 import org.aerogear.graphqlandroid.type.UserInput
 import org.aerogear.offix.Offline
-import java.util.concurrent.atomic.AtomicReference
 
 class MainActivity : AppCompatActivity() {
 
@@ -119,7 +112,7 @@ class MainActivity : AppCompatActivity() {
                                 email = it.email()
                                 userId = it.id().toString()
                             } ?: kotlin.run {
-                                firstName = "User Not assigned"
+                                firstName = ""
                                 lastName = ""
                                 email = ""
                                 userId = ""
@@ -204,11 +197,11 @@ class MainActivity : AppCompatActivity() {
         }
         mutationCall?.enqueue(callback)
         if (Offline.isNetwork()) {
-            Toast.makeText(this@MainActivity, "Task with $id is updated", Toast.LENGTH_LONG).show()
+            Toast.makeText(this@MainActivity, "Task with id $id is updated", Toast.LENGTH_LONG).show()
         } else {
             Toast.makeText(
                 this@MainActivity,
-                "Task with $id is stored offline. Changes will be synced to the server when app comes online.",
+                "Task with id $id is stored offline. Changes will be synced to the server when app comes online.",
                 Toast.LENGTH_LONG
             ).show()
 
@@ -255,11 +248,11 @@ class MainActivity : AppCompatActivity() {
         }
         mutationCall?.enqueue(callback)
         if (Offline.isNetwork()) {
-            Toast.makeText(this, "User with $idUser is updated", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "User with userId$idUser is updated", Toast.LENGTH_LONG).show()
         } else {
             Toast.makeText(
                 this,
-                "Updated in User with $idUser is stored offline. Changes will be synced to the server when app comes online.",
+                "Updations in User with userId$idUser is stored offline. Changes will be synced to the server when app comes online.",
                 Toast.LENGTH_LONG
             ).show()
         }
