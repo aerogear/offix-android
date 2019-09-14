@@ -74,8 +74,11 @@ class ConflictInterceptor(private val conflictResolutionImpl: ConflictResolution
                  */
 
                 Offline.requestList.forEach {
-                    Log.d("$TAG", "-------")
-                    chain.proceedAsync(it, dispatcher, OfflineCallback(it, queueCallback.removeFirst()))
+                    Log.d("$TAG", "size %% ${queueCallback.size}")
+                    if (queueCallback.isNotEmpty()) {
+                        chain.proceedAsync(it, dispatcher, OfflineCallback(it, queueCallback.removeFirst()))
+                    }
+                    Log.d("$TAG", "size %% %%  ${queueCallback.size}")
                 }
             } else {
                 Log.d("$TAG 200", "--------")
