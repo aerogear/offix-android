@@ -5,7 +5,7 @@ export const checkAndUpdateTask = {
   Mutation: {
     checkAndUpdateTask: async (_: any, clientData: any, context: GraphQLContext) => {
       console.log("Update", clientData)
-      const task = await context.db('tasks').select()
+      const task = await context.db('task').select()
         .where('id', clientData.id).then((rows) => rows[0])
       if (!task) {
         throw new Error(`Invalid ID for task object: ${clientData.id}`);
@@ -16,7 +16,7 @@ export const checkAndUpdateTask = {
         throw conflictError;
       }
 
-      const update = await context.db('tasks').update(clientData)
+      const update = await context.db('task').update(clientData)
         .where({
           'id': clientData.id
         }).returning('*').then((rows) => rows[0])
