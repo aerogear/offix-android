@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Switch
 import android.widget.TextView
+import android.widget.Toast
 import kotlinx.android.synthetic.main.alert_update_task.view.*
 import kotlinx.android.synthetic.main.alert_update_user.view.*
 import kotlinx.android.synthetic.main.alertfrag_create_user.view.*
@@ -108,6 +109,11 @@ class TaskAdapter(private val notes: List<UserOutput>, private val context: Cont
                         description
                     )
                     dialog.dismiss()
+                    Toast.makeText(
+                        context,
+                        "You made a conflicted mutation! But no worries, it's resolved now.",
+                        Toast.LENGTH_LONG
+                    ).show()
                 }
                 .create()
             customAlert.show()

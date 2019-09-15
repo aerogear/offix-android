@@ -2,9 +2,11 @@ package org.aerogear.graphqlandroid
 
 import android.content.Context
 import android.util.Log
+import android.widget.Toast
 import com.apollographql.apollo.ApolloCall
 import com.apollographql.apollo.api.Response
 import com.apollographql.apollo.exception.ApolloException
+import org.aerogear.graphqlandroid.activities.MainActivity
 import org.aerogear.graphqlandroid.type.TaskInput
 import org.aerogear.offix.interfaces.ConflictResolutionInterface
 import com.apollographql.apollo.api.Operation as Operation1
@@ -32,7 +34,7 @@ class UserConflictResolutionHandler(val context: Context) : ConflictResolutionIn
 
         if (containsVersion) {
             var versionAfterConflict1 = "" + serverMap["version"]
-            var versionAfterConflict = versionAfterConflict1.toInt() + 1
+            var versionAfterConflict = versionAfterConflict1.toInt()
 
             Log.e("L 2 ---", "$versionAfterConflict")
 
