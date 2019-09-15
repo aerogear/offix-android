@@ -84,6 +84,36 @@ class TaskAdapter(private val notes: List<UserOutput>, private val context: Cont
             customAlert.show()
         }
 
+        holder.itemView.setOnLongClickListener {
+            Log.e("Adapter", "Inside setOnLongClickListener")
+            //Used for updating details of user (to depict conflicts)
+            val inflatedView = LayoutInflater.from(context)
+                .inflate(R.layout.alert_update_task, null, false)
+            inflatedView.etId.setText(id_task, TextView.BufferType.EDITABLE)
+            inflatedView.etTitle.setText(title_task, TextView.BufferType.EDITABLE)
+            inflatedView.etDesc.setText(desc_task, TextView.BufferType.EDITABLE)
+            val customAlert: AlertDialog = AlertDialog.Builder(context)
+                .setView(inflatedView)
+                .setTitle("Update the details of the Task")
+                .setNegativeButton("No") { dialog, which ->
+                    dialog.dismiss()
+                }
+                .setPositiveButton("Yes") { dialog, which ->
+                    val id = inflatedView.etId.text.toString()
+                    val titleEt = inflatedView.etTitle.text.toString()
+                    val description = inflatedView.etDesc.text.toString()
+                    if (context is MainActivity) this.context.checkAndUpdateTask(
+                        id,
+                        titleEt,
+                        description
+                    )
+                    dialog.dismiss()
+                }
+                .create()
+            customAlert.show()
+            return@setOnLongClickListener true
+        }
+
         holder.itemView.user_switch.setOnCheckedChangeListener { buttonView, isChecked ->
             if (isChecked) {
                 if (buttonView.isPressed && currentTask.firstName.isEmpty()) {

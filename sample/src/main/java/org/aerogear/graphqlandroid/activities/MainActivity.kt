@@ -345,6 +345,60 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    fun checkAndUpdateTask(id: String, title: String, description: String) {
+        Log.e(TAG, "inside checkAndUpdateTask in MainActivity")
+
+        /*
+        As version is assumed to be auto incremented ( //TODO Have to make changes in sqlite db)
+        */
+
+        var mutation =
+            CheckAndUpdateTaskMutation.builder().version(1).id(id).title(title).description(description).status("test")
+                .build()
+
+        Log.e(TAG, " checkAndUpdateTask ********: - $mutation")
+
+        val mutationCall = Utils.getApolloClient(this)?.mutate(
+            mutation
+        )?.refetchQueries(apolloQueryWatcher?.operation()?.name())
+
+        Log.e(TAG, " checkAndUpdateTask class name: - ${mutation.javaClass.simpleName}")
+        Log.e(
+            TAG,
+            " checkAndUpdateTask 20: - ${mutationCall?.requestHeaders(com.apollographql.apollo.request.RequestHeaders.builder().build())}"
+        )
+        Log.e(TAG, " checkAndUpdateTask 21: - ${mutationCall?.operation()?.queryDocument()}")
+        Log.e(TAG, " checkAndUpdateTask 22: - ${mutationCall?.operation()?.variables()?.valueMap()}")
+        Log.e(TAG, " checkAndUpdateTask 23: - ${mutationCall?.operation()?.name()}")
+
+        val callback = object : ApolloCall.Callback<CheckAndUpdateTaskMutation.Data>() {
+            override fun onFailure(e: ApolloException) {
+                Log.e("onFailure() updateTask", "${mutation.variables().valueMap()}")
+                e.printStackTrace()
+            }
+
+            override fun onResponse(response: Response<CheckAndUpdateTaskMutation.Data>) {
+                val result = response.data()?.checkAndUpdateTask()
+
+                //In case of conflicts data returned from the server id null.
+                result?.let {
+                    Log.e(TAG, "onResponse-UpdateTask- $it")
+                }
+            }
+        }
+        mutationCall?.enqueue(callback)
+        if (Offline.isNetwork()) {
+            Toast.makeText(this@MainActivity, "Task with id $id is updated without any Conflict.", Toast.LENGTH_LONG)
+                .show()
+        } else {
+            Toast.makeText(
+                this@MainActivity,
+                "Task with id $id is stored offline. Changes will be synced to the server when app comes online.",
+                Toast.LENGTH_LONG
+            ).show()
+        }
+    }
+
     fun subscriptionNewTask() {
         val subscription = NewTaskSubscription()
         val subscriptionCall = Utils.getApolloClient(this)
