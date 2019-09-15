@@ -34,6 +34,9 @@ class OffixConflictCallback(
             val serverStateMap = conflictInfo["serverState"] as Map<String, Any>
             val clientStateMap = conflictInfo["clientState"] as Map<String, Any>
 
+            Log.e("serverStateMap", "${serverStateMap.entries}")
+            Log.e("clientStateMap", "${clientStateMap.entries}")
+
             conflictResolutionImpl.resolveConflict(serverStateMap, clientStateMap, conflictedMutationClass)
         } else {
             callBack.onResponse(response)

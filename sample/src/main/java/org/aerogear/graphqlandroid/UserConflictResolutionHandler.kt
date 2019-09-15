@@ -2,9 +2,11 @@ package org.aerogear.graphqlandroid
 
 import android.content.Context
 import android.util.Log
+import android.widget.Toast
 import com.apollographql.apollo.ApolloCall
 import com.apollographql.apollo.api.Response
 import com.apollographql.apollo.exception.ApolloException
+import org.aerogear.graphqlandroid.activities.MainActivity
 import org.aerogear.graphqlandroid.type.TaskInput
 import org.aerogear.offix.interfaces.ConflictResolutionInterface
 import com.apollographql.apollo.api.Operation as Operation1
@@ -31,7 +33,36 @@ class UserConflictResolutionHandler(val context: Context) : ConflictResolutionIn
         val containsVersion = serverMap.containsKey("version")
 
         if (containsVersion) {
-            var versionAfterConflict = serverMap.get("version") as Int + 1
+            var versionAfterConflict1 = "" + serverMap["version"]
+            var versionAfterConflict = versionAfterConflict1.toInt()
+
+            Log.e("L 2 ---", "$versionAfterConflict")
+
+            var mutation = CheckAndUpdateTaskMutation.builder().id(clientState["id"].toString())
+                .title(clientState["title"].toString()).version(versionAfterConflict)
+                .description(clientState["description"].toString()).status("test").build()
+
+            val mutationCall = Utils.getApolloClient(context)?.mutate(
+                mutation
+            )
+
+            val callback = object : ApolloCall.Callback<CheckAndUpdateTaskMutation.Data>() {
+                override fun onFailure(e: ApolloException) {
+                    Log.e("onFailure() updateTask", "${mutation.variables().valueMap()}")
+                    e.printStackTrace()
+                }
+
+                override fun onResponse(response: Response<CheckAndUpdateTaskMutation.Data>) {
+                    Log.e("onResp checkAndUpdate", "${response.data()?.checkAndUpdateTask()?.title()}")
+                    val result = response.data()?.checkAndUpdateTask()
+
+                    //In case of conflicts data returned from the server id null.
+                    result?.let {
+                        Log.e("CheckAndUpdateTask", "onResponse-UpdateTask- $it")
+                    }
+                }
+            }
+            mutationCall?.enqueue(callback)
 
             /* You can run a switch case on the operation type to detect which type of mutation is it in which conflict occured
                and accordingly create an object of that mutation, resolve conflict and make a server call with it.
@@ -78,6 +109,35 @@ class UserConflictResolutionHandler(val context: Context) : ConflictResolutionIn
                     2. Create an object of mutation.
                     3. Again make a call to the server.
                     */
+                }
+
+                "checkAndUpdateTask" -> {
+                    Log.e("CheckAndUpdateTask", "inside it")
+                    var mutation = CheckAndUpdateTaskMutation.builder().id(clientState["id"].toString())
+                        .title(clientState["title"].toString()).version(versionAfterConflict)
+                        .description(clientState["description"].toString()).status("test").build()
+
+                    val mutationCall = Utils.getApolloClient(context)?.mutate(
+                        mutation
+                    )
+
+                    val callback = object : ApolloCall.Callback<CheckAndUpdateTaskMutation.Data>() {
+                        override fun onFailure(e: ApolloException) {
+                            Log.e("onFailure() updateTask", "${mutation.variables().valueMap()}")
+                            e.printStackTrace()
+                        }
+
+                        override fun onResponse(response: Response<CheckAndUpdateTaskMutation.Data>) {
+                            Log.e("onResp checkAndUpdate", "${response.data()?.checkAndUpdateTask()?.title()}")
+                            val result = response.data()?.checkAndUpdateTask()
+
+                            //In case of conflicts data returned from the server id null.
+                            result?.let {
+                                Log.e("CheckAndUpdateTask", "onResponse-UpdateTask- $it")
+                            }
+                        }
+                    }
+                    mutationCall?.enqueue(callback)
                 }
             }
         }
