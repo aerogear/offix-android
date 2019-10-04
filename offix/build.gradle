@@ -50,7 +50,7 @@ dependencies {
     implementation 'com.apollographql.apollo:apollo-android-support:1.0.2'
     implementation 'com.apollographql.apollo:apollo-runtime:1.0.2'
 
-    implementation 'com.squareup.okhttp3:logging-interceptor:3.10.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:3.12.1'
 
     compileOnly 'org.jetbrains:annotations:13.0'
     testCompileOnly 'org.jetbrains:annotations:13.0'
