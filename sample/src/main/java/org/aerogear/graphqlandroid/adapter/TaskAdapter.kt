@@ -1,14 +1,12 @@
 package org.aerogear.graphqlandroid.adapter
 
 import android.content.Context
-import android.preference.PreferenceManager
 import android.support.v7.app.AlertDialog
 import android.support.v7.widget.RecyclerView
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
 import kotlinx.android.synthetic.main.alert_update_task.view.*
@@ -29,7 +27,7 @@ class TaskAdapter(private val notes: List<UserOutput>, private val context: Cont
     override fun onCreateViewHolder(container: ViewGroup, p1: Int): TaskHolder {
         return TaskHolder(
             LayoutInflater.from(container.context).inflate(
-                org.aerogear.graphqlandroid.R.layout.item_row_tasks,
+                R.layout.item_row_tasks,
                 container,
                 false
             )
@@ -41,19 +39,18 @@ class TaskAdapter(private val notes: List<UserOutput>, private val context: Cont
     override fun onBindViewHolder(holder: TaskHolder, position: Int) {
 
         val currentTask = notes[position]
-        var title_task = currentTask.title
-        var desc_task = currentTask.desc
-        var id_task = currentTask.id.toString()
+        val titleTask = currentTask.title
+        val descTask = currentTask.desc
+        val idTask = currentTask.id.toString()
 
         with(holder.itemView) {
             user_switch.isChecked = false
             title_tv.text = currentTask.title
             desc_tv.text = currentTask.desc
             id_tv.text = currentTask.id.toString()
-            if (!currentTask.firstName.isNullOrBlank()) {
+            if (!currentTask.firstName.isBlank()) {
                 user_switch.toggle()
-                firstName_tv.text = "${currentTask.firstName} ${currentTask.lastName}"
-            } else {
+                firstName_tv.text = resources.getString(R.string.task_name, currentTask.firstName, currentTask.lastName)
             }
         }
 
@@ -61,16 +58,16 @@ class TaskAdapter(private val notes: List<UserOutput>, private val context: Cont
             //Used for updating details of user
             val inflatedView = LayoutInflater.from(context)
                 .inflate(R.layout.alert_update_task, null, false)
-            inflatedView.etId.setText(id_task, TextView.BufferType.EDITABLE)
-            inflatedView.etTitle.setText(title_task, TextView.BufferType.EDITABLE)
-            inflatedView.etDesc.setText(desc_task, TextView.BufferType.EDITABLE)
+            inflatedView.etId.setText(idTask, TextView.BufferType.EDITABLE)
+            inflatedView.etTitle.setText(titleTask, TextView.BufferType.EDITABLE)
+            inflatedView.etDesc.setText(descTask, TextView.BufferType.EDITABLE)
             val customAlert: AlertDialog = AlertDialog.Builder(context)
                 .setView(inflatedView)
-                .setTitle("Update the details of the Task")
-                .setNegativeButton("No") { dialog, which ->
+                .setTitle(R.string.update_details)
+                .setNegativeButton(android.R.string.no) { dialog, _ ->
                     dialog.dismiss()
                 }
-                .setPositiveButton("Yes") { dialog, which ->
+                .setPositiveButton(android.R.string.yes) { dialog, _ ->
                     val id = inflatedView.etId.text.toString()
                     val titleEt = inflatedView.etTitle.text.toString()
                     val description = inflatedView.etDesc.text.toString()
@@ -90,16 +87,16 @@ class TaskAdapter(private val notes: List<UserOutput>, private val context: Cont
             //Used for updating details of user (to depict conflicts)
             val inflatedView = LayoutInflater.from(context)
                 .inflate(R.layout.alert_update_task, null, false)
-            inflatedView.etId.setText(id_task, TextView.BufferType.EDITABLE)
-            inflatedView.etTitle.setText(title_task, TextView.BufferType.EDITABLE)
-            inflatedView.etDesc.setText(desc_task, TextView.BufferType.EDITABLE)
+            inflatedView.etId.setText(idTask, TextView.BufferType.EDITABLE)
+            inflatedView.etTitle.setText(titleTask, TextView.BufferType.EDITABLE)
+            inflatedView.etDesc.setText(descTask, TextView.BufferType.EDITABLE)
             val customAlert: AlertDialog = AlertDialog.Builder(context)
                 .setView(inflatedView)
-                .setTitle("Update the details of the Task")
-                .setNegativeButton("No") { dialog, which ->
+                .setTitle(R.string.update_details)
+                .setNegativeButton(android.R.string.no) { dialog, _ ->
                     dialog.dismiss()
                 }
-                .setPositiveButton("Yes") { dialog, which ->
+                .setPositiveButton(android.R.string.yes) { dialog, _ ->
                     val id = inflatedView.etId.text.toString()
                     val titleEt = inflatedView.etTitle.text.toString()
                     val description = inflatedView.etDesc.text.toString()
@@ -111,7 +108,7 @@ class TaskAdapter(private val notes: List<UserOutput>, private val context: Cont
                     dialog.dismiss()
                     Toast.makeText(
                         context,
-                        "You made a conflicted mutation! But no worries, it's resolved now.",
+                        R.string.made_conflit_mutation,
                         Toast.LENGTH_LONG
                     ).show()
                 }
@@ -126,17 +123,16 @@ class TaskAdapter(private val notes: List<UserOutput>, private val context: Cont
                     val inflatedView =
                         LayoutInflater.from(context)
                             .inflate(R.layout.alertfrag_create_user, null, false)
-                    inflatedView.etTaskIdUser.setText(id_task, TextView.BufferType.EDITABLE)
-                    inflatedView.etTitleUser.setText(title_task, TextView.BufferType.EDITABLE)
+                    inflatedView.etTaskIdUser.setText(idTask, TextView.BufferType.EDITABLE)
+                    inflatedView.etTitleUser.setText(titleTask, TextView.BufferType.EDITABLE)
                     val customAlert: AlertDialog = AlertDialog.Builder(context)
                         .setView(inflatedView)
-                        .setTitle("Assign the User a task")
-                        .setNegativeButton("No") { dialog, which ->
+                        .setTitle(R.string.assing_task)
+                        .setNegativeButton(android.R.string.no) { dialog, _ ->
                             buttonView.isChecked = false
                             dialog.dismiss()
                         }
-                        .setPositiveButton("Yes") { dialog, which ->
-                            val taskId = inflatedView.etTaskIdUser.text.toString()
+                        .setPositiveButton(android.R.string.yes) { dialog, _ ->
                             val title = inflatedView.etTitleUser.text.toString()
                             val firstName = inflatedView.etFirstName.text.toString()
                             val lastName = inflatedView.etLastName.text.toString()
@@ -146,7 +142,7 @@ class TaskAdapter(private val notes: List<UserOutput>, private val context: Cont
                                 firstName,
                                 lastName,
                                 email,
-                                id_task
+                                idTask
                             )
                             buttonView.isChecked = true
                             dialog.dismiss()
@@ -165,7 +161,7 @@ class TaskAdapter(private val notes: List<UserOutput>, private val context: Cont
             //Used for updating details of user
             val inflatedView =
                 LayoutInflater.from(context).inflate(R.layout.alert_update_user, null, false)
-            inflatedView.etIdassigned.setText(id_task, TextView.BufferType.EDITABLE)
+            inflatedView.etIdassigned.setText(idTask, TextView.BufferType.EDITABLE)
             inflatedView.etFname.setText(currentTask.firstName, TextView.BufferType.EDITABLE)
             inflatedView.etLname.setText(currentTask.lastName, TextView.BufferType.EDITABLE)
             inflatedView.etLEmailUSer.setText(currentTask.email, TextView.BufferType.EDITABLE)
@@ -174,11 +170,11 @@ class TaskAdapter(private val notes: List<UserOutput>, private val context: Cont
 
             val customAlert: AlertDialog = AlertDialog.Builder(context)
                 .setView(inflatedView)
-                .setTitle("Update details of the User")
-                .setNegativeButton("No") { dialog, which ->
+                .setTitle(R.string.update_details)
+                .setNegativeButton(android.R.string.no) { dialog, _ ->
                     dialog.dismiss()
                 }
-                .setPositiveButton("Yes") { dialog, which ->
+                .setPositiveButton(android.R.string.yes) { dialog, _ ->
                     val taskId = inflatedView.etIdassigned.text.toString()
                     val userId = inflatedView.etIdUSer.text.toString()
                     val title = inflatedView.etTitleUser.text.toString()

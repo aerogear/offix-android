@@ -33,12 +33,12 @@ class UserConflictResolutionHandler(val context: Context) : ConflictResolutionIn
         val containsVersion = serverMap.containsKey("version")
 
         if (containsVersion) {
-            var versionAfterConflict1 = "" + serverMap["version"]
-            var versionAfterConflict = versionAfterConflict1.toInt()
+            val versionAfterConflict1 = "" + serverMap["version"]
+            val versionAfterConflict = versionAfterConflict1.toInt()
 
             Log.e("L 2 ---", "$versionAfterConflict")
 
-            var mutation = CheckAndUpdateTaskMutation.builder().id(clientState["id"].toString())
+            val mutation = CheckAndUpdateTaskMutation.builder().id(clientState["id"].toString())
                 .title(clientState["title"].toString()).version(versionAfterConflict)
                 .description(clientState["description"].toString()).status("test").build()
 
@@ -79,7 +79,7 @@ class UserConflictResolutionHandler(val context: Context) : ConflictResolutionIn
                     val input = TaskInput.builder().title(clientState["title"].toString()).version(versionAfterConflict)
                         .description(clientState["description"].toString()).status("test").build()
 
-                    var mutation = UpdateTaskMutation.builder().id(clientState["id"].toString()).input(input).build()
+                    val mutation = UpdateTaskMutation.builder().id(clientState["id"].toString()).input(input).build()
                     val mutationCall = Utils.getApolloClient(context)?.mutate(
                         mutation
                     )
@@ -113,7 +113,7 @@ class UserConflictResolutionHandler(val context: Context) : ConflictResolutionIn
 
                 "checkAndUpdateTask" -> {
                     Log.e("CheckAndUpdateTask", "inside it")
-                    var mutation = CheckAndUpdateTaskMutation.builder().id(clientState["id"].toString())
+                    val mutation = CheckAndUpdateTaskMutation.builder().id(clientState["id"].toString())
                         .title(clientState["title"].toString()).version(versionAfterConflict)
                         .description(clientState["description"].toString()).status("test").build()
 

@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">TasksApp</string>
+    <string name="task_name">%s %s</string>
+    <string name="new_task">Create a new Task</string>
+    <string name="user_updated">User with userId %d is updated</string>
+    <string name="user_updates_stored">Updates in User with userId %d is stored offline. Changes will be synced to the server when app comes online.</string>
+    <string name="update_details">Update the details of the Task</string>
+    <string name="made_conflit_mutation">You made a conflicted mutation! But no worries, it\'s resolved now.</string>
+    <string name="assing_task">Assign the User a task</string>
 </resources>
