@@ -33,13 +33,13 @@ class LoggingInterceptor : Interceptor {
     }
 
     private fun bodyToString(request: Request): String {
-        try {
+        return try {
             val copy = request.newBuilder().build()
             val buffer = Buffer()
             copy.body()?.writeTo(buffer)
-            return buffer.readUtf8()
+            buffer.readUtf8()
         } catch (e: IOException) {
-            return "did not work"
+            "did not work"
         }
     }
 }

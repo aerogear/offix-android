@@ -21,23 +21,21 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.alertfrag_create_tasks.view.*
 import org.aerogear.graphqlandroid.*
 import org.aerogear.graphqlandroid.adapter.TaskAdapter
-import org.aerogear.graphqlandroid.model.NamePair
 import org.aerogear.graphqlandroid.model.UserOutput
 import org.aerogear.graphqlandroid.type.TaskInput
-import org.aerogear.graphqlandroid.type.UserFilter
 import org.aerogear.graphqlandroid.type.UserInput
 import org.aerogear.offix.Offline
 
 class MainActivity : AppCompatActivity() {
 
     var tasksList = arrayListOf<UserOutput>()
-    val TAG = javaClass.simpleName
+    private val TAG = javaClass.simpleName
     val taskAdapter by lazy {
         TaskAdapter(tasksList, this)
     }
 
     private val disposables = CompositeDisposable()
-    var apolloQueryWatcher: ApolloQueryWatcher<FindAllTasksQuery.Data>? = null
+    private var apolloQueryWatcher: ApolloQueryWatcher<FindAllTasksQuery.Data>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,14 +47,14 @@ class MainActivity : AppCompatActivity() {
                 LayoutInflater.from(this).inflate(R.layout.alertfrag_create_tasks, null, false)
             val customAlert: AlertDialog = AlertDialog.Builder(this)
                 .setView(inflatedView)
-                .setTitle("Create a new Task")
-                .setNegativeButton("No") { dialog, which ->
+                .setTitle(R.string.new_task)
+                .setNegativeButton(android.R.string.no) { dialog, _ ->
                     dialog.dismiss()
                 }
-                .setPositiveButton("Yes") { dialog, which ->
+                .setPositiveButton(android.R.string.yes) { dialog, _ ->
                     val title = inflatedView.etTitleTask.text.toString()
                     val desc = inflatedView.etDescTask.text.toString()
-                    createtask(title, desc)
+                    createTask(title, desc)
                     dialog.dismiss()
                 }
                 .create()
@@ -73,13 +71,13 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun doSampleUpdate() {
+    private fun doSampleUpdate() {
         Log.e(TAG, " --------------- doSampleUpdate")
         tasksList.clear()
         getTasks()
     }
 
-    fun getTasks() {
+    private fun getTasks() {
         Log.e(TAG, " ----- getTasks")
 
         tasksList.clear()
@@ -98,26 +96,34 @@ class MainActivity : AppCompatActivity() {
                         Log.e(TAG, "on Response getTasks : Data ${response.data()}")
                         val result = response.data()?.findAllTasks()
 
-                        result?.forEach {
-                            val title = it.title()
-                            val desc = it.description()
-                            val id = it.id()
+                        result?.forEach { allTasks ->
+                            val title = allTasks.title()
+                            val desc = allTasks.description()
+                            val id = allTasks.id()
                             var firstName = ""
                             var lastName = ""
                             var email = ""
                             var userId = ""
-                            it.assignedTo()?.let {
-                                firstName = it.firstName()
-                                lastName = it.lastName()
-                                email = it.email()
-                                userId = it.id().toString()
+                            allTasks.assignedTo()?.let { query ->
+                                firstName = query.firstName()
+                                lastName = query.lastName()
+                                email = query.email()
+                                userId = query.id()
                             } ?: kotlin.run {
                                 firstName = ""
                                 lastName = ""
                                 email = ""
                                 userId = ""
                             }
-                            val taskOutput = UserOutput(title, desc, id.toInt(), firstName, lastName, userId, email)
+                            val taskOutput = UserOutput(
+                                title,
+                                desc,
+                                id.toInt(),
+                                firstName,
+                                lastName,
+                                userId,
+                                email
+                            )
                             runOnUiThread {
                                 tasksList.add(taskOutput)
                                 taskAdapter.notifyDataSetChanged()
@@ -128,42 +134,17 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun getUser(id: Int): NamePair {
-        Log.e("${TAG} Inside getUser", "TaskId: $id")
-        var namePair = NamePair("", "")
-        val userFilter = UserFilter.builder().id(id.toString()).build()
-        FindUsersQuery.builder().fields(userFilter).build()?.let {
-            Utils.getApolloClient(this)?.query(it)?.responseFetcher(ApolloResponseFetchers.CACHE_FIRST)
-                ?.enqueue(object : ApolloCall.Callback<FindUsersQuery.Data>() {
-                    override fun onFailure(e: ApolloException) {
-                        e.printStackTrace()
-                    }
-
-                    override fun onResponse(response: Response<FindUsersQuery.Data>) {
-                        Log.e(TAG, "on Response : response.data ${response.data()}")
-                        val result = response.data()?.findUsers()
-
-                        result?.forEach {
-                            var firstName = it.firstName()
-                            var lastName = it.lastName()
-                            namePair.fName = firstName
-                            namePair.lName = lastName
-                        }
-                    }
-                })
-        }
-        return namePair
-    }
-
     fun updateTask(id: String, title: String, description: String) {
         Log.e(TAG, "inside update title in MainActivity")
 
         /*
         As version is assumed to be auto incremented ( //TODO Have to make changes in sqlite db)
         */
-        val input = TaskInput.builder().title(title).version(1).description(description).status("test").build()
+        val input =
+            TaskInput.builder().title(title).version(1).description(description).status("test")
+                .build()
 
-        var mutation = UpdateTaskMutation.builder().id(id).input(input).build()
+        val mutation = UpdateTaskMutation.builder().id(id).input(input).build()
 
         Log.e(TAG, " updateTask ********: - $mutation")
 
@@ -197,7 +178,8 @@ class MainActivity : AppCompatActivity() {
         }
         mutationCall?.enqueue(callback)
         if (Offline.isNetwork()) {
-            Toast.makeText(this@MainActivity, "Task with id $id is updated", Toast.LENGTH_LONG).show()
+            Toast.makeText(this@MainActivity, "Task with id $id is updated", Toast.LENGTH_LONG)
+                .show()
         } else {
             Toast.makeText(
                 this@MainActivity,
@@ -208,13 +190,22 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun updateUser(idUser: String, taskId: String, title: String, firstName: String, lastName: String, email: String) {
+    fun updateUser(
+        idUser: String,
+        taskId: String,
+        title: String,
+        firstName: String,
+        lastName: String,
+        email: String
+    ) {
         Log.e(TAG, "inside updateUser in MainActivity")
 
-        val input = UserInput.builder().title(title).lastName(lastName).firstName(firstName).email(email).taskId(taskId)
-            .creationmetadataId(taskId).build()
+        val input =
+            UserInput.builder().title(title).lastName(lastName).firstName(firstName).email(email)
+                .taskId(taskId)
+                .creationmetadataId(taskId).build()
 
-        var mutation = UpdateUserMutation.builder().id(idUser).input(input).build()
+        val mutation = UpdateUserMutation.builder().id(idUser).input(input).build()
 
         Log.e(TAG, " updateUser ********: - $mutation")
 
@@ -248,24 +239,30 @@ class MainActivity : AppCompatActivity() {
         }
         mutationCall?.enqueue(callback)
         if (Offline.isNetwork()) {
-            Toast.makeText(this, "User with userId$idUser is updated", Toast.LENGTH_LONG).show()
+            Toast.makeText(
+                this,
+                resources.getText(R.string.user_updated, idUser),
+                Toast.LENGTH_LONG
+            ).show()
         } else {
             Toast.makeText(
                 this,
-                "Updations in User with userId$idUser is stored offline. Changes will be synced to the server when app comes online.",
+                resources.getText(R.string.user_updates_stored, idUser),
                 Toast.LENGTH_LONG
             ).show()
         }
 
     }
 
-    fun createtask(title: String, description: String) {
+    private fun createTask(title: String, description: String) {
         Log.e(TAG, "inside create title")
 
         /*
          As version is assumed to be auto incremented ( //TODO Have to make changes in sqlite db)
          */
-        val input = TaskInput.builder().title(title).description(description).version(1).status("test").build()
+        val input =
+            TaskInput.builder().title(title).description(description).version(1).status("test")
+                .build()
 
         val mutation = CreateTaskMutation.builder().input(input).build()
 
@@ -304,11 +301,19 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun createUser(title: String, firstName: String, lastName: String, email: String, taskId: String) {
+    fun createUser(
+        title: String,
+        firstName: String,
+        lastName: String,
+        email: String,
+        taskId: String
+    ) {
         Log.e(TAG, "inside create user")
 
-        val input = UserInput.builder().taskId(taskId).email(email).firstName(firstName).lastName(lastName).title(title)
-            .creationmetadataId(taskId).build()
+        val input =
+            UserInput.builder().taskId(taskId).email(email).firstName(firstName).lastName(lastName)
+                .title(title)
+                .creationmetadataId(taskId).build()
 
         val mutation = CreateUserMutation.builder().input(input).build()
 
@@ -334,7 +339,11 @@ class MainActivity : AppCompatActivity() {
         }
         mutationCall?.enqueue(callback)
         if (Offline.isNetwork()) {
-            Toast.makeText(this, "Task with id $taskId is assigned to $firstName $lastName", Toast.LENGTH_LONG)
+            Toast.makeText(
+                this,
+                "Task with id $taskId is assigned to $firstName $lastName",
+                Toast.LENGTH_LONG
+            )
                 .show()
         } else {
             Toast.makeText(
@@ -352,8 +361,9 @@ class MainActivity : AppCompatActivity() {
         As version is assumed to be auto incremented ( //TODO Have to make changes in sqlite db)
         */
 
-        var mutation =
-            CheckAndUpdateTaskMutation.builder().version(1).id(id).title(title).description(description).status("test")
+        val mutation =
+            CheckAndUpdateTaskMutation.builder().version(1).id(id).title(title)
+                .description(description).status("test")
                 .build()
 
         Log.e(TAG, " checkAndUpdateTask ********: - $mutation")
@@ -368,7 +378,10 @@ class MainActivity : AppCompatActivity() {
             " checkAndUpdateTask 20: - ${mutationCall?.requestHeaders(com.apollographql.apollo.request.RequestHeaders.builder().build())}"
         )
         Log.e(TAG, " checkAndUpdateTask 21: - ${mutationCall?.operation()?.queryDocument()}")
-        Log.e(TAG, " checkAndUpdateTask 22: - ${mutationCall?.operation()?.variables()?.valueMap()}")
+        Log.e(
+            TAG,
+            " checkAndUpdateTask 22: - ${mutationCall?.operation()?.variables()?.valueMap()}"
+        )
         Log.e(TAG, " checkAndUpdateTask 23: - ${mutationCall?.operation()?.name()}")
 
         val callback = object : ApolloCall.Callback<CheckAndUpdateTaskMutation.Data>() {
@@ -388,7 +401,11 @@ class MainActivity : AppCompatActivity() {
         }
         mutationCall?.enqueue(callback)
         if (Offline.isNetwork()) {
-            Toast.makeText(this@MainActivity, "Task with id $id is updated without any Conflict.", Toast.LENGTH_LONG)
+            Toast.makeText(
+                this@MainActivity,
+                "Task with id $id is updated without any Conflict.",
+                Toast.LENGTH_LONG
+            )
                 .show()
         } else {
             Toast.makeText(
@@ -399,7 +416,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun subscriptionNewTask() {
+    private fun subscriptionNewTask() {
         val subscription = NewTaskSubscription()
         val subscriptionCall = Utils.getApolloClient(this)
             ?.subscribe(subscription)
@@ -428,7 +445,7 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
-    fun subscriptionUpdateTask() {
+    private fun subscriptionUpdateTask() {
 
         val subscription = UpdatedTaskSubscription()
         val subscriptionCall = Utils.getApolloClient(this)
@@ -442,7 +459,10 @@ class MainActivity : AppCompatActivity() {
                     override fun onNext(response: Response<UpdatedTaskSubscription.Data>) {
                         val res = response.data()?.updatedTask()
                         res?.let {
-                            Log.e(TAG, " inside subscriptionUpdateTask ${it.title()} mutated upon updating")
+                            Log.e(
+                                TAG,
+                                " inside subscriptionUpdateTask ${it.title()} mutated upon updating"
+                            )
                         }
                     }
 
@@ -458,7 +478,7 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
-    fun subscriptionNewUser() {
+    private fun subscriptionNewUser() {
         val subscription = NewUserSubscription()
         val subscriptionCall = Utils.getApolloClient(this)
             ?.subscribe(subscription)
@@ -472,7 +492,10 @@ class MainActivity : AppCompatActivity() {
                         override fun onNext(response: Response<NewUserSubscription.Data>) {
                             val res = response.data()?.newUser()
                             res?.let {
-                                Log.e(TAG, " inside subscriptionNewUser ${it.title()} mutated upon new title")
+                                Log.e(
+                                    TAG,
+                                    " inside subscriptionNewUser ${it.title()} mutated upon new title"
+                                )
                             }
                         }
 
@@ -488,7 +511,7 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
-    fun subscriptionUpdateUser() {
+    private fun subscriptionUpdateUser() {
 
         val subscription = UpdatedUserSubscription()
         val subscriptionCall = Utils.getApolloClient(this)
@@ -503,7 +526,10 @@ class MainActivity : AppCompatActivity() {
 
                         val res = response.data()?.updatedUser()
                         res?.let {
-                            Log.e(TAG, " inside subscriptionUpdateUser ${it.title()} mutated upon updating")
+                            Log.e(
+                                TAG,
+                                " inside subscriptionUpdateUser ${it.title()} mutated upon updating"
+                            )
                         }
                     }
 
