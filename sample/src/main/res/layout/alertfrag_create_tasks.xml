@@ -1,30 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="match_parent"
-              android:orientation="vertical"
-              android:layout_marginTop="4dp"
-              android:layout_height="match_parent">
+    android:layout_width="match_parent"
+    android:orientation="vertical"
+    android:layout_marginTop="@dimen/tiny_margin"
+    android:layout_height="match_parent">
 
     <android.support.design.widget.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+        android:id="@+id/ilTitleTask"
+        android:layout_marginStart="@dimen/large_margin"
+        android:layout_marginTop="@dimen/small_margin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
         <EditText android:layout_width="match_parent"
-                  android:layout_height="wrap_content"
-                  android:id="@+id/etTitleTask"
-                  android:layout_marginStart="24dp"
-                  android:layout_marginEnd="24dp"
-                  android:hint="Title of the Task"/>
+            android:layout_height="wrap_content"
+            android:id="@+id/etTitleTask"
+            android:layout_marginEnd="@dimen/large_margin"
+            android:hint="@string/title_of_task"/>
     </android.support.design.widget.TextInputLayout>
 
     <android.support.design.widget.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+        android:layout_marginTop="@dimen/small_margin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
         <EditText android:layout_width="match_parent"
-                  android:layout_height="wrap_content"
-                  android:id="@+id/etDescTask"
-                  android:layout_marginStart="24dp"
-                  android:layout_marginEnd="24dp"
-                  android:hint="Description of the Task"/>
+            android:layout_height="wrap_content"
+            android:id="@+id/etDescTask"
+            android:layout_marginStart="@dimen/large_margin"
+            android:layout_marginEnd="@dimen/large_margin"
+            android:hint="@string/description_of_task"/>
     </android.support.design.widget.TextInputLayout>
 
 </LinearLayout>

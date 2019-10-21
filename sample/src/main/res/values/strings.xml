@@ -7,4 +7,7 @@
     <string name="update_details">Update the details of the Task</string>
     <string name="made_conflit_mutation">You made a conflicted mutation! But no worries, it\'s resolved now.</string>
     <string name="assing_task">Assign the User a task</string>
+    <string name="title_of_task">Title of the Task</string>
+    <string name="description_of_task">Description of the Task</string>
+    <string name="task_title_error">Title of task can\'t be empty</string>
 </resources>
