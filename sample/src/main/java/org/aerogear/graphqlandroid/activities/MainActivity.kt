@@ -4,6 +4,8 @@ import android.os.Bundle
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.view.LayoutInflater
 import android.widget.Toast
@@ -45,19 +47,50 @@ class MainActivity : AppCompatActivity() {
             //Used for creating a new task
             val inflatedView =
                 LayoutInflater.from(this).inflate(R.layout.alertfrag_create_tasks, null, false)
+            val ilTitleTask = inflatedView.ilTitleTask
+            val etTitleTask = inflatedView.etTitleTask
+            etTitleTask.addTextChangedListener(object :TextWatcher{
+                override fun beforeTextChanged(
+                    s: CharSequence?,
+                    start: Int,
+                    count: Int,
+                    after: Int
+                ) {
+
+                }
+
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+
+                }
+
+                override fun afterTextChanged(s: Editable?) {
+                    if(s.toString().isNotEmpty()){
+                        ilTitleTask.error = null
+                    }
+                }
+
+            })
             val customAlert: AlertDialog = AlertDialog.Builder(this)
                 .setView(inflatedView)
                 .setTitle(R.string.new_task)
                 .setNegativeButton(android.R.string.no) { dialog, _ ->
                     dialog.dismiss()
                 }
-                .setPositiveButton(android.R.string.yes) { dialog, _ ->
-                    val title = inflatedView.etTitleTask.text.toString()
-                    val desc = inflatedView.etDescTask.text.toString()
-                    createTask(title, desc)
-                    dialog.dismiss()
-                }
+                .setPositiveButton(android.R.string.yes, null)
                 .create()
+            customAlert.setOnShowListener {
+                val positiveButton = customAlert.getButton(AlertDialog.BUTTON_POSITIVE)
+                positiveButton.setOnClickListener {
+                    val title = etTitleTask.text.toString()
+                    if(title.isEmpty()){
+                        ilTitleTask.error = resources.getString(R.string.task_title_error)
+                    } else {
+                        val desc = inflatedView.etDescTask.text.toString()
+                        createTask(title, desc)
+                        customAlert.dismiss()
+                    }
+                }
+            }
             customAlert.show()
         }
         recycler_view.layoutManager = LinearLayoutManager(this)
