@@ -49,7 +49,10 @@ See [offix website](https://android.offix.dev) for usage and more details.
 
 See [sample](https://github.com/aerogear/offix-android/tree/master/sample) for example application.<br/>
 
- 
+## Presentation Link
+
+https://docs.google.com/presentation/d/1SzAfRQTqfMtXbp6jFfr99jkIjjZWslX3tU2Wkoec2Uk/edit?usp=sharing
+
 ## Contributing 
 
 See [contribution guidelines](./CONTRIBUTING.md) file for more information
