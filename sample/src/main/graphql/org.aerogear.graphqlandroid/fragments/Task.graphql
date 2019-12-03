@@ -1,0 +1,20 @@
+fragment TaskFields on Task {
+    id
+    version
+    title
+    description
+    status
+}
+
+fragment CreationData on Task {
+    creationMetadata{
+        createdDate
+        taskId
+        createdBy{
+            ...UserFields
+        }
+    }
+    assignedTo{
+        ...UserFields
+    }
+}

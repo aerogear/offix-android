@@ -1,11 +1,5 @@
 subscription updatedUser{
     updatedUser{
-        id
-        firstName
-        lastName
-        title
-        email
-        taskId
-        creationmetadataId
+        ...UserFields
     }
 }

@@ -1,31 +1,6 @@
 subscription newTask{
     newTask{
-        id
-        version
-        title
-        description
-        status
-        creationMetadata{
-            createdDate
-            taskId
-            createdBy{
-                id
-                firstName
-                lastName
-                title
-                email
-                taskId
-                creationmetadataId
-            }
-        }
-        assignedTo{
-            id
-            firstName
-            lastName
-            title
-            email
-            taskId
-            creationmetadataId
-        }
+        ...TaskFields
+        ...CreationData
     }
 }
