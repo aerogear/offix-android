@@ -109,7 +109,6 @@ class MainActivity : AppCompatActivity() {
         tasksList.clear()
         getTasks()
     }
-
     private fun getTasks() {
         Log.e(TAG, " ----- getTasks")
 
