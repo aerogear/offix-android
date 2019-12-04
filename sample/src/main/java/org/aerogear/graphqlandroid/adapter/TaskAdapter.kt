@@ -14,6 +14,10 @@ import kotlinx.android.synthetic.main.alert_update_user.view.*
 import kotlinx.android.synthetic.main.alertfrag_create_user.view.*
 import kotlinx.android.synthetic.main.alertfrag_create_user.view.etTitleUser
 import kotlinx.android.synthetic.main.item_row_tasks.view.*
+import org.aerogear.graphqlandroid.managers.MutationManager.checkAndUpdateTask
+import org.aerogear.graphqlandroid.managers.MutationManager.createUser
+import org.aerogear.graphqlandroid.managers.MutationManager.updateTask
+import org.aerogear.graphqlandroid.managers.MutationManager.updateUser
 import org.aerogear.graphqlandroid.R
 import org.aerogear.graphqlandroid.activities.MainActivity
 import org.aerogear.graphqlandroid.model.UserOutput
@@ -71,10 +75,11 @@ class TaskAdapter(private val notes: List<UserOutput>, private val context: Cont
                     val id = inflatedView.etId.text.toString()
                     val titleEt = inflatedView.etTitle.text.toString()
                     val description = inflatedView.etDesc.text.toString()
-                    if (context is MainActivity) this.context.updateTask(
+                    if (context is MainActivity) updateTask(
                         id,
                         titleEt,
-                        description
+                        description,
+                        context
                     )
                     dialog.dismiss()
                 }
@@ -100,10 +105,11 @@ class TaskAdapter(private val notes: List<UserOutput>, private val context: Cont
                     val id = inflatedView.etId.text.toString()
                     val titleEt = inflatedView.etTitle.text.toString()
                     val description = inflatedView.etDesc.text.toString()
-                    if (context is MainActivity) this.context.checkAndUpdateTask(
+                    if (context is MainActivity) checkAndUpdateTask(
                         id,
                         titleEt,
-                        description
+                        description,
+                        context
                     )
                     dialog.dismiss()
                     Toast.makeText(
@@ -137,12 +143,13 @@ class TaskAdapter(private val notes: List<UserOutput>, private val context: Cont
                             val firstName = inflatedView.etFirstName.text.toString()
                             val lastName = inflatedView.etLastName.text.toString()
                             val email = inflatedView.etEmail.text.toString()
-                            if (context is MainActivity) this.context.createUser(
+                            if (context is MainActivity) createUser(
                                 title,
                                 firstName,
                                 lastName,
                                 email,
-                                idTask
+                                idTask,
+                                context
                             )
                             buttonView.isChecked = true
                             dialog.dismiss()
@@ -181,13 +188,14 @@ class TaskAdapter(private val notes: List<UserOutput>, private val context: Cont
                     val firstName = inflatedView.etFname.text.toString()
                     val lastName = inflatedView.etLname.text.toString()
                     val email = inflatedView.etLEmailUSer.text.toString()
-                    if (context is MainActivity) this.context.updateUser(
+                    if (context is MainActivity) updateUser(
                         userId,
                         taskId,
                         title,
                         firstName,
                         lastName,
-                        email
+                        email,
+                        context
                     )
                     dialog.dismiss()
                 }

@@ -22,5 +22,6 @@ public class ExampleInstrumentedTest {
         Context appContext = InstrumentationRegistry.getTargetContext();
 
         assertEquals("org.aerogear.offixsdk.test", appContext.getPackageName());
+
     }
 }

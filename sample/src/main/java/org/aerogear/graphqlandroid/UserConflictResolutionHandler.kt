@@ -2,14 +2,11 @@ package org.aerogear.graphqlandroid
 
 import android.content.Context
 import android.util.Log
-import android.widget.Toast
 import com.apollographql.apollo.ApolloCall
 import com.apollographql.apollo.api.Response
 import com.apollographql.apollo.exception.ApolloException
-import org.aerogear.graphqlandroid.activities.MainActivity
 import org.aerogear.graphqlandroid.type.TaskInput
 import org.aerogear.offix.interfaces.ConflictResolutionInterface
-import com.apollographql.apollo.api.Operation as Operation1
 
 /*
 UserConflictResolutionHandler extends ConflictResolutionInterface.
