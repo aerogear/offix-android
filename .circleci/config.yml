@@ -30,19 +30,18 @@ jobs:
       - run:
           name: Generate Maven Artifacts
           command: ./gradlew assembleDebug
-
 workflows:
   version: 2
   build:
+    steps:
+      - codecov/upload:
+          file: coverage/*.json
+          token: "f93aa7c8-1579-4687-870f-cc6e08a93316"
+      - run:
+          name: send to codecov
+          command: "bash <(curl -s https://codecov.io/bash) -t f93aa7c8-1579-4687-870f-cc6e08a93316"
     jobs:
       - build:
-          setps:
-            - codecov/upload:
-                file: coverage/*.json
-                token: "f93aa7c8-1579-4687-870f-cc6e08a93316"
-                  - run:
-                      name: send to codecov
-                      command: "bash <(curl -s https://codecov.io/bash) -t f93aa7c8-1579-4687-870f-cc6e08a93316"
           filters:
             tags:
               only: /.*/
