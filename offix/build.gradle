@@ -13,6 +13,9 @@ buildscript {
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4'
     }
 }
+apollo {
+    generateKotlinModels = true // or false
+}
 
 task cleanBuildPublish(type: GradleBuild) {
     tasks = ['clean', 'build', 'bintrayUpload' , 'sourcesJar' ,'javadocJar' , 'javadoc']

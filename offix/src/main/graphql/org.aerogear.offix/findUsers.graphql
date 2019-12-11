@@ -1,0 +1,11 @@
+query findUsers($fields: UserFilter!){
+    findUsers(fields: $fields){
+        id
+        firstName
+        lastName
+        title
+        email
+        taskId
+        creationmetadataId
+    }
+}
