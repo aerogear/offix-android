@@ -1,4 +1,5 @@
 <p align="center">
+
   <img width="400" src="https://github.com/aerogear/offix/raw/master/resources/logo.png">
   <br/>
   Offix extends capabilities of Apollo GraphQL providing</br>
@@ -6,6 +7,7 @@
   
   [![codecov](https://codecov.io/gh/s091424/offix-android/branch/master/graph/badge.svg)](https://codecov.io/gh/s091424/offix-android)
   [![travis](https://api.travis-ci.com/s091424/offix-android.svg?branch=master)
+  
 </p>
 
 
