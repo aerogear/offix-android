@@ -5,6 +5,7 @@
   fully featured Offline Workflow and Conflict Resolution for Android Platform
   
   [![codecov](https://codecov.io/gh/s091424/offix-android/branch/master/graph/badge.svg)](https://codecov.io/gh/s091424/offix-android)
+  [![travis](https://api.travis-ci.com/s091424/offix-android.svg?branch=master)
 </p>
 
 
