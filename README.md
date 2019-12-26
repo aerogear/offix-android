@@ -3,6 +3,8 @@
   <br/>
   Offix extends capabilities of Apollo GraphQL providing</br>
   fully featured Offline Workflow and Conflict Resolution for Android Platform
+  
+  [![codecov](https://codecov.io/gh/s091424/offix-android/branch/master/graph/badge.svg)](https://codecov.io/gh/s091424/offix-android)
 </p>
 
 

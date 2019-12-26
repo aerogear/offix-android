@@ -3,7 +3,6 @@ package org.aerogear.graphqlandroid
 import com.apollographql.apollo.api.OperationName
 import org.aerogear.graphqlandroid.model.NamePair
 import org.aerogear.graphqlandroid.model.UserOutput
-import org.aerogear.graphqlandroid.type.TaskInput
 import org.junit.Test
 
 import org.junit.Assert.*
