@@ -1,6 +1,11 @@
 language: android
 dist: trusty
 
+env:
+  global:
+    - ANDROID_TARGET=android-28
+    - CODECOV_TOKEN=52bcf07f-611f-47cc-81f5-e86d77d6fcb7
+
 android:
   components:
      - android-28
