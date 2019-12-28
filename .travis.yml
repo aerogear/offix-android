@@ -4,6 +4,7 @@ dist: trusty
 env:
   global:
     - ANDROID_TARGET=android-28
+    - ANDROID_ABI=armeabi-v7a
     - CODECOV_TOKEN=52bcf07f-611f-47cc-81f5-e86d77d6fcb7
 
 android:
@@ -17,13 +18,17 @@ android:
      - $ANDROID_TARGET
      - sys-img-${ANDROID_ABI}-${ANDROID_TARGET}
 
+licenses:
+     - 'android-sdk-license-.+'
+
 script:
      - ./gradlew build jacocoTestReport
 
 before_install:
      - chmod +x gradlew
+     - yes | sdkmanager "platforms;android-28"
 
-after_success: 
+after_success:
      - bash <(curl -s https://codecov.io/bash) -t ${CODECOV_TOKEN}
 
 
