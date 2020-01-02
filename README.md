@@ -1,5 +1,5 @@
 [![Build Status](https://travis-ci.com/ParthPali/offix-android.svg?branch=add-codecov)](https://travis-ci.com/ParthPali/offix-android)
-[![codecov](https://codecov.io/gh/ParthPali/offix-android/branch/add-codecov)](https://codecov.io/gh/ParthPali/offix-android)
+[![codecov](https://codecov.io/gh/ParthPali/offix-android/branch/add-codecov/graph/badge.svg)](https://codecov.io/gh/ParthPali/offix-android)
 
 <p align="center">
   <img width="400" src="https://github.com/aerogear/offix/raw/master/resources/logo.png">
