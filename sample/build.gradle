@@ -1,11 +1,22 @@
+buildscript{
+    repositories{
+        jcenter()
+    }
+    dependencies{
+        classpath 'com.dicedmelon.gradle:jacoco-android:0.1.4'
+    }
+}
+
 apply plugin: 'com.android.application'
 apply plugin: 'com.apollographql.android'
 
 apply plugin: 'kotlin-android'
-
 apply plugin: 'kotlin-kapt'
-
 apply plugin: 'kotlin-android-extensions'
+
+apply plugin: 'jacoco-android'
+
+
 
 android {
     compileSdkVersion 28
@@ -22,6 +33,9 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+        debug{
+            testCoverageEnabled true
         }
     }
 }
