@@ -1,20 +1,8 @@
 mutation checkAndUpdateTask($id: ID!, $title: String, $description: String, $version: Int!, $status: String!){
     checkAndUpdateTask(id: $id, title: $title, description: $description, version: $version, status: $status){
-        id
-        version
-        title
-        description
-        status
-        creationMetadata{
-            createdDate
-            createdBy{
-                id
-                firstName
-                lastName
-                title
-                email
-            }
-        }
+
+        ...TaskDetails
+        ...creationMetaData
         assignedTo{
             id
             firstName

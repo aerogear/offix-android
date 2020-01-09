@@ -1,0 +1,11 @@
+fragment UserDetails on User{
+
+    id
+    firstName
+    lastName
+    title
+    email
+    taskId
+    creationmetadataId
+
+}
