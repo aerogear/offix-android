@@ -94,7 +94,12 @@ class InstrumentedTest {
                 }
 
                 override fun onResponse(response: Response<CreateTaskMutation.Data>) {
-                    assertTrue(true)
+
+                    val result = response.data()?.createTask()
+
+                    result?.let {
+                        assertTrue(true)
+                    }
                 }
             })
     }
@@ -119,7 +124,13 @@ class InstrumentedTest {
                 }
 
                 override fun onResponse(response: Response<UpdateTaskMutation.Data>) {
-                    assertTrue(true)
+
+                    val result = response.data()?.updateTask()
+
+                    result?.let{
+                        assertTrue(true)
+                    }
+
                 }
             })
     }
@@ -144,7 +155,11 @@ class InstrumentedTest {
                 }
 
                 override fun onResponse(response: Response<CreateUserMutation.Data>) {
-                    assertTrue(true)
+                    val result = response.data()?.createUser()
+
+                    result?.let {
+                        assertTrue(true)
+                    }
                 }
             })
     }
@@ -168,7 +183,12 @@ class InstrumentedTest {
                 }
 
                 override fun onResponse(response: Response<CheckAndUpdateTaskMutation.Data>) {
-                    assertTrue(true)
+
+                    val result = response.data()?.checkAndUpdateTask()
+
+                    result?.let {
+                        assertTrue(true)
+                    }
                 }
             })
     }
