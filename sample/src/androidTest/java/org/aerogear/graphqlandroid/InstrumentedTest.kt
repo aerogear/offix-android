@@ -1,6 +1,5 @@
 package org.aerogear.graphqlandroid
 
-import android.media.session.MediaSession
 import android.support.test.InstrumentationRegistry
 import android.support.test.runner.AndroidJUnit4
 
@@ -10,10 +9,6 @@ import org.junit.runner.RunWith
 import org.junit.Assert.*
 
 // Imports
-import android.util.Log
-import org.aerogear.graphqlandroid.*
-import org.aerogear.graphqlandroid.adapter.TaskAdapter
-import org.aerogear.graphqlandroid.model.UserOutput
 import org.aerogear.graphqlandroid.type.TaskInput
 import org.aerogear.graphqlandroid.type.UserInput
 import com.apollographql.apollo.ApolloCall
@@ -21,7 +16,6 @@ import com.apollographql.apollo.ApolloQueryWatcher
 import com.apollographql.apollo.api.Response
 import com.apollographql.apollo.exception.ApolloException
 import com.apollographql.apollo.fetcher.ApolloResponseFetchers
-import kotlinx.android.synthetic.main.item_row_tasks.view.*
 
 /**
  * Instrumented test, which will execute on an Android device.
@@ -29,7 +23,7 @@ import kotlinx.android.synthetic.main.item_row_tasks.view.*
  * See [testing documentation](http://d.android.com/tools/testing).
  */
 @RunWith(AndroidJUnit4::class)
-class ExampleInstrumentedTest {
+class InstrumentedTest {
 
     val appContext = InstrumentationRegistry.getTargetContext()
     private var apolloQueryWatcher: ApolloQueryWatcher<FindAllTasksQuery.Data>? = null
@@ -40,8 +34,9 @@ class ExampleInstrumentedTest {
         assertEquals("org.aerogear.graphqlandroid", appContext.packageName)
     }
 
+    // Test - Find All Tasks
     @Test
-    fun findAllTasksQuery(){
+    fun findAllTasks(){
 
         FindAllTasksQuery.builder()?.build()?.let{
             Utils.getApolloClient(this.appContext)?.query(it)
@@ -59,8 +54,9 @@ class ExampleInstrumentedTest {
         }
     }
 
+    // Test - Find All Users
     @Test
-    fun findAllUsersQuery(){
+    fun findAllUsers(){
 
         FindAllUsersQuery.builder()?.build()?.let{
             Utils.getApolloClient(appContext)?.query(it)
@@ -78,11 +74,14 @@ class ExampleInstrumentedTest {
         }
     }
 
+    // Test - Create A Task
     @Test
     fun createTask(){
 
-        val input = TaskInput.builder().title("Test Task 2").version(1).description("Test Description").status("test")
+        val input = TaskInput.builder().title("Test Task 2").version(1).description("Test Description")
+            .status("test")
             .build()
+
         val mutation = CreateTaskMutation.builder().input(input).build()
 
         Utils.getApolloClient(appContext)
@@ -100,10 +99,14 @@ class ExampleInstrumentedTest {
             })
     }
 
+    // Test - Update A Task
     @Test
     fun updateTask(){
 
-        val input = TaskInput.builder().title("Test Task Changed").version(1).description("Test Desc").status("test").build()
+        val input = TaskInput.builder().title("Test Task Changed").version(1).description("Test Desc")
+            .status("test")
+            .build()
+
         val mutation = UpdateTaskMutation.builder().id("6").input(input).build()
 
         Utils.getApolloClient(appContext)
@@ -121,9 +124,11 @@ class ExampleInstrumentedTest {
             })
     }
 
+    // Test - Create A User
     @Test
     fun createUser(){
-        val input = UserInput.builder().taskId("6").email("sample@example.com").firstName("ezio").lastName("auditore")
+        val input = UserInput.builder().taskId("6").email("sample@example.com").firstName("ezio")
+            .lastName("auditore")
             .title("User Test")
             .creationmetadataId("6").build()
 
@@ -144,6 +149,7 @@ class ExampleInstrumentedTest {
             })
     }
 
+    // Test - Check And Update A Task
     @Test
     fun checkAndUpdateTask(){
 
