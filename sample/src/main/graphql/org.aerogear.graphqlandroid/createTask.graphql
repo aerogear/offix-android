@@ -1,31 +1,6 @@
 mutation createTask($input: TaskInput!){
     createTask(input: $input){
-        id
-        version
-        title
-        description
-        status
-        creationMetadata{
-            createdDate
-            taskId
-            createdBy{
-                id
-                firstName
-                lastName
-                title
-                email
-                taskId
-                creationmetadataId
-            }
-        }
-        assignedTo{
-            id
-            firstName
-            lastName
-            title
-            email
-            taskId
-            creationmetadataId
-        }
+        ...taskDetails
+        ...taskUserCreationDetails
     }
 }

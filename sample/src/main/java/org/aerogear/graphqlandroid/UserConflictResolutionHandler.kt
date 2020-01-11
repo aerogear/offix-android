@@ -53,7 +53,7 @@ class UserConflictResolutionHandler(val context: Context) : ConflictResolutionIn
                 }
 
                 override fun onResponse(response: Response<CheckAndUpdateTaskMutation.Data>) {
-                    Log.e("onResp checkAndUpdate", "${response.data()?.checkAndUpdateTask()?.title()}")
+                    Log.e("onResp checkAndUpdate", "${response.data()?.checkAndUpdateTask()?.fragments()?.taskDetails()?.title()}")
                     val result = response.data()?.checkAndUpdateTask()
 
                     //In case of conflicts data returned from the server id null.
@@ -91,7 +91,7 @@ class UserConflictResolutionHandler(val context: Context) : ConflictResolutionIn
                         }
 
                         override fun onResponse(response: Response<UpdateTaskMutation.Data>) {
-                            Log.e("onResponse() updateTask", "${response.data()?.updateTask()?.title()}")
+                            Log.e("onResponse() updateTask", "${response.data()?.updateTask()?.fragments()?.taskDetails()?.title()}")
                             val result = response.data()?.updateTask()
 
                             //In case of conflicts data returned from the server id null.
@@ -128,7 +128,7 @@ class UserConflictResolutionHandler(val context: Context) : ConflictResolutionIn
                         }
 
                         override fun onResponse(response: Response<CheckAndUpdateTaskMutation.Data>) {
-                            Log.e("onResp checkAndUpdate", "${response.data()?.checkAndUpdateTask()?.title()}")
+                            Log.e("onResp checkAndUpdate", "${response.data()?.checkAndUpdateTask()?.fragments()?.taskDetails()?.title()}")
                             val result = response.data()?.checkAndUpdateTask()
 
                             //In case of conflicts data returned from the server id null.
