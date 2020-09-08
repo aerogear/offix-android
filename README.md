@@ -5,7 +5,7 @@
   fully featured Offline Workflow and Conflict Resolution for Android Platform
 </p>
 
-NOTE: Project is no longer maintained and updated to latest version of the Apollo Android SDK 
+> NOTE: Project is no longer maintained and updated to latest version of the Apollo Android SDK 
 
 ## Introduction
 
