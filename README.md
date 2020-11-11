@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.org/reaganiwadha/offix-android.svg?branch=master)](https://travis-ci.com/reaganiwadha/offix-android)
+[![Code Coverage](https://codecov.io/gh/reaganiwadha/offix-android/branch/master/graph/badge.svg)](https://travis-ci.com/reaganiwadha/offix-android)
+
 <p align="center">
   <img width="400" src="https://github.com/aerogear/offix/raw/master/resources/logo.png">
   <br/>
