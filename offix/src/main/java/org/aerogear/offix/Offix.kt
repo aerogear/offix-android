@@ -8,6 +8,7 @@ import com.apollographql.apollo.api.Input
 import com.apollographql.apollo.api.Mutation
 import com.apollographql.apollo.api.Operation
 import org.json.JSONObject
+import org.aerogear.offix.MutationDataCheck
 
 /*
 conflictedMutationClass variable stores the name of the mutation class in which conflict has occurred.
@@ -19,11 +20,11 @@ var conflictedMutationClass=""
  */
 fun getPersistenceMutation(mutation: Mutation<Operation.Data, Any, Operation.Variables>): org.aerogear.offix.persistence.Mutation {
 
-    val operationId = mutation.operationId()
-    val operationDoc = mutation.queryDocument()
-    val operationName = mutation.name()
+    val operationId = MutationDataCheck.checkOperationID(mutation.operationId())
+    val operationDoc = MutationDataCheck.checkOperationDoc(mutation.queryDocument())
+    val operationName = MutationDataCheck.checkOperationName(mutation.name())
     val valMap = mutation.variables().valueMap()
-    val jsonObject = JSONObject(valMap)
+    val jsonObject = MutationDataCheck.checkJSONObject(JSONObject(valMap))
     val responseClassName = mutation.javaClass.name
 
     /* Make an object of com.aerogear.offix.persistence.Mutation
