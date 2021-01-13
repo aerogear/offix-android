@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.com/sayamss/offix-android.svg?branch=codecov)](https://travis-ci.com/sayamss/offix-android)
+[![codecov](https://codecov.io/gh/sayamss/offix-android/branch/codecov/graph/badge.svg)](https://codecov.io/gh/sayamss/offix-android)
+
 <p align="center">
   <img width="400" src="https://github.com/aerogear/offix/raw/master/resources/logo.png">
   <br/>
