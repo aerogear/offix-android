@@ -19,6 +19,11 @@ task cleanBuildPublish(type: GradleBuild) {
 }
 
 android {
+
+    testOptions {
+        unitTests.returnDefaultValues = true
+    }
+
     compileSdkVersion 28
 
     defaultConfig {
@@ -39,6 +44,9 @@ android {
 }
 
 dependencies {
+
+    testImplementation 'org.json:json:20140107'
+
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'com.android.support:appcompat-v7:28.0.0'
