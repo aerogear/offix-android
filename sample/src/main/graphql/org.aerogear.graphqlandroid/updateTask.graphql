@@ -1,31 +1,9 @@
 mutation updateTask($id: ID!, $input: TaskInput!){
     updateTask(id: $id, input: $input){
-        id
-        version
-        title
-        description
-        status
-        creationMetadata{
-            createdDate
-            taskId
-            createdBy{
-                id
-                firstName
-                lastName
-                title
-                email
-                taskId
-                creationmetadataId
-            }
-        }
+        ...TaskDetails
+        ...creationMetaData
         assignedTo{
-            id
-            firstName
-            lastName
-            title
-            email
-            taskId
-            creationmetadataId
+            ...UserDetails
         }
     }
 }

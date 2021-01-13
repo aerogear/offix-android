@@ -1,3 +1,4 @@
+
 package org.aerogear.graphqlandroid
 
 import org.junit.Test

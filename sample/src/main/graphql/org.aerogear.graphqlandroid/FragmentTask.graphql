@@ -1,0 +1,22 @@
+fragment TaskDetails on Task{
+
+    id
+    version
+    title
+    description
+    status
+
+}
+
+fragment creationMetaData on Task{
+
+    creationMetadata{
+
+        createdDate
+        taskId
+        createdBy{
+            ...UserDetails
+        }
+    }
+
+}
