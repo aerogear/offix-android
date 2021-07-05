@@ -1,0 +1,11 @@
+subscription newUser{
+    newUser{
+        id
+        firstName
+        lastName
+        title
+        email
+        taskId
+        creationmetadataId
+    }
+}
