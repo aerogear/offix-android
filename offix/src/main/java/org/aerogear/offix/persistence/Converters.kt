@@ -2,7 +2,9 @@ package org.aerogear.offix.persistence
 
 import android.arch.persistence.room.TypeConverter
 import com.apollographql.apollo.api.OperationName
+import org.aerogear.offix.ConversionCheck
 import org.json.JSONObject
+import java.lang.Exception
 
 /*
 Converters are used to serialise and de-serialise objects for storing and fetching from database.
@@ -16,13 +18,21 @@ class Converters {
 
     @TypeConverter
     fun OperationNameToString(name: OperationName): String {
-        return name.name()
+        if(ConversionCheck.operationNameExists(name)) {
+            return name.name()
+        } else {
+            throw Exception("EmptyOperationNameException")
+        }
     }
 
     @TypeConverter
     fun StringToJson(string: String): JSONObject {
-        val jsonObject = JSONObject(string)
-        return jsonObject
+        if(ConversionCheck.checkStringisJson(string)) {
+            val jsonObject = JSONObject(string)
+            return jsonObject
+        } else {
+            return JSONObject("{}")
+        }
     }
 
     @TypeConverter
