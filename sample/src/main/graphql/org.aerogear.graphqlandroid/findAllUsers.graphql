@@ -1,11 +1,5 @@
 query findAllUsers{
     findAllUsers{
-        id
-        firstName
-        lastName
-        title
-        email
-        taskId
-        creationmetadataId
+       ...UserFields
     }
 }

@@ -130,18 +130,18 @@ class MainActivity : AppCompatActivity() {
                         val result = response.data()?.findAllTasks()
 
                         result?.forEach { allTasks ->
-                            val title = allTasks.title()
-                            val desc = allTasks.description()
-                            val id = allTasks.id()
+                            val title = allTasks.fragments().taskFields().title()
+                            val desc = allTasks.fragments().taskFields().description()
+                            val id = allTasks.fragments().taskFields().id()
                             var firstName = ""
                             var lastName = ""
                             var email = ""
                             var userId = ""
-                            allTasks.assignedTo()?.let { query ->
-                                firstName = query.firstName()
-                                lastName = query.lastName()
-                                email = query.email()
-                                userId = query.id()
+                            allTasks.fragments().creationData().assignedTo()?.let { query ->
+                                firstName = query.fragments().userFields().firstName()
+                                lastName = query.fragments().userFields().lastName()
+                                email = query.fragments().userFields().email()
+                                userId = query.fragments().userFields().id()
                             } ?: kotlin.run {
                                 firstName = ""
                                 lastName = ""
@@ -494,7 +494,7 @@ class MainActivity : AppCompatActivity() {
                         res?.let {
                             Log.e(
                                 TAG,
-                                " inside subscriptionUpdateTask ${it.title()} mutated upon updating"
+                                " inside subscriptionUpdateTask ${it.fragments().taskFields().title()} mutated upon updating"
                             )
                         }
                     }
@@ -527,7 +527,7 @@ class MainActivity : AppCompatActivity() {
                             res?.let {
                                 Log.e(
                                     TAG,
-                                    " inside subscriptionNewUser ${it.title()} mutated upon new title"
+                                    " inside subscriptionNewUser ${it.fragments().userFields().title()} mutated upon new title"
                                 )
                             }
                         }
@@ -561,7 +561,7 @@ class MainActivity : AppCompatActivity() {
                         res?.let {
                             Log.e(
                                 TAG,
-                                " inside subscriptionUpdateUser ${it.title()} mutated upon updating"
+                                " inside subscriptionUpdateUser ${it.fragments().userFields().title()} mutated upon updating"
                             )
                         }
                     }
